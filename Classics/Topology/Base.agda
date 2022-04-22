@@ -21,8 +21,8 @@ open import Cubical.HITs.PropositionalTruncation as Prop hiding (map)
 
 open import Cubical.Relation.Nullary
 
-open import Classics.Axioms.Choice
-open import Classics.Axioms.ExcludedMiddle
+open import Classics.Axioms
+open import Classics.Preliminary.Logic
 open import Classics.Foundations.Powerset
 
 private
@@ -33,7 +33,7 @@ private
 
 module Topology (decide : LEM)(choice : AC) where
 
-  open AxiomOfChoice choice
+  open AxiomOfChoices choice
   open Powerset decide
 
   -- Definitions
@@ -72,18 +72,18 @@ module Topology (decide : LEM)(choice : AC) where
     Open = X .openset
 
     Closed : ℙ Subset
-    Closed A = X .openset (∁ A)
+    Closed A = Open (∁ A)
 
     isOpenSubSet : Subset → Type _
-    isOpenSubSet U = U ∈ X .openset
+    isOpenSubSet U = U ∈ Open
 
     isClosedSubSet : Subset → Type _
-    isClosedSubSet A = ∁ A ∈ X .openset
+    isClosedSubSet A = ∁ A ∈ Open
 
-    -- Open covers
+    -- Open coverings
 
     _covers_ : ℙ Subset → Subset → Type _
-    _covers_ 𝒰 A = A ⊆ union 𝒰 × 𝒰 ⊆ X .openset
+    _covers_ 𝒰 A = A ⊆ union 𝒰 × 𝒰 ⊆ Open
 
     union∈Open : {𝒰 : ℙ Subset} → 𝒰 ⊆ Open → union 𝒰 ∈ Open
     union∈Open = {!!}
@@ -95,6 +95,9 @@ module Topology (decide : LEM)(choice : AC) where
 
     N∈ℕbhx→x∈N : {x : X .set}{N : Subset} → N ∈ ℕbh x → x ∈ N
     N∈ℕbhx→x∈N = {!!}
+
+    N∈ℕbhx→N∈Open : {x : X .set}{N : Subset} → N ∈ ℕbh x → N ∈ Open
+    N∈ℕbhx→N∈Open = {!!}
 
     getℕbh : {x : X .set}{N : Subset} → x ∈ N → N ∈ Open → N ∈ ℕbh x
     getℕbh = {!!}
@@ -108,16 +111,16 @@ module Topology (decide : LEM)(choice : AC) where
 
     -- Inside interior of some someset
 
-    _∈∙_ : (x : X .set) → (U : Subset) → Type _
-    x ∈∙ U = Σ[ N ∈ Subset ] (N ∈ ℕbh x) × N ⊆ U
+    _Σ∈∘_ : (x : X .set) → (U : Subset) → Type _
+    x Σ∈∘ U = Σ[ N ∈ Subset ] (N ∈ ℕbh x) × N ⊆ U
 
     _∈∘_ : (x : X .set) → (U : Subset) → Type _
-    x ∈∘ U = ∥ x ∈∙ U ∥
+    x ∈∘ U = ∥ x Σ∈∘ U ∥
 
-    isProp∈∙ : {x : X .set}{U : Subset} → isProp (x ∈∙ U)
-    isProp∈∙ = {!!}
+    isPropΣ∈∘ : {x : X .set}{U : Subset} → isProp (x Σ∈∘ U)
+    isPropΣ∈∘ = {!!}
 
-    ℕbhCriterionOfOpenness : (U : Subset) → ((x : X .set) → x ∈ U → x ∈∘ U) → U ∈ X .openset
+    ℕbhCriterionOfOpenness : (U : Subset) → ((x : X .set) → x ∈ U → x ∈∘ U) → U ∈ Open
     ℕbhCriterionOfOpenness U p = U∈Open
       where
       P : Subset → hProp _
@@ -126,63 +129,60 @@ module Topology (decide : LEM)(choice : AC) where
       𝒰 : ℙ Subset
       𝒰 = sub P
 
-      helper : {N : Subset} → ∥ Σ[ x ∈ X .set ] (N ∈ ℕbh x) × N ⊆ U ∥ → N ∈ X .openset
-      helper = {!!}
+      rec-helper1 : {N : Subset} → ∥ Σ[ x ∈ X .set ] (N ∈ ℕbh x) × N ⊆ U ∥ → N ∈ Open
+      rec-helper1 = Prop.rec (isProp∈ {A = Open}) λ (_ , p , _) → N∈ℕbhx→N∈Open p
 
-      𝒰⊆Open : 𝒰 ⊆ X .openset
-      𝒰⊆Open p = helper (∈→Inhab P p)
+      𝒰⊆Open : 𝒰 ⊆ Open
+      𝒰⊆Open p = rec-helper1 (∈→Inhab P p)
 
       𝕌 : Subset
       𝕌 = union 𝒰
 
-      𝕌∈Open : 𝕌 ∈ X .openset
+      𝕌∈Open : 𝕌 ∈ Open
       𝕌∈Open = X .∪-close 𝒰⊆Open
 
-      helper' : {N : Subset} → ∥ Σ[ x ∈ X .set ] (N ∈ ℕbh x) × N ⊆ U ∥ → N ⊆ U
-      helper' = {!!}
+      rec-helper2 : {N : Subset} → ∥ Σ[ x ∈ X .set ] (N ∈ ℕbh x) × N ⊆ U ∥ → N ⊆ U
+      rec-helper2 = Prop.rec isProp⊆ λ (_ , _ , p) → p
 
       N∈𝒰→N⊆U : (N : Subset) → N ∈ 𝒰 → N ⊆ U
-      N∈𝒰→N⊆U _ p = helper' (∈→Inhab P p)
+      N∈𝒰→N⊆U _ p = rec-helper2 (∈→Inhab P p)
 
       𝕌⊆U : 𝕌 ⊆ U
       𝕌⊆U = union⊆ N∈𝒰→N⊆U
 
-      helper'' : (x : X .set) → x ∈ U → Σ[ N ∈ Subset ] (N ∈ ℕbh x) × (N ⊆ U)
-        → Σ[ N ∈ Subset ] (x ∈ N) × (N ∈ 𝒰)
-      helper'' x x∈U (N , N∈Nx , N⊆U) = N , N∈ℕbhx→x∈N N∈Nx , Inhab→∈ P ∣ x , N∈Nx , N⊆U ∣
-
-      helper''' : ∥ ((x : X .set) → x ∈ U → Σ[ N ∈ Subset ] (N ∈ ℕbh x) × (N ⊆ U)) ∥
-        → (x : X .set) → x ∈ U → ∥ Σ[ N ∈ Subset ] (x ∈ N) × (N ∈ 𝒰) ∥
-      helper''' = {!!}
-
-      choice-helper : _
-      choice-helper =
-        choice2 (X .isset)
-          (λ _ → isProp→isSet (isProp∈ {A = U}))
-          (λ _ _ → isProp→isSet isProp∈∙) p
-
       U⊆𝕌 : U ⊆ 𝕌
-      U⊆𝕌 x∈U = ∈union (helper''' choice-helper _ x∈U)
+      U⊆𝕌 x∈U = ∈union
+        (Prop.map (λ (N , N∈ℕx , N⊆U) → N , N∈ℕbhx→x∈N N∈ℕx , Inhab→∈ P ∣ _ , N∈ℕx , N⊆U ∣) (p _ x∈U))
 
       𝕌≡U : 𝕌 ≡ U
       𝕌≡U = bi⊆→≡ 𝕌⊆U U⊆𝕌
 
-      U∈Open : U ∈ X .openset
-      U∈Open = subst (_∈ X .openset) 𝕌≡U 𝕌∈Open
+      U∈Open : U ∈ Open
+      U∈Open = subst (_∈ Open) 𝕌≡U 𝕌∈Open
 
 
-    -- A technical lemma to construct separating open set
+    -- Separating a point from a subset using open sets
 
-    coverSeparate :
-      (x : X .set)(𝒰 : ℙ Subset)(𝒰⊆Open : 𝒰 ⊆ Open)
-      (sep : (U : Subset) → U ∈ 𝒰 → ∥ Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (U ∩ V ≡ ∅) ∥)
-      → isFinSubset 𝒰 → ∥ Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (union 𝒰 ∩ V ≡ ∅) ∥
-    coverSeparate x 𝒰 _ _ isfin∅ = ∣ total , total∈ℕbh {x = x} , ∩-rUnit (union 𝒰) ∙ union∅ ∣
-    coverSeparate x 𝒰 𝒰⊆Open sep (isfinsuc U {A = 𝒰₀} fin𝒰₀) = subst Sep (sym union∪[A]) sep𝕌₀∪U
+    ΣSep : (x : X .set) → Subset → Type _
+    ΣSep x A = Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (A ∩ V ≡ ∅)
+
+    ΣSep⊆ : {x : X .set}{A B : Subset} → A ⊆ B → ΣSep x B → ΣSep x A
+    ΣSep⊆ = {!!}
+
+    -- It reads as "there merely exists a neighbourhood of x that is separated from A"
+    Sep : (x : X .set) → Subset → Type _
+    Sep x A = ∥ ΣSep x A ∥
+
+    Sep⊆ : {x : X .set}{A B : Subset} → A ⊆ B → Sep x B → Sep x A
+    Sep⊆ A⊆B = Prop.map (ΣSep⊆ A⊆B)
+
+    unionSep : (x : X .set)
+      (𝒰 : ℙ Subset)(𝒰⊆Open : 𝒰 ⊆ Open)
+      (sep : (U : Subset) → U ∈ 𝒰 → Sep x U)
+      → isFinSubset 𝒰 → Sep x (union 𝒰)
+    unionSep x 𝒰 _ _ isfin∅ = ∣ total , total∈ℕbh {x = x} , ∩-rUnit (union 𝒰) ∙ union∅ ∣
+    unionSep x 𝒰 𝒰⊆Open sep (isfinsuc U {A = 𝒰₀} fin𝒰₀) = subst (Sep x) (sym union∪[A]) sep𝕌₀∪U
       where
-      Sep : Subset → Type _
-      Sep A = ∥ Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (A ∩ V ≡ ∅) ∥
-
       𝕌₀ : Subset
       𝕌₀ = union 𝒰₀
 
@@ -198,18 +198,15 @@ module Topology (decide : LEM)(choice : AC) where
       ∪∅-helper : (A B C D : Subset) → A ∩ C ≡ ∅ → B ∩ D ≡ ∅ → (A ∪ B) ∩ (C ∩ D) ≡ ∅
       ∪∅-helper = {!!}
 
-      ind-Sep-helper : (A B : Subset) → A ∈ Open → B ∈ Open
-        → Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (A ∩ V ≡ ∅)
-        → Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (B ∩ V ≡ ∅)
-        → Σ[ V ∈ Subset ] (V ∈ ℕbh x) × ((A ∪ B) ∩ V ≡ ∅)
+      ind-Sep-helper : (A B : Subset) → A ∈ Open → B ∈ Open → ΣSep x A → ΣSep x B → ΣSep x (A ∪ B)
       ind-Sep-helper _ _ _ _ (VA , VA∈Nx , VA∅) (VB , VB∈Nx , VB∅) =
         VA ∩ VB , ℕbh∩ VA∈Nx VB∈Nx , ∪∅-helper _ _ _ _ VA∅ VB∅
 
       ind-Sep : (A B : Subset) → A ∈ Open → B ∈ Open → _
       ind-Sep A B p q = Prop.map2 (ind-Sep-helper A B p q)
 
-      sep𝕌₀ : Sep 𝕌₀
-      sep𝕌₀ = coverSeparate _ _ 𝒰₀⊆Open (λ U U∈𝒰₀ → sep U (∈⊆-trans {A = 𝒰₀} U∈𝒰₀ 𝒰₀⊆𝒰)) fin𝒰₀
+      sep𝕌₀ : Sep x 𝕌₀
+      sep𝕌₀ = unionSep _ _ 𝒰₀⊆Open (λ U U∈𝒰₀ → sep U (∈⊆-trans {A = 𝒰₀} U∈𝒰₀ 𝒰₀⊆𝒰)) fin𝒰₀
 
       U∈𝒰 : U ∈ 𝒰
       U∈𝒰 = [A]⊆S→A∈S (∪-right⊆ 𝒰₀ [ U ])
@@ -217,10 +214,10 @@ module Topology (decide : LEM)(choice : AC) where
       U∈Open : U ∈ Open
       U∈Open = ∈⊆-trans {A = 𝒰} U∈𝒰 𝒰⊆Open
 
-      sep[U] : Sep U
+      sep[U] : Sep x U
       sep[U] = sep U U∈𝒰
 
-      sep𝕌₀∪U : Sep (𝕌₀ ∪ U)
+      sep𝕌₀∪U : Sep x (𝕌₀ ∪ U)
       sep𝕌₀∪U = ind-Sep _ _ 𝕌₀∈Open U∈Open sep𝕌₀ sep[U]
 
 
@@ -244,33 +241,43 @@ module Topology (decide : LEM)(choice : AC) where
         (x₀ : X .set) where
 
         P : Subset → hProp _
-        P U = ∥ Σ[ x ∈ X .set ] (x ∈ K) × (U ∈ ℕbh x) × (Σ[ V ∈ Subset ] (V ∈ ℕbh x₀) × (U ∩ V ≡ ∅)) ∥ , squash
+        P U = ∥ Σ[ x ∈ X .set ] (x ∈ K) × (U ∈ ℕbh x) × (Sep x₀ U) ∥ , squash
 
         𝒰 : ℙ Subset
         𝒰 = sub P
 
-        𝒰⊆Open : 𝒰 ⊆ X .openset
+        𝒰⊆Open : 𝒰 ⊆ Open
         𝒰⊆Open p = {!!}
-
-        𝒰-covers-K : 𝒰 covers K
-        𝒰-covers-K = {!!}
 
         𝕌 : Subset
         𝕌 = union 𝒰
 
-        𝕌∈Open : 𝕌 ∈ X .openset
+        K⊆𝕌 : K ⊆ 𝕌
+        K⊆𝕌 = {!!}
+
+        𝒰-covers-K : 𝒰 covers K
+        𝒰-covers-K = K⊆𝕌 , 𝒰⊆Open
+
+        𝕌∈Open : 𝕌 ∈ Open
         𝕌∈Open = X .∪-close 𝒰⊆Open
 
-        ∃𝒰₀' : ∥ Σ[ 𝒰₀ ∈ ℙ Subset ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers K ∥
-        ∃𝒰₀' = iscmpt _ 𝒰-covers-K
+        ∃𝒰₀-helper : ∥ Σ[ 𝒰₀ ∈ ℙ Subset ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers K ∥
+        ∃𝒰₀-helper = iscmpt _ 𝒰-covers-K
 
-        ∃𝒰₀ :
-          ∥ Σ[ 𝒰₀ ∈ ℙ Subset ]
-                𝒰₀ ⊆ Open
-              × isFinSubset 𝒰₀
-              × 𝒰₀ covers K
-              × ((U : Subset) → U ∈ 𝒰₀ → Σ[ V ∈ Subset ] (V ∈ ℕbh x₀) × (U ∩ V ≡ ∅)) ∥
+        ∃𝒰₀ : ∥ Σ[ 𝒰₀ ∈ ℙ Subset ] 𝒰₀ ⊆ Open × isFinSubset 𝒰₀ × 𝒰₀ covers K × ((U : Subset) → U ∈ 𝒰₀ → Sep x₀ U) ∥
         ∃𝒰₀ = {!!}
 
-    isCompactSubset→isClosedSubSet : isHausdorff → (K : Subset) → isCompactSubset K → isClosedSubSet K
-    isCompactSubset→isClosedSubSet p K compt = {!!}
+        sep : Sep x₀ K
+        sep = Prop.rec squash
+          (λ (_ , 𝒰₀⊆Open , fin⊆𝒰₀ , 𝒰₀covK , sep)
+              → Sep⊆ (𝒰₀covK .fst) (unionSep _ _ 𝒰₀⊆Open sep fin⊆𝒰₀)) ∃𝒰₀
+
+
+    module _
+      (haus : isHausdorff) where
+
+      sepCompact : (x : X .set)(K : Subset) → isCompactSubset K → x ∉ K → Sep x K
+      sepCompact = {!!}
+
+      isCompactSubset→isClosedSubSet : (K : Subset) → isCompactSubset K → isClosedSubSet K
+      isCompactSubset→isClosedSubSet p K compt = {!!}

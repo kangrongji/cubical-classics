@@ -1,6 +1,12 @@
 {-
 
-Powerset under decide
+Impredicative Powerset
+
+This file introduces a "powerset", thanks to Excluded Middle,
+behaving very similar to that in classical set theory.
+I think most of the results only relies on impredicativity,
+so that maybe axiom as Propositional Resizing is enough
+to recover these useful properties.
 
 -}
 {-# OPTIONS --allow-unsolved-meta #-}
