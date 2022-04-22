@@ -1,3 +1,4 @@
-name: classics-0.1
+name: classics
+include: .
 depend: cubical
 flags: --cubical --no-import-sorts
