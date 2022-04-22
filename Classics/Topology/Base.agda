@@ -3,7 +3,7 @@
 Topological Space
 
 -}
-{-# OPTIONS --safe #-}
+{-# OPTIONS --allow-unsolved-meta #-}
 module Classics.Topology.Base where
 
 open import Cubical.Foundations.Prelude
@@ -74,16 +74,19 @@ module Topology (decide : LEM)(choice : AC) where
     Closed : ℙ Subset
     Closed A = X .openset (∁ A)
 
-    isOpen : Subset → Type _
-    isOpen U = U ∈ X .openset
+    isOpenSubSet : Subset → Type _
+    isOpenSubSet U = U ∈ X .openset
 
-    isClosed : Subset → Type _
-    isClosed A = ∁ A ∈ X .openset
+    isClosedSubSet : Subset → Type _
+    isClosedSubSet A = ∁ A ∈ X .openset
 
     -- Open covers
 
     _covers_ : ℙ Subset → Subset → Type _
     _covers_ 𝒰 A = A ⊆ union 𝒰 × 𝒰 ⊆ X .openset
+
+    union∈Open : {𝒰 : ℙ Subset} → 𝒰 ⊆ Open → union 𝒰 ∈ Open
+    union∈Open = {!!}
 
     -- Neighbourhood around a given point
 
@@ -93,6 +96,18 @@ module Topology (decide : LEM)(choice : AC) where
     N∈ℕbhx→x∈N : {x : X .set}{N : Subset} → N ∈ ℕbh x → x ∈ N
     N∈ℕbhx→x∈N = {!!}
 
+    getℕbh : {x : X .set}{N : Subset} → x ∈ N → N ∈ Open → N ∈ ℕbh x
+    getℕbh = {!!}
+
+    total∈ℕbh : {x : X .set} → total ∈ ℕbh x
+    total∈ℕbh = {!!}
+
+    ℕbh∩ : {x : X .set}{U V : Subset} → U ∈ ℕbh x → V ∈ ℕbh x → U ∩ V ∈ ℕbh x
+    ℕbh∩ = {!!}
+
+
+    -- Inside interior of some someset
+
     _∈∙_ : (x : X .set) → (U : Subset) → Type _
     x ∈∙ U = Σ[ N ∈ Subset ] (N ∈ ℕbh x) × N ⊆ U
 
@@ -101,10 +116,6 @@ module Topology (decide : LEM)(choice : AC) where
 
     isProp∈∙ : {x : X .set}{U : Subset} → isProp (x ∈∙ U)
     isProp∈∙ = {!!}
-
-    private
-      module Helper1
-        (U : Subset) where
 
     ℕbhCriterionOfOpenness : (U : Subset) → ((x : X .set) → x ∈ U → x ∈∘ U) → U ∈ X .openset
     ℕbhCriterionOfOpenness U p = U∈Open
@@ -159,20 +170,61 @@ module Topology (decide : LEM)(choice : AC) where
       U∈Open : U ∈ X .openset
       U∈Open = subst (_∈ X .openset) 𝕌≡U 𝕌∈Open
 
-    ----------------
 
-    module _
-      (x : X .set)(𝒰 : ℙ Subset)(isopen : 𝒰 ⊆ Open)
-      (sep : (U : Subset) → U ∈ 𝒰 → ∥ Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (U ∩ V ≡ ∅) ∥) where
+    -- A technical lemma to construct separating open set
 
-      private
-        𝕌 = union 𝒰
+    coverSeparate :
+      (x : X .set)(𝒰 : ℙ Subset)(𝒰⊆Open : 𝒰 ⊆ Open)
+      (sep : (U : Subset) → U ∈ 𝒰 → ∥ Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (U ∩ V ≡ ∅) ∥)
+      → isFinSubset 𝒰 → ∥ Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (union 𝒰 ∩ V ≡ ∅) ∥
+    coverSeparate x 𝒰 _ _ isfin∅ = ∣ total , total∈ℕbh {x = x} , ∩-rUnit (union 𝒰) ∙ union∅ ∣
+    coverSeparate x 𝒰 𝒰⊆Open sep (isfinsuc U {A = 𝒰₀} fin𝒰₀) = subst Sep (sym union∪[A]) sep𝕌₀∪U
+      where
+      Sep : Subset → Type _
+      Sep A = ∥ Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (A ∩ V ≡ ∅) ∥
 
-      coverSeparation : isFinSubset 𝒰 → ∥ Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (𝕌 ∩ V ≡ ∅) ∥
-      coverSeparation isfin∅ = ∣ total , {!!} , _ ∣
-      coverSeparation (isfinsuc U fin) = {!!}
+      𝕌₀ : Subset
+      𝕌₀ = union 𝒰₀
 
-    -----------------
+      𝒰₀⊆𝒰 : 𝒰₀ ⊆ 𝒰
+      𝒰₀⊆𝒰 = ∪-left⊆ 𝒰₀ [ U ]
+
+      𝒰₀⊆Open : 𝒰₀ ⊆ Open
+      𝒰₀⊆Open = ⊆-trans {A = 𝒰₀} 𝒰₀⊆𝒰 𝒰⊆Open
+
+      𝕌₀∈Open : 𝕌₀ ∈ Open
+      𝕌₀∈Open = union∈Open 𝒰₀⊆Open
+
+      ∪∅-helper : (A B C D : Subset) → A ∩ C ≡ ∅ → B ∩ D ≡ ∅ → (A ∪ B) ∩ (C ∩ D) ≡ ∅
+      ∪∅-helper = {!!}
+
+      ind-Sep-helper : (A B : Subset) → A ∈ Open → B ∈ Open
+        → Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (A ∩ V ≡ ∅)
+        → Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (B ∩ V ≡ ∅)
+        → Σ[ V ∈ Subset ] (V ∈ ℕbh x) × ((A ∪ B) ∩ V ≡ ∅)
+      ind-Sep-helper _ _ _ _ (VA , VA∈Nx , VA∅) (VB , VB∈Nx , VB∅) =
+        VA ∩ VB , ℕbh∩ VA∈Nx VB∈Nx , ∪∅-helper _ _ _ _ VA∅ VB∅
+
+      ind-Sep : (A B : Subset) → A ∈ Open → B ∈ Open → _
+      ind-Sep A B p q = Prop.map2 (ind-Sep-helper A B p q)
+
+      sep𝕌₀ : Sep 𝕌₀
+      sep𝕌₀ = coverSeparate _ _ 𝒰₀⊆Open (λ U U∈𝒰₀ → sep U (∈⊆-trans {A = 𝒰₀} U∈𝒰₀ 𝒰₀⊆𝒰)) fin𝒰₀
+
+      U∈𝒰 : U ∈ 𝒰
+      U∈𝒰 = [A]⊆S→A∈S (∪-right⊆ 𝒰₀ [ U ])
+
+      U∈Open : U ∈ Open
+      U∈Open = ∈⊆-trans {A = 𝒰} U∈𝒰 𝒰⊆Open
+
+      sep[U] : Sep U
+      sep[U] = sep U U∈𝒰
+
+      sep𝕌₀∪U : Sep (𝕌₀ ∪ U)
+      sep𝕌₀∪U = ind-Sep _ _ 𝕌₀∈Open U∈Open sep𝕌₀ sep[U]
+
+
+    -- Compactness
 
     isCompactSubset : Subset → Type _
     isCompactSubset K =
@@ -220,5 +272,5 @@ module Topology (decide : LEM)(choice : AC) where
               × ((U : Subset) → U ∈ 𝒰₀ → Σ[ V ∈ Subset ] (V ∈ ℕbh x₀) × (U ∩ V ≡ ∅)) ∥
         ∃𝒰₀ = {!!}
 
-    isCompact→isClosed : isHausdorff → (K : Subset) → isCompactSubset K → isClosed K
-    isCompact→isClosed p K compt = {!!}
+    isCompactSubset→isClosedSubSet : isHausdorff → (K : Subset) → isCompactSubset K → isClosedSubSet K
+    isCompactSubset→isClosedSubSet p K compt = {!!}

@@ -3,7 +3,7 @@
 Powerset under decide
 
 -}
-{-# OPTIONS --safe #-}
+{-# OPTIONS --allow-unsolved-meta #-}
 module Classics.Foundations.Powerset where
 
 open import Cubical.Foundations.Prelude
@@ -211,6 +211,18 @@ module Powerset (decide : LEM) where
   ∪-Idem : (A : ℙ X) → A ∪ A ≡ A
   ∪-Idem A i x = or-idem (A x) i
 
+  ∪-left∈ : {x : X}(A B : ℙ X) → x ∈ A → x ∈ (A ∪ B)
+  ∪-left∈ {x = x} _ B x∈A = (λ i → x∈A i or B x) ∙ zeroˡ _
+
+  ∪-right∈ : {x : X}(A B : ℙ X) → x ∈ B → x ∈ (A ∪ B)
+  ∪-right∈ {x = x} A _ x∈B = (λ i → A x or x∈B i) ∙ zeroʳ _
+
+  ∪-left⊆ : (A B : ℙ X) → A ⊆ (A ∪ B)
+  ∪-left⊆ A B = ∪-left∈ A B
+
+  ∪-right⊆ : (A B : ℙ X) → B ⊆ (A ∪ B)
+  ∪-right⊆ A B = ∪-right∈ A B
+
   -- Binary intersection
 
   _∩_ : ℙ X → ℙ X → ℙ X
@@ -236,6 +248,12 @@ module Powerset (decide : LEM) where
 
   ∩-Idem : (A : ℙ X) → A ∩ A ≡ A
   ∩-Idem A i x = and-idem (A x) i
+
+  ∩-∈ : {x : X}(A B : ℙ X) → x ∈ A → x ∈ B → x ∈ (A ∩ B)
+  ∩-∈ A B x∈A x∈B i = x∈A i and x∈B i
+
+  ∩-⊆ : {C : ℙ X}(A B : ℙ X) → C ⊆ A → C ⊆ B → C ⊆ (A ∩ B)
+  ∩-⊆ A B C⊆A C⊆B x∈C = ∩-∈ A B (C⊆A x∈C) (C⊆B x∈C)
 
   -- Absorption laws
 
@@ -324,6 +342,23 @@ module Powerset (decide : LEM) where
 
   {-
 
+    Singleton Subset
+
+  -}
+
+  -- Subset with one-element
+
+  [_] : X → ℙ X
+  [_] x = sub λ y → ∥ x ≡ y ∥ , squash
+
+  A∈S→[A]⊆S : {A : ℙ X}{S : ℙ (ℙ X)} → A ∈ S → [ A ] ⊆ S
+  A∈S→[A]⊆S = {!!}
+
+  [A]⊆S→A∈S : {A : ℙ X}{S : ℙ (ℙ X)} → [ A ] ⊆ S → A ∈ S
+  [A]⊆S→A∈S = {!!}
+
+  {-
+
     Image and Preimage under Functions
 
   -}
@@ -374,17 +409,24 @@ module Powerset (decide : LEM) where
     helper : ∥ Σ[ N ∈ ℙ X ] (x ∈ N) × (N ∈ S) ∥ → x ∈ A
     helper = Prop.rec (isProp∈ {A = A}) (λ (_ , x∈N , N∈S) → ∈⊆-trans {B = A} x∈N (U∈S→U⊆A _ N∈S))
 
+  union∪ : {S T : ℙ (ℙ X)} → union (S ∪ T) ≡ union S ∪ union T
+  union∪ = {!!}
+
+  union∪-left⊆ : {S T : ℙ (ℙ X)} → union S ⊆ union (S ∪ T)
+  union∪-left⊆ = {!!}
+
+  union[A] : {A : ℙ X} → union [ A ] ≡ A
+  union[A] = {!!}
+
+  union∪[A] : {S : ℙ (ℙ X)}{A : ℙ X} → union (S ∪ [ A ]) ≡ (union S) ∪ A
+  union∪[A] {S = S} {A = A} = union∪ ∙ (λ i → (union S) ∪ union[A] {A = A} i)
+
 
   {-
 
     Finiteness of Subset
 
   -}
-
-  -- Subset with one-element
-
-  [_] : X → ℙ X
-  [_] x = sub λ y → ∥ x ≡ y ∥ , squash
 
   -- Finite subset
 
