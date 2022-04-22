@@ -161,6 +161,19 @@ module Topology (decide : LEM)(choice : AC) where
 
     ----------------
 
+    module _
+      (x : X .set)(𝒰 : ℙ Subset)(isopen : 𝒰 ⊆ Open)
+      (sep : (U : Subset) → U ∈ 𝒰 → ∥ Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (U ∩ V ≡ ∅) ∥) where
+
+      private
+        𝕌 = union 𝒰
+
+      coverSeparation : isFinSubset 𝒰 → ∥ Σ[ V ∈ Subset ] (V ∈ ℕbh x) × (𝕌 ∩ V ≡ ∅) ∥
+      coverSeparation isfin∅ = ∣ total , {!!} , _ ∣
+      coverSeparation (isfinsuc U fin) = {!!}
+
+    -----------------
+
     isCompactSubset : Subset → Type _
     isCompactSubset K =
       (𝒰 : ℙ Subset) → 𝒰 covers K → ∥ Σ[ 𝒰₀ ∈ ℙ Subset ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers K ∥
