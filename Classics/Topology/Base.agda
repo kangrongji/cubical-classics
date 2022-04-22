@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-meta #-}
+{-# OPTIONS --safe #-}
 module Classics.Topology.Base where
 
 open import Cubical.Foundations.Prelude
@@ -43,17 +43,13 @@ module Topology (decide : LEM)(choice : AC) where
 
   open TopologicalSpace
 
-  record ContinuousMap {ℓ ℓ' : Level} (X : TopologicalSpace ℓ)(Y : TopologicalSpace ℓ') : Type (ℓ-suc (ℓ-max ℓ ℓ')) where
+  record ContinuousMap {ℓ ℓ' : Level}
+    (X : TopologicalSpace ℓ)(Y : TopologicalSpace ℓ') : Type (ℓ-max ℓ ℓ') where
     field
       map : X .set → Y .set
       presopen : (U : ℙ (Y .set)) → U ∈ Y .openset → preimage map U ∈ X .openset
 
   open ContinuousMap
-
-  record Presheaf {ℓ ℓ' : Level} (X : TopologicalSpace ℓ) : Type (ℓ-suc (ℓ-max ℓ ℓ')) where
-    field
-      section : (U : ℙ (X .set)) → U ∈ X .openset → Type ℓ'
-      --restric : {U V : ℙ (X .set)} → U ∈ X .openset → V ∈ X .openset → U ⊆ V → 
 
   module _
     (X : TopologicalSpace ℓ) where
@@ -61,101 +57,110 @@ module Topology (decide : LEM)(choice : AC) where
     Subset : Type _
     Subset = ℙ (X .set)
 
-    SubFamily : Type _
-    SubFamily = ℙ (ℙ (X .set))
+    closedset : ℙ Subset
+    closedset A = X .openset (∁ A)
 
-    closedset : ℙ (ℙ (X .set))
-    closedset A = X .openset (compdecideent A)
+    Open : ℙ Subset
+    Open = X .openset
 
-    isOpen : ℙ (X .set) → Type _
+    isOpen : Subset → Type _
     isOpen U = U ∈ X .openset
 
-    isClosed : ℙ (X .set) → Type _
-    isClosed A = compdecideent A ∈ X .openset
+    isClosed : Subset → Type _
+    isClosed A = ∁ A ∈ X .openset
 
-    ℕbh : X .set → ℙ (ℙ (X .set))
+    ℕbh : X .set → ℙ Subset
     ℕbh x A = A x and X .openset A
 
-    N∈ℕbhx→x∈N : {x : X .set}{N : ℙ (X .set)} → N ∈ ℕbh x → x ∈ N
+    N∈ℕbhx→x∈N : {x : X .set}{N : Subset} → N ∈ ℕbh x → x ∈ N
     N∈ℕbhx→x∈N = {!!}
 
-    _covers_ : ℙ (ℙ (X .set)) → ℙ (X .set) → Type _
+    _covers_ : ℙ Subset → Subset → Type _
     _covers_ 𝒰 A = A ⊆ union 𝒰 × 𝒰 ⊆ X .openset
 
-    isCompactSubset : ℙ (X .set) → Type _
+    isCompactSubset : Subset → Type _
     isCompactSubset K =
-      (𝒰 : ℙ (ℙ (X .set))) → 𝒰 covers K → ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ (X .set)) ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers K ∥
+      (𝒰 : ℙ Subset) → 𝒰 covers K → ∥ Σ[ 𝒰₀ ∈ ℙ Subset ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers K ∥
 
     isCompact : Type _
     isCompact = isCompactSubset total
 
     isHausdorff : Type _
     isHausdorff =
-      (x y : X .set) → ∥ Σ[ U ∈ ℙ (X .set) ] Σ[ V ∈ ℙ (X .set) ] (U ∈ ℕbh x) × (V ∈ ℕbh y) × (U ∩ V ≡ ∅) ∥
+      (x y : X .set) → ∥ Σ[ U ∈ Subset ] Σ[ V ∈ Subset ] (U ∈ ℕbh x) × (V ∈ ℕbh y) × (U ∩ V ≡ ∅) ∥
 
-    _∈∙_ : (x : X .set) → (U : ℙ (X .set)) → Type _
-    x ∈∙ U = Σ[ N ∈ ℙ (X .set) ] (N ∈ ℕbh x) × N ⊆ U
+    _∈∙_ : (x : X .set) → (U : Subset) → Type _
+    x ∈∙ U = Σ[ N ∈ Subset ] (N ∈ ℕbh x) × N ⊆ U
 
-    _∈∘_ : (x : X .set) → (U : ℙ (X .set)) → Type _
+    _∈∘_ : (x : X .set) → (U : Subset) → Type _
     x ∈∘ U = ∥ x ∈∙ U ∥
 
-    isProp∈∙ : {x : X .set}{U : ℙ (X .set)} → isProp (x ∈∙ U)
+    isProp∈∙ : {x : X .set}{U : Subset} → isProp (x ∈∙ U)
     isProp∈∙ = {!!}
 
     private
+      module Helper1
+        (U : Subset) where
+
+    ℕbhCriterionOfOpenness : (U : Subset) → ((x : X .set) → x ∈ U → x ∈∘ U) → U ∈ X .openset
+    ℕbhCriterionOfOpenness U p = U∈Open
+      where
+      P : Subset → hProp _
+      P N = ∥ Σ[ x ∈ X .set ] (N ∈ ℕbh x) × N ⊆ U ∥ , squash
+
+      𝒰 : ℙ Subset
+      𝒰 = sub P
+
+      helper : {N : Subset} → ∥ Σ[ x ∈ X .set ] (N ∈ ℕbh x) × N ⊆ U ∥ → N ∈ X .openset
+      helper = {!!}
+
+      𝒰⊆Open : 𝒰 ⊆ X .openset
+      𝒰⊆Open p = helper (∈→Inhab P p)
+
+      𝕌 : Subset
+      𝕌 = union 𝒰
+
+      𝕌∈Open : 𝕌 ∈ X .openset
+      𝕌∈Open = X .∪-close 𝒰⊆Open
+
+      helper' : {N : Subset} → ∥ Σ[ x ∈ X .set ] (N ∈ ℕbh x) × N ⊆ U ∥ → N ⊆ U
+      helper' = {!!}
+
+      N∈𝒰→N⊆U : (N : Subset) → N ∈ 𝒰 → N ⊆ U
+      N∈𝒰→N⊆U _ p = helper' (∈→Inhab P p)
+
+      𝕌⊆U : 𝕌 ⊆ U
+      𝕌⊆U = union⊆ N∈𝒰→N⊆U
+
+      helper'' : (x : X .set) → x ∈ U → Σ[ N ∈ Subset ] (N ∈ ℕbh x) × (N ⊆ U)
+        → Σ[ N ∈ Subset ] (x ∈ N) × (N ∈ 𝒰)
+      helper'' x x∈U (N , N∈Nx , N⊆U) = N , N∈ℕbhx→x∈N N∈Nx , Inhab→∈ P ∣ x , N∈Nx , N⊆U ∣
+
+      helper''' : ∥ ((x : X .set) → x ∈ U → Σ[ N ∈ Subset ] (N ∈ ℕbh x) × (N ⊆ U)) ∥
+        → (x : X .set) → x ∈ U → ∥ Σ[ N ∈ Subset ] (x ∈ N) × (N ∈ 𝒰) ∥
+      helper''' = {!!}
+
+      U⊆𝕌 : U ⊆ 𝕌
+      U⊆𝕌 x∈U = ∈union (helper''' (choice2 (X .isset) (λ _ → isProp→isSet (isProp∈ {A = U})) (λ _ _ → isProp→isSet isProp∈∙) p) _ x∈U)
+
+      𝕌≡U : 𝕌 ≡ U
+      𝕌≡U = bi⊆→≡ 𝕌⊆U U⊆𝕌
+
+      U∈Open : U ∈ X .openset
+      U∈Open = subst (_∈ X .openset) 𝕌≡U 𝕌∈Open
+
+
+    private
       module _
-        (U : ℙ (X .set)) where
+        (haus : isHausdorff)
+        (K : Subset)(iscmpt : isCompactSubset K)
+        (x₀ : X .set) where
 
-        P : ℙ (X .set) → hProp _
-        P N = ∥ Σ[ x ∈ X .set ] (N ∈ ℕbh x) × N ⊆ U ∥ , squash
+        P : Subset → hProp _
+        P U = ∥ Σ[ x ∈ X .set ] (x ∈ K) × (U ∈ ℕbh x) × (Σ[ V ∈ Subset ] (V ∈ ℕbh x₀) × (U ∩ V ≡ ∅)) ∥ , squash
 
-        𝒰 : ℙ (ℙ (X .set))
+        𝒰 : ℙ Subset
         𝒰 = sub P
 
-        helper : {N : ℙ (X .set)} → ∥ Σ[ x ∈ X .set ] (N ∈ ℕbh x) × N ⊆ U ∥ → N ∈ X .openset
-        helper = {!!}
-
-        𝒰⊆Open : 𝒰 ⊆ X .openset
-        𝒰⊆Open p = helper (∈→Inhab P p)
-
-        𝕌 : ℙ (X .set)
-        𝕌 = union 𝒰
-
-        𝕌∈Open : 𝕌 ∈ X .openset
-        𝕌∈Open = X .∪-close 𝒰⊆Open
-
-        helper' : {N : ℙ (X .set)} → ∥ Σ[ x ∈ X .set ] (N ∈ ℕbh x) × N ⊆ U ∥ → N ⊆ U
-        helper' = {!!}
-
-        N∈𝒰→N⊆U : (N : ℙ (X .set)) → N ∈ 𝒰 → N ⊆ U
-        N∈𝒰→N⊆U _ p = helper' (∈→Inhab P p)
-
-        𝕌⊆U : 𝕌 ⊆ U
-        𝕌⊆U = union⊆ N∈𝒰→N⊆U
-
-        helper'' : (x : X .set) → x ∈ U → Σ[ N ∈ ℙ (X .set) ] (N ∈ ℕbh x) × (N ⊆ U)
-          → Σ[ N ∈ ℙ (X .set) ] (x ∈ N) × (N ∈ 𝒰)
-        helper'' x x∈U (N , N∈Nx , N⊆U) = N , N∈ℕbhx→x∈N N∈Nx , Inhab→∈ P ∣ x , N∈Nx , N⊆U ∣
-
-        helper''' : ∥ ((x : X .set) → x ∈ U → Σ[ N ∈ ℙ (X .set) ] (N ∈ ℕbh x) × (N ⊆ U)) ∥
-          → (x : X .set) → x ∈ U → ∥ Σ[ N ∈ ℙ (X .set) ] (x ∈ N) × (N ∈ 𝒰) ∥
-        helper''' = {!!}
-
-        module _
-          (p : ∥ ((x : X .set) → x ∈ U → Σ[ N ∈ ℙ (X .set) ] (N ∈ ℕbh x) × (N ⊆ U)) ∥) where
-
-          U⊆𝕌 : U ⊆ 𝕌
-          U⊆𝕌 x∈U = ∈union (helper''' p _ x∈U)
-
-          𝕌≡U : 𝕌 ≡ U
-          𝕌≡U = bi⊆→≡ 𝕌⊆U U⊆𝕌
-
-          U∈Open : U ∈ X .openset
-          U∈Open = subst (_∈ X .openset) 𝕌≡U 𝕌∈Open
-
-    ℕbhCriterionOfOpenness : (U : ℙ (X .set)) → ((x : X .set) → x ∈ U → x ∈∘ U) → U ∈ X .openset
-    ℕbhCriterionOfOpenness U p =
-      U∈Open _ (choice2 (X .isset) (λ _ → isProp→isSet (isProp∈ {A = U})) (λ _ _ → isProp→isSet isProp∈∙) p)
-
-    Thm : isHausdorff → (K : ℙ (X .set)) → isCompactSubset K → isClosed K
-    Thm p K compt = {!!}
+    isCompact→isClosed : isHausdorff → (K : Subset) → isCompactSubset K → isClosed K
+    isCompact→isClosed p K compt = {!!}
