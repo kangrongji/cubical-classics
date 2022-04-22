@@ -1,3 +1,8 @@
+{-
+
+Topological Space
+
+-}
 {-# OPTIONS --safe #-}
 module Classics.Topology.Base where
 
@@ -31,6 +36,8 @@ module Topology (decide : LEM)(choice : AC) where
   open AxiomOfChoice choice
   open Powerset decide
 
+  -- Definitions
+
   record TopologicalSpace (ℓ : Level) : Type (ℓ-suc ℓ) where
     field
       set   : Type ℓ
@@ -51,17 +58,21 @@ module Topology (decide : LEM)(choice : AC) where
 
   open ContinuousMap
 
+  -- Basic properties of topological spaces
+
   module _
     (X : TopologicalSpace ℓ) where
+
+    -- Some convenient naming
 
     Subset : Type _
     Subset = ℙ (X .set)
 
-    closedset : ℙ Subset
-    closedset A = X .openset (∁ A)
-
     Open : ℙ Subset
     Open = X .openset
+
+    Closed : ℙ Subset
+    Closed A = X .openset (∁ A)
 
     isOpen : Subset → Type _
     isOpen U = U ∈ X .openset
@@ -69,25 +80,18 @@ module Topology (decide : LEM)(choice : AC) where
     isClosed : Subset → Type _
     isClosed A = ∁ A ∈ X .openset
 
+    -- Open covers
+
+    _covers_ : ℙ Subset → Subset → Type _
+    _covers_ 𝒰 A = A ⊆ union 𝒰 × 𝒰 ⊆ X .openset
+
+    -- Neighbourhood around a given point
+
     ℕbh : X .set → ℙ Subset
     ℕbh x A = A x and X .openset A
 
     N∈ℕbhx→x∈N : {x : X .set}{N : Subset} → N ∈ ℕbh x → x ∈ N
     N∈ℕbhx→x∈N = {!!}
-
-    _covers_ : ℙ Subset → Subset → Type _
-    _covers_ 𝒰 A = A ⊆ union 𝒰 × 𝒰 ⊆ X .openset
-
-    isCompactSubset : Subset → Type _
-    isCompactSubset K =
-      (𝒰 : ℙ Subset) → 𝒰 covers K → ∥ Σ[ 𝒰₀ ∈ ℙ Subset ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers K ∥
-
-    isCompact : Type _
-    isCompact = isCompactSubset total
-
-    isHausdorff : Type _
-    isHausdorff =
-      (x y : X .set) → ∥ Σ[ U ∈ Subset ] Σ[ V ∈ Subset ] (U ∈ ℕbh x) × (V ∈ ℕbh y) × (U ∩ V ≡ ∅) ∥
 
     _∈∙_ : (x : X .set) → (U : Subset) → Type _
     x ∈∙ U = Σ[ N ∈ Subset ] (N ∈ ℕbh x) × N ⊆ U
@@ -140,8 +144,14 @@ module Topology (decide : LEM)(choice : AC) where
         → (x : X .set) → x ∈ U → ∥ Σ[ N ∈ Subset ] (x ∈ N) × (N ∈ 𝒰) ∥
       helper''' = {!!}
 
+      choice-helper : _
+      choice-helper =
+        choice2 (X .isset)
+          (λ _ → isProp→isSet (isProp∈ {A = U}))
+          (λ _ _ → isProp→isSet isProp∈∙) p
+
       U⊆𝕌 : U ⊆ 𝕌
-      U⊆𝕌 x∈U = ∈union (helper''' (choice2 (X .isset) (λ _ → isProp→isSet (isProp∈ {A = U})) (λ _ _ → isProp→isSet isProp∈∙) p) _ x∈U)
+      U⊆𝕌 x∈U = ∈union (helper''' choice-helper _ x∈U)
 
       𝕌≡U : 𝕌 ≡ U
       𝕌≡U = bi⊆→≡ 𝕌⊆U U⊆𝕌
@@ -149,6 +159,18 @@ module Topology (decide : LEM)(choice : AC) where
       U∈Open : U ∈ X .openset
       U∈Open = subst (_∈ X .openset) 𝕌≡U 𝕌∈Open
 
+    ----------------
+
+    isCompactSubset : Subset → Type _
+    isCompactSubset K =
+      (𝒰 : ℙ Subset) → 𝒰 covers K → ∥ Σ[ 𝒰₀ ∈ ℙ Subset ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers K ∥
+
+    isCompact : Type _
+    isCompact = isCompactSubset total
+
+    isHausdorff : Type _
+    isHausdorff =
+      (x y : X .set) → ∥ Σ[ U ∈ Subset ] Σ[ V ∈ Subset ] (U ∈ ℕbh x) × (V ∈ ℕbh y) × (U ∩ V ≡ ∅) ∥
 
     private
       module _
@@ -161,6 +183,29 @@ module Topology (decide : LEM)(choice : AC) where
 
         𝒰 : ℙ Subset
         𝒰 = sub P
+
+        𝒰⊆Open : 𝒰 ⊆ X .openset
+        𝒰⊆Open p = {!!}
+
+        𝒰-covers-K : 𝒰 covers K
+        𝒰-covers-K = {!!}
+
+        𝕌 : Subset
+        𝕌 = union 𝒰
+
+        𝕌∈Open : 𝕌 ∈ X .openset
+        𝕌∈Open = X .∪-close 𝒰⊆Open
+
+        ∃𝒰₀' : ∥ Σ[ 𝒰₀ ∈ ℙ Subset ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers K ∥
+        ∃𝒰₀' = iscmpt _ 𝒰-covers-K
+
+        ∃𝒰₀ :
+          ∥ Σ[ 𝒰₀ ∈ ℙ Subset ]
+                𝒰₀ ⊆ Open
+              × isFinSubset 𝒰₀
+              × 𝒰₀ covers K
+              × ((U : Subset) → U ∈ 𝒰₀ → Σ[ V ∈ Subset ] (V ∈ ℕbh x₀) × (U ∩ V ≡ ∅)) ∥
+        ∃𝒰₀ = {!!}
 
     isCompact→isClosed : isHausdorff → (K : Subset) → isCompactSubset K → isClosed K
     isCompact→isClosed p K compt = {!!}
