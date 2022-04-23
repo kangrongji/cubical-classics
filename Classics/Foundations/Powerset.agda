@@ -4,8 +4,8 @@ Impredicative Powerset
 
 This file introduces a "powerset", thanks to Excluded Middle,
 behaving very similar to that in classical set theory.
-I think most of the results only relies on impredicativity,
-so probably axiom like Propositional Resizing is enough to recover these useful properties.
+I think most of the following results only relies on the concept of impredicativity,
+so probably axiom like Propositional Resizing is enough to make sense of it.
 
 -}
 {-# OPTIONS --safe #-}
@@ -13,6 +13,7 @@ module Classics.Foundations.Powerset where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
+open import Cubical.Foundations.Function
 
 open import Cubical.Data.Bool
 open import Cubical.Data.Empty as Empty
@@ -52,12 +53,14 @@ module Powerset (decide : LEM) where
   isSetℙ : isSet (ℙ X)
   isSetℙ = isSetΠ λ _ → isSetProp
 
-  infix 5 _∈_
-  infix 5 _∉_
-  infix 6 _∈?_
-  infix 6 _⊆_
-  infixr 5 _∪_
-  infixr 6 _∩_
+  infix 6 _∈_
+  infix 6 _∉_
+
+  infix 7 _⊆_
+
+  infixr 10 ∁_
+  infixr 8 _∪_
+  infixr 9 _∩_
 
   -- The specification operator `specify`,
   -- transforming a predicate into the subset of elements that satisfying it,
@@ -68,29 +71,35 @@ module Powerset (decide : LEM) where
 
   {-
 
-    The Membership and Subset Relation
+    The Membership and Inclusion Relation
 
   -}
 
-  _∈_ : X → ℙ X → Type _
+  -- Membership
+  _∈_ : X → ℙ X → Type ℓ-zero
   x ∈ A = A x ≡ true
 
-  _∉_ : X → ℙ X → Type _
+  -- Non-membership
+  _∉_ : X → ℙ X → Type ℓ-zero
   x ∉ A = A x ≡ false
 
-  isProp∈ : {x : X}{A : ℙ X} → isProp (x ∈ A)
-  isProp∈ = isSetProp _ _
+  isProp∈ : {x : X}(A : ℙ X) → isProp (x ∈ A)
+  isProp∈ _ = isSetProp _ _
 
-  isProp∉ : {x : X}{A : ℙ X} → isProp (x ∉ A)
-  isProp∉ = isSetProp _ _
+  isProp∉ : {x : X}(A : ℙ X) → isProp (x ∉ A)
+  isProp∉ _ = isSetProp _ _
 
   dichotomy∈ : (x : X)(A : ℙ X) → (x ∈ A) ⊎ (x ∉ A)
   dichotomy∈ x A = dichotomyBool (A x)
 
-  explode∈ : {x : X}{A : ℙ X} → x ∈ A → x ∉ A → Y
+  explode∈ : {Y : Type ℓ'} → {x : X}{A : ℙ X} → x ∈ A → x ∉ A → Y
   explode∈ x∈A x∉A = Empty.rec (true≢false (sym x∈A ∙ x∉A))
 
+  ∈∉→≢ : {x y : X}{A : ℙ X} → x ∈ A → y ∉ A → ¬ x ≡ y
+  ∈∉→≢ {A = A} x∈A y∉A x≡y = explode∈ {A = A} (subst (_∈ A) x≡y x∈A) y∉A
+
   -- Negation of membership
+
   module _
     {x : X}{A : ℙ X} where
 
@@ -116,14 +125,12 @@ module Powerset (decide : LEM) where
     ¬¬∉→∉ : ¬ ¬ x ∉ A → x ∉ A
     ¬¬∉→∉ p = ¬∈→∉ (¬map ∈→¬∉ p)
 
-  _∈?_ : X → ℙ X → Prop
-  x ∈? A = A x
-
-  _⊆_ : ℙ X → ℙ X → Type _
+  -- Inclusion relation
+  _⊆_ : {X : Type ℓ} → ℙ X → ℙ X → Type ℓ
   A ⊆ B = ∀ {x} → x ∈ A → x ∈ B
 
   isProp⊆ : {A B : ℙ X} → isProp (A ⊆ B)
-  isProp⊆ {B = B} = isPropImplicitΠ (λ x → isPropΠ (λ _ → isProp∈ {x = x} {A = B}))
+  isProp⊆ {B = B} = isPropImplicitΠ (λ x → isPropΠ (λ _ → isProp∈ B))
 
   ⊆-trans :{A B C : ℙ X} → A ⊆ B → B ⊆ C → A ⊆ C
   ⊆-trans A⊆B B⊆C x∈A = B⊆C (A⊆B x∈A)
@@ -144,8 +151,6 @@ module Powerset (decide : LEM) where
   ...   | inl q = Empty.rec {A = A ≡ B} (true≢false (sym (B⊆A q) ∙ p)) i x
   ...   | inr q = (p ∙ sym q) i
 
-  ∈∉→≢ : {x y : X}{A : ℙ X} → x ∈ A → y ∉ A → ¬ x ≡ y
-  ∈∉→≢ = {!!}
 
   {-
 
@@ -157,9 +162,11 @@ module Powerset (decide : LEM) where
 
   -- Empty and Total Subset
 
+  -- The empty subset
   ∅ : ℙ X
   ∅ x = false
 
+  -- The total subset
   total : ℙ X
   total x = true
 
@@ -199,10 +206,10 @@ module Powerset (decide : LEM) where
   ∁-Unip A i x = notnot (A x) i
 
   ∉→∈∁ : {x : X}{A : ℙ X} → x ∉ A → x ∈ (∁ A)
-  ∉→∈∁ = {!!}
+  ∉→∈∁ x∉A i = not (x∉A i)
 
   ∈∁→∉ : {x : X}{A : ℙ X} → x ∈ (∁ A) → x ∉ A
-  ∈∁→∉ = {!!}
+  ∈∁→∉ x∈∁A = sym (notnot _) ∙ cong not x∈∁A
 
   -- Binary union
 
@@ -242,6 +249,12 @@ module Powerset (decide : LEM) where
   ∪-right⊆ : (A B : ℙ X) → B ⊆ (A ∪ B)
   ∪-right⊆ A B = ∪-right∈ A B
 
+  ∈A∪B→∈A+∈B : {x : X}(A B : ℙ X) → x ∈ (A ∪ B) → (x ∈ A) ⊎ (x ∈ B)
+  ∈A∪B→∈A+∈B {x = x} A B x∈A∪B = or-dichotomy (A x) (B x) x∈A∪B
+
+  ∈A+∈B→∈A∪B : {x : X}(A B : ℙ X) → ∥ (x ∈ A) ⊎ (x ∈ B) ∥ → x ∈ (A ∪ B)
+  ∈A+∈B→∈A∪B {x = x} A B = Prop.rec (isProp∈ (A ∪ B)) (λ ∈A+∈B → or≡true (A x) (B x) ∈A+∈B)
+
   -- Binary intersection
 
   _∩_ : ℙ X → ℙ X → ℙ X
@@ -275,10 +288,10 @@ module Powerset (decide : LEM) where
   ⊆→⊆∩ A B C⊆A C⊆B x∈C = ∈→∈∩ A B (C⊆A x∈C) (C⊆B x∈C)
 
   left∈-∩ : {x : X}(A B : ℙ X) → x ∈ (A ∩ B) → x ∈ A
-  left∈-∩ = {!!}
+  left∈-∩ {x = x} A B x∈A∩B = and-cancelˡ (A x) (B x) x∈A∩B
 
   right∈-∩ : {x : X}(A B : ℙ X) → x ∈ (A ∩ B) → x ∈ B
-  right∈-∩ = {!!}
+  right∈-∩ {x = x} A B x∈A∩B = and-cancelʳ (A x) (B x) x∈A∩B
 
   ⊆→∩⊆ : (A B C : ℙ X) → A ⊆ B → (A ∩ C) ⊆ (B ∩ C)
   ⊆→∩⊆ A B C A⊆B x∈A∩C = ∈→∈∩ B C (A⊆B (left∈-∩ A C x∈A∩C)) (right∈-∩ A C x∈A∩C)
@@ -324,13 +337,28 @@ module Powerset (decide : LEM) where
   ∩-∪-deMorgan : (A B : ℙ X) → (∁ A) ∩ (∁ B) ≡ ∁ (A ∪ B)
   ∩-∪-deMorgan A B i x = and-or-deMorgan (A x) (B x) i
 
-  -- Facts about complementary subsets
+  -- Facts between non-intersecting subsets and complementary subsets
+
+  →∩∅ : {A B : ℙ X} → ((x : X) → x ∈ A → x ∉ B) → A ∩ B ≡ ∅
+  →∩∅ {A = A} {B = B} p i x with dichotomy∈ x A
+  ... | inl x∈A = x∈A i and p x x∈A i
+  ... | inr x∉A = and-absorpˡ (A x) (B x) x∉A i
 
   A∩B=∅→A⊆∁B : {A B : ℙ X} → A ∩ B ≡ ∅ → A ⊆ (∁ B)
-  A∩B=∅→A⊆∁B = {!!}
+  A∩B=∅→A⊆∁B {A = A} {B = B} A∩B≡∅ {x = x} x∈A =
+    ∉→∈∁ {A = B} (and-forceˡ (A x) (B x) (λ i → A∩B≡∅ i x) x∈A)
+
+  A∩B=∅→B⊆∁A : {A B : ℙ X} → A ∩ B ≡ ∅ → B ⊆ (∁ A)
+  A∩B=∅→B⊆∁A A∩B≡∅ = A∩B=∅→A⊆∁B (∩-Comm _ _ ∙ A∩B≡∅)
 
   A⊆∁B→A∩B=∅ : {A B : ℙ X} → A ⊆ (∁ B) → A ∩ B ≡ ∅
-  A⊆∁B→A∩B=∅ = {!!}
+  A⊆∁B→A∩B=∅ {X = X} {A = A} {B = B} A⊆∁B = →∩∅ helper
+    where
+    helper : (x : X) → x ∈ A → x ∉ B
+    helper x x∈A = ∈∁→∉ {A = B} (A⊆∁B x∈A)
+
+  B⊆∁A→A∩B=∅ : {A B : ℙ X} → B ⊆ (∁ A) → A ∩ B ≡ ∅
+  B⊆∁A→A∩B=∅ B⊆∁A = ∩-Comm _ _ ∙ A⊆∁B→A∩B=∅ B⊆∁A
 
 
   {-
@@ -338,6 +366,8 @@ module Powerset (decide : LEM) where
     Consequences of the Axiom Schema of Specification
 
   -}
+
+  -- Membership and inhabitedness
 
   module _
     (P : X → hProp ℓ){x : X} where
@@ -362,6 +392,14 @@ module Powerset (decide : LEM) where
     ... | yes p = Empty.rec (¬p p)
     ... | no ¬p = refl
 
+    {-
+    TODO:
+    specify¬ : (P : X → hProp ℓ) → specify (λ x → (¬ P x .fst) , isProp¬ _) ≡ ∁ (specify P)
+    specify¬ P i x with decide (P x .snd)
+    ... | yes p = {!!}
+    ... | no ¬p = (Inhab→∈ _ ¬p ∙ sym (cong not (Empty→∉ _ ¬p))) i
+    -}
+
   module _
     (P : X → hProp ℓ)(Q : X → hProp ℓ') where
 
@@ -371,12 +409,16 @@ module Powerset (decide : LEM) where
     Imply→⊆ : ((x : X) → P x .fst → Q x .fst) → specify P ⊆ specify Q
     Imply→⊆ P→Q x∈P = Inhab→∈ Q (P→Q _ (∈→Inhab P x∈P))
 
-  {-
-  specify¬ : (P : X → hProp ℓ) → specify (λ x → (¬ P x .fst) , isProp¬ _) ≡ ∁ (specify P)
-  specify¬ P i x with decide (P x .snd)
-  ... | yes p = {!!}
-  ... | no ¬p = (Inhab→∈ _ ¬p ∙ sym (cong not (Empty→∉ _ ¬p))) i
-  -}
+    ∈-∪→Inhab⊎ : (x : X) → x ∈ specify P ∪ specify Q → P x .fst ⊎ Q x .fst
+    ∈-∪→Inhab⊎ x x∈∪ with ∈A∪B→∈A+∈B (specify P) (specify Q) x∈∪
+    ... | inl p = inl (∈→Inhab P p)
+    ... | inr q = inr (∈→Inhab Q q)
+
+    Inhab⊎→∈-∪ : (x : X) → ∥ P x .fst ⊎ Q x .fst ∥ → x ∈ specify P ∪ specify Q
+    Inhab⊎→∈-∪ x =
+      Prop.rec (isProp∈ (specify P ∪ specify Q))
+      (λ { (inl p) → ∪-left∈  (specify P) (specify Q) (Inhab→∈ P p)
+         ; (inr q) → ∪-right∈ (specify P) (specify Q) (Inhab→∈ Q q) })
 
 
   {-
@@ -390,11 +432,19 @@ module Powerset (decide : LEM) where
   [_] : X → ℙ X
   [_] x = specify λ y → ∥ x ≡ y ∥ , squash
 
+  x∈[x] : {x : X} → x ∈ [ x ]
+  x∈[x] {x = x} = Inhab→∈ (λ y → ∥ x ≡ y ∥ , squash) ∣ refl ∣
+
+  y∈[x]→∥x≡y∥ : {x y : X} → y ∈ [ x ] → ∥ x ≡ y ∥
+  y∈[x]→∥x≡y∥ {x = x} = ∈→Inhab (λ y → ∥ x ≡ y ∥ , squash)
+
   A∈S→[A]⊆S : {A : ℙ X}{S : ℙ (ℙ X)} → A ∈ S → [ A ] ⊆ S
-  A∈S→[A]⊆S = {!!}
+  A∈S→[A]⊆S {S = S} A∈S B∈[A] =
+    Prop.rec (isProp∈ S) (λ A≡B → subst (_∈ S) A≡B A∈S) (y∈[x]→∥x≡y∥ B∈[A])
 
   [A]⊆S→A∈S : {A : ℙ X}{S : ℙ (ℙ X)} → [ A ] ⊆ S → A ∈ S
-  [A]⊆S→A∈S = {!!}
+  [A]⊆S→A∈S [A]⊆S = [A]⊆S x∈[x]
+
 
   {-
 
@@ -424,11 +474,12 @@ module Powerset (decide : LEM) where
     ∈union→∃ : x ∈ union S → ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥
     ∈union→∃ = ∈→Inhab (λ x → ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥ , squash)
 
-    ∈union : ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥ → x ∈ union S
-    ∈union = Inhab→∈ λ x → ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥ , squash
+    ∃→∈union : ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥ → x ∈ union S
+    ∃→∈union = Inhab→∈ λ x → ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥ , squash
 
-    --∉union→∀ : x ∉ union S → (A : ℙ X) → A ∈ S → x ∉ A
-    --∉union→∀ = {!!}
+    -- TODO:
+    -- ∉union→∀ : x ∉ union S → (A : ℙ X) → A ∈ S → x ∉ A
+    -- ∉union→∀ = {!!}
 
     ∉union : ((A : ℙ X) → A ∈ S → x ∉ A) → x ∉ union S
     ∉union p = ¬∈→∉ {A = union S} (¬map ∈union→∃ helper)
@@ -446,16 +497,44 @@ module Powerset (decide : LEM) where
   union⊆ {X = X} {S = S} {A = A} U∈S→U⊆A {x = x} x∈∪S = helper (∈union→∃ x∈∪S)
     where
     helper : ∥ Σ[ N ∈ ℙ X ] (x ∈ N) × (N ∈ S) ∥ → x ∈ A
-    helper = Prop.rec (isProp∈ {A = A}) (λ (_ , x∈N , N∈S) → ∈⊆-trans {B = A} x∈N (U∈S→U⊆A _ N∈S))
+    helper = Prop.rec (isProp∈ A) (λ (_ , x∈N , N∈S) → ∈⊆-trans {B = A} x∈N (U∈S→U⊆A _ N∈S))
 
   union∪ : {S T : ℙ (ℙ X)} → union (S ∪ T) ≡ union S ∪ union T
-  union∪ = {!!}
+  union∪ {S = S} {T = T} = bi⊆→≡ ∪-S∪T⊆∪S-∪-∪T ∪S-∪-∪T⊆∪-S∪T
+    where
+    ∪-S∪T⊆∪S-∪-∪T : union (S ∪ T) ⊆ union S ∪ union T
+    ∪-S∪T⊆∪S-∪-∪T x∈∪-S∪T = ∈A+∈B→∈A∪B (union S) (union T)
+      (Prop.map
+      (λ (A , x∈A , A∈S∪T) →
+        case ∈A∪B→∈A+∈B S T A∈S∪T of λ
+        { (inl A∈S) → inl (∃→∈union ∣ A , x∈A , A∈S ∣)
+        ; (inr A∈T) → inr (∃→∈union ∣ A , x∈A , A∈T ∣) })
+      (∈union→∃ x∈∪-S∪T))
+
+    ∪S-∪-∪T⊆∪-S∪T : union S ∪ union T ⊆ union (S ∪ T)
+    ∪S-∪-∪T⊆∪-S∪T x∈∪S-∪-∪T = ∃→∈union
+      (case ∈A∪B→∈A+∈B (union S) (union T) x∈∪S-∪-∪T of λ
+        { (inl x∈S) → Prop.map (λ (A , x∈A , x∈S) → A , x∈A , ∪-left∈  S T x∈S) (∈union→∃ x∈S)
+        ; (inr x∈T) → Prop.map (λ (A , x∈A , x∈T) → A , x∈A , ∪-right∈ S T x∈T) (∈union→∃ x∈T) })
 
   union∪-left⊆ : {S T : ℙ (ℙ X)} → union S ⊆ union (S ∪ T)
-  union∪-left⊆ = {!!}
+  union∪-left⊆ {S = S} {T = T} = subst (union S ⊆_) (sym union∪) (∪-left⊆ (union S) (union T))
+
+  union∪-right⊆ : {S T : ℙ (ℙ X)} → union T ⊆ union (S ∪ T)
+  union∪-right⊆ {S = S} {T = T} = subst (union T ⊆_) (sym union∪) (∪-right⊆ (union S) (union T))
 
   union[A] : {A : ℙ X} → union [ A ] ≡ A
-  union[A] = {!!}
+  union[A] {A = A} = bi⊆→≡ ∪[A]⊆A A⊆∪[A]
+    where
+    ∪[A]⊆A : union [ A ] ⊆ A
+    ∪[A]⊆A {x = x} x∈∪[A] =
+      Prop.rec (isProp∈ A)
+      (λ (B , x∈B , B∈[A]) →
+        Prop.rec (isProp∈ A) (λ A≡B → subst (x ∈_) (sym A≡B) x∈B)
+      (y∈[x]→∥x≡y∥ B∈[A])) (∈union→∃ x∈∪[A])
+
+    A⊆∪[A] : A ⊆ union [ A ]
+    A⊆∪[A] x∈A = ∃→∈union ∣ A , x∈A , x∈[x] ∣
 
   union∪[A] : {S : ℙ (ℙ X)}{A : ℙ X} → union (S ∪ [ A ]) ≡ (union S) ∪ A
   union∪[A] {S = S} {A = A} = union∪ ∙ (λ i → (union S) ∪ union[A] {A = A} i)
@@ -486,16 +565,19 @@ module Powerset (decide : LEM) where
   -}
 
   rep : (x : X) → ℙ (ℙ X)
-  rep x A = A x --specify (λ A → x ∈ A , isProp∈ {A = A})
+  rep x A = A x
 
   module _
     {x : X}{A : ℙ X} where
 
-    A∈repx→x∈A : A ∈ rep x → x ∈ A
-    A∈repx→x∈A = {!!}
+    x∈A≡A∈repx : x ∈ A ≡ A ∈ rep x
+    x∈A≡A∈repx = refl
 
     x∈A→A∈repx : x ∈ A → A ∈ rep x
-    x∈A→A∈repx = {!!}
+    x∈A→A∈repx p = p
+
+    A∈repx→x∈A : A ∈ rep x → x ∈ A
+    A∈repx→x∈A p = p
 
   ∩-∈rep : {x : X}(A B : ℙ X) → A ∈ rep x → B ∈ rep x → (A ∩ B) ∈ rep x
-  ∩-∈rep = {!!}
+  ∩-∈rep = ∈→∈∩

@@ -14,6 +14,7 @@ private
   variable
     ℓ ℓ' : Level
 
+
 AC : Typeω
 AC = {ℓ ℓ' : Level}{X : Type ℓ}{Y : X → Type ℓ'}
   → isSet X

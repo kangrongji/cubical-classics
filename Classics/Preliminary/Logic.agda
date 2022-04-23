@@ -17,6 +17,7 @@ private
     X : Type ℓ
     Y : Type ℓ'
 
+
 ¬map : (X → Y) → ¬ Y → ¬ X
 ¬map f ¬y x = ¬y (f x)
 

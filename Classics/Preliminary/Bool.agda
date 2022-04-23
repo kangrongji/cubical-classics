@@ -7,20 +7,10 @@ This file contains some facts about Bool so far not included in the Cubical Stan
 module Classics.Preliminary.Bool where
 
 open import Cubical.Foundations.Prelude
-open import Cubical.Foundations.Equiv
-open import Cubical.Foundations.Isomorphism
-open import Cubical.Foundations.Transport
-open import Cubical.Foundations.Univalence
+open import Cubical.Data.Bool
+open import Cubical.Data.Empty as Empty
+open import Cubical.Data.Sum
 
-open import Cubical.Data.Bool.Base
-open import Cubical.Data.Empty
-
-open import Cubical.Relation.Nullary
-open import Cubical.Relation.Nullary.DecidableEq
-
-private
-  variable
-    ℓ : Level
 
 -- Algebraic properties of `and` operation
 
@@ -119,3 +109,51 @@ and-or-deMorgan true  true  = refl
 and-or-deMorgan true  false = refl
 and-or-deMorgan false true  = refl
 and-or-deMorgan false false = refl
+
+-- Cancellation
+
+and-cancelˡ : ∀ x y → x and y ≡ true → x ≡ true
+and-cancelˡ true  true  _ = refl
+and-cancelˡ true  false _ = refl
+and-cancelˡ false true  p = Empty.rec (false≢true p)
+and-cancelˡ false false p = Empty.rec (false≢true p)
+
+and-cancelʳ : ∀ x y → x and y ≡ true → y ≡ true
+and-cancelʳ true  true  _ = refl
+and-cancelʳ true  false p = Empty.rec (false≢true p)
+and-cancelʳ false true  _ = refl
+and-cancelʳ false false p = Empty.rec (false≢true p)
+
+and-forceˡ : ∀ x y → x and y ≡ false → x ≡ true → y ≡ false
+and-forceˡ true  true  p _ = Empty.rec (true≢false p)
+and-forceˡ true  false _ _ = refl
+and-forceˡ false true  _ q = Empty.rec (false≢true q)
+and-forceˡ false false _ _ = refl
+
+and-forceʳ : ∀ x y → x and y ≡ false → y ≡ true → x ≡ false
+and-forceʳ true  true  p _ = Empty.rec (true≢false p)
+and-forceʳ true  false _ q = Empty.rec (false≢true q)
+and-forceʳ false true  _ _ = refl
+and-forceʳ false false _ _ = refl
+
+-- Absorption
+
+and-absorpˡ : ∀ x y → x ≡ false → x and y ≡ false
+and-absorpˡ true  true  p = Empty.rec (true≢false p)
+and-absorpˡ true  false _ = refl
+and-absorpˡ false true  _ = refl
+and-absorpˡ false false _ = refl
+
+-- Dichotomy
+
+or-dichotomy : ∀ x y → x or y ≡ true → (x ≡ true) ⊎ (y ≡ true)
+or-dichotomy true _ _ = inl refl
+or-dichotomy false true _ = inr refl
+or-dichotomy false false p = Empty.rec (false≢true p)
+
+or≡true : ∀ x y → (x ≡ true) ⊎ (y ≡ true) → x or y ≡ true
+or≡true true  true  _ = refl
+or≡true true  false _ = refl
+or≡true false true  _ = refl
+or≡true false false (inl p) = Empty.rec (false≢true p)
+or≡true false false (inr p) = Empty.rec (false≢true p)

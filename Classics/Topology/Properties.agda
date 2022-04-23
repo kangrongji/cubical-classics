@@ -106,7 +106,7 @@ module TopologyProperties (decide : LEM) where
       𝒰 = specify P
 
       rec-helper1 : {N : Subset} → ∥ Σ[ x ∈ X .set ] (N ∈ ℕbh x) × N ⊆ U ∥ → N ∈ Open
-      rec-helper1 = Prop.rec (isProp∈ {A = Open}) λ (_ , p , _) → N∈ℕbhx→N∈Open p
+      rec-helper1 = Prop.rec (isProp∈ Open) λ (_ , p , _) → N∈ℕbhx→N∈Open p
 
       𝒰⊆Open : 𝒰 ⊆ Open
       𝒰⊆Open p = rec-helper1 (∈→Inhab P p)
@@ -127,7 +127,7 @@ module TopologyProperties (decide : LEM) where
       𝕌⊆U = union⊆ N∈𝒰→N⊆U
 
       U⊆𝕌 : U ⊆ 𝕌
-      U⊆𝕌 x∈U = ∈union
+      U⊆𝕌 x∈U = ∃→∈union
         (Prop.map (λ (N , N∈ℕx , N⊆U) → N , N∈ℕbhx→x∈N N∈ℕx , Inhab→∈ P ∣ _ , N∈ℕx , N⊆U ∣) (p _ x∈U))
 
       𝕌≡U : 𝕌 ≡ U
@@ -269,7 +269,7 @@ module TopologyProperties (decide : LEM) where
 
         𝒰⊆Open : 𝒰 ⊆ Open
         𝒰⊆Open p =
-          Prop.rec (isProp∈ {A = Open}) (λ (_ , _ , q , _) → N∈ℕbhx→N∈Open q) (∈→Inhab P p)
+          Prop.rec (isProp∈ Open) (λ (_ , _ , q , _) → N∈ℕbhx→N∈Open q) (∈→Inhab P p)
 
         𝕌 : Subset
         𝕌 = union 𝒰
@@ -277,9 +277,9 @@ module TopologyProperties (decide : LEM) where
         -- A shuffle of propositions
         K⊆𝕌 : K ⊆ 𝕌
         K⊆𝕌 x∈K =
-          Prop.rec (isProp∈ {A = 𝕌})
+          Prop.rec (isProp∈ 𝕌)
           (λ (U , V , U∈ℕx , V∈ℕx₀ , U∩V≡∅) →
-             ∈union ∣ U , N∈ℕbhx→x∈N U∈ℕx , Inhab→∈ P ∣ _ , x∈K , U∈ℕx , ∣ V , V∈ℕx₀ , U∩V≡∅ ∣ ∣ ∣)
+             ∃→∈union ∣ U , N∈ℕbhx→x∈N U∈ℕx , Inhab→∈ P ∣ _ , x∈K , U∈ℕx , ∣ V , V∈ℕx₀ , U∩V≡∅ ∣ ∣ ∣)
           (haus (∈∉→≢ x∈K x₀∉K))
 
         𝒰-covers-K : 𝒰 covers K

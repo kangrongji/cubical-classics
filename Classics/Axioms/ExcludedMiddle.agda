@@ -16,6 +16,7 @@ private
   variable
     ℓ : Level
 
+
 -- LEM for Law of Excluded Middle and DNE for Double Negation Elimination
 -- The "per universe" version.
 
