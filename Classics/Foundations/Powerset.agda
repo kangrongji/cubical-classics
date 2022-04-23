@@ -5,7 +5,7 @@ Impredicative Powerset
 This file introduces a "powerset", thanks to Excluded Middle,
 behaving very similar to that in classical set theory.
 I think most of the results only relies on impredicativity,
-so that maybe axiom as Propositional Resizing is enough
+so probably axiom as Propositional Resizing is enough
 to recover these useful properties.
 
 -}
@@ -135,6 +135,9 @@ module Powerset (decide : LEM) where
   ≡→⊆ : {A B : ℙ X} → A ≡ B → A ⊆ B
   ≡→⊆ p {x = x} x∈A = subst (x ∈_) p x∈A
 
+  ⊆-refl : {A : ℙ X} → A ⊆ A
+  ⊆-refl p = p
+
   bi⊆→≡ : {A B : ℙ X} → A ⊆ B → B ⊆ A → A ≡ B
   bi⊆→≡ {A = A} {B = B} A⊆B B⊆A i x with dichotomy∈ x A
   ... | inl p = (p ∙ sym (A⊆B p)) i
@@ -142,6 +145,8 @@ module Powerset (decide : LEM) where
   ...   | inl q = Empty.rec {A = A ≡ B} (true≢false (sym (B⊆A q) ∙ p)) i x
   ...   | inr q = (p ∙ sym q) i
 
+  ∈∉→≢ : {x y : X}{A : ℙ X} → x ∈ A → y ∉ A → ¬ x ≡ y
+  ∈∉→≢ = {!!}
 
   {-
 
@@ -190,6 +195,12 @@ module Powerset (decide : LEM) where
 
   ∁-Unip : (A : ℙ X) → ∁ ∁ A ≡ A
   ∁-Unip A i x = notnot (A x) i
+
+  ∉→∈∁ : {x : X}{A : ℙ X} → x ∉ A → x ∈ (∁ A)
+  ∉→∈∁ = {!!}
+
+  ∈∁→∉ : {x : X}{A : ℙ X} → x ∈ (∁ A) → x ∉ A
+  ∈∁→∉ = {!!}
 
   -- Binary union
 
@@ -271,11 +282,17 @@ module Powerset (decide : LEM) where
 
   -- Distribution laws
 
-  ∪-∩-Dist : (A B C : ℙ X) → A ∪ (B ∩ C) ≡ (A ∪ B) ∩ (A ∪ C)
-  ∪-∩-Dist A B C i x = or-and-dist (A x) (B x) (C x) i
+  ∪-∩-rDist : (A B C : ℙ X) → A ∪ (B ∩ C) ≡ (A ∪ B) ∩ (A ∪ C)
+  ∪-∩-rDist A B C i x = or-and-dist (A x) (B x) (C x) i
 
-  ∩-∪-Dist : (A B C : ℙ X) → A ∩ (B ∪ C) ≡ (A ∩ B) ∪ (A ∩ C)
-  ∩-∪-Dist A B C i x = and-or-dist (A x) (B x) (C x) i
+  ∩-∪-rDist : (A B C : ℙ X) → A ∩ (B ∪ C) ≡ (A ∩ B) ∪ (A ∩ C)
+  ∩-∪-rDist A B C i x = and-or-dist (A x) (B x) (C x) i
+
+  ∪-∩-lDist : (A B C : ℙ X) → (A ∩ B) ∪ C ≡ (A ∪ C) ∩ (B ∪ C)
+  ∪-∩-lDist A B C = ∪-Comm _ _ ∙ ∪-∩-rDist _ _ _ ∙ (λ i → ∪-Comm C A i ∩ ∪-Comm C B i)
+
+  ∩-∪-lDist : (A B C : ℙ X) → (A ∪ B) ∩ C ≡ (A ∩ C) ∪ (B ∩ C)
+  ∩-∪-lDist A B C = ∩-Comm _ _ ∙ ∩-∪-rDist _ _ _ ∙ (λ i → ∩-Comm C A i ∪ ∩-Comm C B i)
 
   -- Complementation laws
 
