@@ -392,14 +392,6 @@ module Powerset (decide : LEM) where
     ... | yes p = Empty.rec (¬p p)
     ... | no ¬p = refl
 
-    {-
-    TODO:
-    specify¬ : (P : X → hProp ℓ) → specify (λ x → (¬ P x .fst) , isProp¬ _) ≡ ∁ (specify P)
-    specify¬ P i x with decide (P x .snd)
-    ... | yes p = {!!}
-    ... | no ¬p = (Inhab→∈ _ ¬p ∙ sym (cong not (Empty→∉ _ ¬p))) i
-    -}
-
   module _
     (P : X → hProp ℓ)(Q : X → hProp ℓ') where
 
@@ -476,10 +468,6 @@ module Powerset (decide : LEM) where
 
     ∃→∈union : ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥ → x ∈ union S
     ∃→∈union = Inhab→∈ λ x → ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥ , squash
-
-    -- TODO:
-    -- ∉union→∀ : x ∉ union S → (A : ℙ X) → A ∈ S → x ∉ A
-    -- ∉union→∀ = {!!}
 
     ∉union : ((A : ℙ X) → A ∈ S → x ∉ A) → x ∉ union S
     ∉union p = ¬∈→∉ {A = union S} (¬map ∈union→∃ helper)
@@ -567,17 +555,8 @@ module Powerset (decide : LEM) where
   rep : (x : X) → ℙ (ℙ X)
   rep x A = A x
 
-  module _
-    {x : X}{A : ℙ X} where
-
-    x∈A≡A∈repx : x ∈ A ≡ A ∈ rep x
-    x∈A≡A∈repx = refl
-
-    x∈A→A∈repx : x ∈ A → A ∈ rep x
-    x∈A→A∈repx p = p
-
-    A∈repx→x∈A : A ∈ rep x → x ∈ A
-    A∈repx→x∈A p = p
+  x∈A≡A∈repx : {x : X}{A : ℙ X} → x ∈ A ≡ A ∈ rep x
+  x∈A≡A∈repx = refl
 
   ∩-∈rep : {x : X}(A B : ℙ X) → A ∈ rep x → B ∈ rep x → (A ∩ B) ∈ rep x
   ∩-∈rep = ∈→∈∩

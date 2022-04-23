@@ -1,7 +1,13 @@
 {-
 
 This file contains:
-- ...
+- Basic properties of open covering;
+- Basic properties of neighbourhood;
+- Basic criterion for open/closed subset;
+- Definition of compactness;
+- Definition of Hausdorff space;
+- Point and compact subset can be separated by open set in Hausdorff space;
+- Compact subset in Hausdorff space is closed.
 
 -}
 {-# OPTIONS --safe #-}
@@ -64,13 +70,13 @@ module TopologyProperties (decide : LEM) where
     ℕbh x = rep x ∩ Open
 
     N∈ℕbhx→x∈N : {x : X .set}{N : Subset} → N ∈ ℕbh x → x ∈ N
-    N∈ℕbhx→x∈N {x = x} {N = N} N∈ℕx = A∈repx→x∈A {A = N} (left∈-∩ (rep x) Open N∈ℕx)
+    N∈ℕbhx→x∈N {x = x} N∈ℕx = left∈-∩ (rep x) Open N∈ℕx
 
     N∈ℕbhx→N∈Open : {x : X .set}{N : Subset} → N ∈ ℕbh x → N ∈ Open
-    N∈ℕbhx→N∈Open {x = x} {N = N} = right∈-∩ (rep x) Open
+    N∈ℕbhx→N∈Open {x = x} = right∈-∩ (rep x) Open
 
     getℕbh : {x : X .set}{N : Subset} → x ∈ N → N ∈ Open → N ∈ ℕbh x
-    getℕbh {x = x} {N = N} x∈N N∈Open = ∈→∈∩ (rep x) Open (x∈A→A∈repx {A = N} x∈N) N∈Open
+    getℕbh {x = x} {N = N} x∈N N∈Open = ∈→∈∩ (rep x) Open x∈N N∈Open
 
     total∈ℕbh : {x : X .set} → total ∈ ℕbh x
     total∈ℕbh {x = x} = getℕbh {x = x} (x∈total {x = x}) (X .has-total)
@@ -302,6 +308,7 @@ module TopologyProperties (decide : LEM) where
           (λ (_ , 𝒰₀⊆Open , fin⊆𝒰₀ , 𝒰₀covK , sep)
               →  SepOpen⊆ (union∈Open 𝒰₀⊆Open) (𝒰₀covK .fst) (unionSep _ _ 𝒰₀⊆Open sep fin⊆𝒰₀)) ∃𝒰₀
 
-      -- Compact subset of Hausdorff space is closed subset.
+      -- Compact subset of Hausdorff space is closed.
       isCompactSubset→isClosedSubSet : {K : Subset} → isCompactSubset K → isClosedSubSet K
-      isCompactSubset→isClosedSubSet takefin = SepCriterionOfClosedness (λ _ x∉K → SepOpen→Sep (sepOpenCompact takefin x∉K))
+      isCompactSubset→isClosedSubSet takefin =
+        SepCriterionOfClosedness (λ _ x∉K → SepOpen→Sep (sepOpenCompact takefin x∉K))
