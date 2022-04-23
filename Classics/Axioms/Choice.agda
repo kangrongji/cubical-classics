@@ -14,6 +14,7 @@ private
   variable
     ℓ ℓ' : Level
 
+
 AC : Typeω
 AC = {ℓ ℓ' : Level}{X : Type ℓ}{Y : X → Type ℓ'}
   → isSet X
@@ -27,7 +28,7 @@ AC2 = {ℓ ℓ' ℓ'' : Level}{X : Type ℓ}{Y : X → Type ℓ'}{Z : (x : X) �
   → ((x : X) → (y : Y x) → isSet (Z x y))
   → ((x : X) → (y : Y x) → ∥ Z x y ∥) → ∥ ((x : X) → (y : Y x) → Z x y) ∥
 
-module AxiomOfChoice (choice : AC) where
+module AxiomOfChoices (choice : AC) where
 
   choice2 : AC2
   choice2 isSetX isSetY isSetZ f =

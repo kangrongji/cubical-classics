@@ -1,4 +1,6 @@
 # Cubical Classics
-The `cubical-classics` library is an attempt to do classical mathematics in cubical type theory.
-Though very little contents it has at present, I hope it will eventually contain some important ideas of modern mathematics.
+
+The aim of `cubical-classics` library is to formalize classical mathematics using cubical type theory.
+Though still a baby project at present, I hope someday it will eventually have some important ideas of modern mathematics showing up here.
+
 We are open to advices and contributions!
