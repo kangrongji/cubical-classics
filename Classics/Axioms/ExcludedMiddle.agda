@@ -16,6 +16,9 @@ private
   variable
     ℓ : Level
 
+-- LEM for Law of Excluded Middle and DNE for Double Negation Elimination
+-- The "per universe" version.
+
 LEMOfLevel : (ℓ : Level) → Type (ℓ-suc ℓ)
 LEMOfLevel ℓ = {P : Type ℓ} → isProp P → Dec P
 
@@ -42,7 +45,7 @@ DNEOfLevel→LEMOfLevel elim¬¬ {P = P} isPropP = elim¬¬ (isPropDec isPropP) 
   ¬¬dec : ¬ ¬ Dec P
   ¬¬dec ¬dec = ¬dec (yes (elim¬¬ isPropP λ ¬p → ¬dec (no ¬p)))
 
--- Law of Excluded Middle and Double Negation Elimination
+-- The universal polymorphic version
 
 LEM : Typeω
 LEM = {ℓ : Level} → LEMOfLevel ℓ
