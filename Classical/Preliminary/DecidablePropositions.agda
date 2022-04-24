@@ -50,7 +50,7 @@ DecBool→Type* true  = yes tt*
 DecBool→Type* false = no  λ()
 
 isPropBool→Type* : (x : Bool) → isProp (Bool→Type* {ℓ = ℓ} x)
-isPropBool→Type* true = isContr→isProp isContrUnit*
+isPropBool→Type* true = isPropUnit*
 
 Bool→Dec→Bool* : (x : Bool) → Dec→Bool (DecBool→Type* {ℓ = ℓ} x) ≡ x
 Bool→Dec→Bool* true  = refl

@@ -32,7 +32,7 @@ isSubobjectClassifier Ω = {ℓ : Level}{X : Type ℓ} → (X → Ω) ≃ (X →
 
 -- Renaming to emphasize Prop is a subobject classifier in classical world
 
-Prop : Type ℓ-zero
+Prop : Type
 Prop = Bool
 
 isSetProp : isSet Prop

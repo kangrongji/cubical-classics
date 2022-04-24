@@ -3,7 +3,7 @@
 Voevodsky's Axiom of Propositional Resizing
 
 Notice that Resizing is a corollary of Excluded Middle,
-which is prove in `Classical.Foundations.Impredicativity`.
+of which proof can be found in `Classical.Foundations.Impredicativity`.
 
 -}
 {-# OPTIONS --safe #-}
@@ -41,7 +41,7 @@ Resizing : Typeω
 Resizing = {ℓ ℓ' : Level} → isEquiv (liftProp {ℓ = ℓ} ℓ')
 
 
--- A simplified version that only lifting from level ℓ-zero is required
+-- A simplified version that only lifting from level zero is required
 
 Resizing₀ : Typeω
 Resizing₀ = {ℓ : Level} → isEquiv (liftProp {ℓ = ℓ-zero} ℓ)

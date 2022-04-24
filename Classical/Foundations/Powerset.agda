@@ -7,6 +7,11 @@ behaving very similar to that in classical set theory.
 I think most of the following results only relies on the concept of impredicativity,
 so probably axiom like Propositional Resizing is enough to make sense of it.
 
+TODO:
+Reorganize this file in better ways,
+since there are too many results crowded together.
+Maybe better separate it into several files.
+
 -}
 {-# OPTIONS --safe #-}
 module Classical.Foundations.Powerset where
@@ -76,11 +81,11 @@ module Powerset (decide : LEM) where
   -}
 
   -- Membership
-  _∈_ : X → ℙ X → Type ℓ-zero
+  _∈_ : X → ℙ X → Type
   x ∈ A = A x ≡ true
 
   -- Non-membership
-  _∉_ : X → ℙ X → Type ℓ-zero
+  _∉_ : X → ℙ X → Type
   x ∉ A = A x ≡ false
 
   isProp∈ : {x : X}(A : ℙ X) → isProp (x ∈ A)
