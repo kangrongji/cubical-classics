@@ -24,6 +24,7 @@ private
 
 
 -- A formulation of subobject classifier
+
 isSubobjectClassifier : Type ℓ → Typeω
 isSubobjectClassifier Ω = {ℓ : Level}{X : Type ℓ} → (X → Ω) ≃ (X → hProp ℓ)
 
@@ -76,7 +77,7 @@ module Impredicativity (decide : LEM) where
   hProp≃DecProp = isoToEquiv Iso-hProp-DecProp
 
 
-  -- The type Prop is an subobject classifier
+  -- The type Prop is a subobject classifier
 
   Iso-Prop-hProp : Iso Prop (hProp ℓ)
   Iso-Prop-hProp = compIso Iso-Bool-DecProp (invIso Iso-hProp-DecProp)
