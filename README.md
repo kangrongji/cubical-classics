@@ -1,6 +1,6 @@
 # ¬¬||🧊|| : Cubical Classics
-> From program halts in theory but no one ever seen it,
-> to program no mortal but only god could run.
+> From program halts in the tale,
+> to program only *Übermensch* is able to run.
 
 The aim of `cubical-classics` library is to formalize classical mathematics using cubical type theory.
 Though still a baby project at present, I hope someday it will have some important ideas of modern mathematics eventually.
