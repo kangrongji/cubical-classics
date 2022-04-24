@@ -4,7 +4,7 @@ This file contains some facts about Bool so far not included in the Cubical Stan
 
 -}
 {-# OPTIONS --safe #-}
-module Classics.Preliminary.Bool where
+module Classical.Preliminary.Bool where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Data.Bool

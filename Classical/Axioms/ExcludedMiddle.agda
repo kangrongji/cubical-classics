@@ -4,7 +4,7 @@ Law of Excluded Middle
 
 -}
 {-# OPTIONS --safe #-}
-module Classics.Axioms.ExcludedMiddle where
+module Classical.Axioms.ExcludedMiddle where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels

@@ -11,7 +11,7 @@ This file contains:
 
 -}
 {-# OPTIONS --safe #-}
-module Classics.Topology.Properties where
+module Classical.Topology.Properties where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
@@ -19,10 +19,10 @@ open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 
-open import Classics.Axioms.ExcludedMiddle
-open import Classics.Foundations.Powerset
+open import Classical.Axioms.ExcludedMiddle
+open import Classical.Foundations.Powerset
 
-open import Classics.Topology.Base
+open import Classical.Topology.Base
 
 private
   variable

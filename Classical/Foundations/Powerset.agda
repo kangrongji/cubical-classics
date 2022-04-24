@@ -9,7 +9,7 @@ so probably axiom like Propositional Resizing is enough to make sense of it.
 
 -}
 {-# OPTIONS --safe #-}
-module Classics.Foundations.Powerset where
+module Classical.Foundations.Powerset where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
@@ -23,11 +23,11 @@ open import Cubical.HITs.PropositionalTruncation as Prop
 
 open import Cubical.Relation.Nullary
 
-open import Classics.Preliminary.Bool
-open import Classics.Preliminary.Logic
-open import Classics.Axioms.ExcludedMiddle
+open import Classical.Preliminary.Bool
+open import Classical.Preliminary.Logic
+open import Classical.Axioms.ExcludedMiddle
 
-open import Classics.Foundations.Impredicativity
+open import Classical.Foundations.Impredicativity
   using (Prop ; isSetProp ; type ; bool)
 
 private

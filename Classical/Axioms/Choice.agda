@@ -4,7 +4,7 @@ Axiom of Choice
 
 -}
 {-# OPTIONS --safe #-}
-module Classics.Axioms.Choice where
+module Classical.Axioms.Choice where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels

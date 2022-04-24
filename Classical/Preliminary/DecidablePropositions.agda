@@ -7,7 +7,7 @@ so much of this file will have need for when a new version of cubical std-lib re
 
 -}
 {-# OPTIONS --safe #-}
-module Classics.Preliminary.DecidablePropositions where
+module Classical.Preliminary.DecidablePropositions where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels

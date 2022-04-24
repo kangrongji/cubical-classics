@@ -4,7 +4,7 @@ Impredicativity in Classical Mathematics
 
 -}
 {-# OPTIONS --safe #-}
-module Classics.Foundations.Impredicativity where
+module Classical.Foundations.Impredicativity where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
@@ -14,9 +14,9 @@ open import Cubical.Foundations.Isomorphism
 open import Cubical.Data.Bool
 open import Cubical.Relation.Nullary
 
-open import Classics.Preliminary.DecidablePropositions
-open import Classics.Axioms.ExcludedMiddle
-open import Classics.Axioms.Resizing
+open import Classical.Preliminary.DecidablePropositions
+open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms.Resizing
 
 private
   variable

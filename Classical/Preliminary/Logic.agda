@@ -4,7 +4,7 @@ Some useful logical identity
 
 -}
 {-# OPTIONS --safe #-}
-module Classics.Preliminary.Logic where
+module Classical.Preliminary.Logic where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels

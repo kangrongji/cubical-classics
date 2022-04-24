@@ -3,11 +3,11 @@
 Voevodsky's Axiom of Propositional Resizing
 
 Notice that Resizing is a corollary of Excluded Middle,
-which is prove in `Classics.Foundations.Impredicativity`.
+which is prove in `Classical.Foundations.Impredicativity`.
 
 -}
 {-# OPTIONS --safe #-}
-module Classics.Axioms.Resizing where
+module Classical.Axioms.Resizing where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
@@ -16,7 +16,7 @@ open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Function
 open import Cubical.Foundations.Univalence
 
-open import Classics.Preliminary.Equiv
+open import Classical.Preliminary.Equiv
 
 private
   variable

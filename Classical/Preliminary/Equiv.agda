@@ -7,7 +7,7 @@ Will be abandoned if new release come public.
 
 -}
 {-# OPTIONS --safe #-}
-module Classics.Preliminary.Equiv where
+module Classical.Preliminary.Equiv where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Equiv

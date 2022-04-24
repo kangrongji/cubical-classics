@@ -4,12 +4,12 @@ Topological Space
 
 -}
 {-# OPTIONS --safe #-}
-module Classics.Topology.Base where
+module Classical.Topology.Base where
 
 open import Cubical.Foundations.Prelude
 
-open import Classics.Axioms.ExcludedMiddle
-open import Classics.Foundations.Powerset
+open import Classical.Axioms.ExcludedMiddle
+open import Classical.Foundations.Powerset
 
 private
   variable
