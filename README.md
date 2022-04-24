@@ -5,5 +5,7 @@ Though still a baby project at present, I hope someday it will eventually have s
 
 We are open to advices and contributions!
 
-> From Program that halts in theory but no one ever seen it,
+
+> From program that halts in theory but no one ever seen it,
+>
 > to program that no mortal but only god could run.
