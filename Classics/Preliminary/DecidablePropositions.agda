@@ -24,7 +24,7 @@ open import Cubical.Relation.Nullary
 
 private
   variable
-    ℓ : Level
+    ℓ ℓ' : Level
 
 
 -- Decidable propositions
@@ -56,16 +56,19 @@ Bool→Dec→Bool* : (x : Bool) → Dec→Bool (DecBool→Type* {ℓ = ℓ} x) �
 Bool→Dec→Bool* true  = refl
 Bool→Dec→Bool* false = refl
 
-P→[Dec→Bool→Type*-P] : (P : Type ℓ)(dec : Dec P) → P → Bool→Type* {ℓ = ℓ} (Dec→Bool dec)
+P→[Dec→Bool→Type*-P] : (P : Type ℓ)(dec : Dec P) → P → Bool→Type* {ℓ = ℓ'} (Dec→Bool dec)
 P→[Dec→Bool→Type*-P] _ (yes p) _ = tt*
 P→[Dec→Bool→Type*-P] _ (no ¬p) x = Empty.rec (¬p x)
 
-[Dec→Bool→Type*-P]→P : (P : Type ℓ)(dec : Dec P) → Bool→Type* {ℓ = ℓ} (Dec→Bool dec) → P
+[Dec→Bool→Type*-P]→P : (P : Type ℓ)(dec : Dec P) → Bool→Type* {ℓ = ℓ'} (Dec→Bool dec) → P
 [Dec→Bool→Type*-P]→P _ (yes p) _ = p
 
+[DecProp→Bool→Type*-P]≃P : (P : Type ℓ)(h : isProp P)(dec : Dec P) → Bool→Type* {ℓ = ℓ'} (Dec→Bool dec) ≃ P
+[DecProp→Bool→Type*-P]≃P P h dec =
+  propBiimpl→Equiv (isPropBool→Type* _) h ([Dec→Bool→Type*-P]→P _ dec) (P→[Dec→Bool→Type*-P] _ dec)
+
 [DecProp→Bool→Type*-P]≡P : (P : Type ℓ)(h : isProp P)(dec : Dec P) → Bool→Type* {ℓ = ℓ} (Dec→Bool dec) ≡ P
-[DecProp→Bool→Type*-P]≡P P h dec =
-  hPropExt (isPropBool→Type* _) h ([Dec→Bool→Type*-P]→P _ dec) (P→[Dec→Bool→Type*-P] _ dec)
+[DecProp→Bool→Type*-P]≡P P h dec = ua ([DecProp→Bool→Type*-P]≃P P h dec)
 
 
 -- The type of boolean value is equivalent to the type of decidable propositions

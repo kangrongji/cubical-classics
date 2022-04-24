@@ -1,6 +1,6 @@
 {-
 
-Impredicativity
+Impredicativity in Classical Mathematics
 
 -}
 {-# OPTIONS --safe #-}
@@ -16,6 +16,7 @@ open import Cubical.Relation.Nullary
 
 open import Classics.Preliminary.DecidablePropositions
 open import Classics.Axioms.ExcludedMiddle
+open import Classics.Axioms.Resizing
 
 private
   variable
@@ -87,3 +88,15 @@ module Impredicativity (decide : LEM) where
 
   isSubobjectClassifierProp : isSubobjectClassifier Prop
   isSubobjectClassifierProp = equiv→ (idEquiv _) Prop≃hProp
+
+
+  -- Law of Excluded Middle implies Propositional Resizing
+
+  open DropProp
+
+  drop : Drop
+  drop P .lower = Iso-Prop-hProp .fun (Iso-Prop-hProp .inv P)
+  drop (P , h) .dropEquiv = invEquiv ([DecProp→Bool→Type*-P]≃P P h _)
+
+  resizing : Resizing
+  resizing = Drop→Resizing drop
