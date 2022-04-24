@@ -1,4 +1,4 @@
-# Cubical Classics ¬¬||🧊||
+# ¬¬||🧊|| : Cubical Classics
 > From program halts in theory but no one ever seen it,
 > to program no mortal but only god could run.
 
