@@ -5,12 +5,5 @@ Though still a baby project at present, I hope someday it will eventually have s
 
 We are open to advices and contributions!
 
-Constructive v.s. Classical à la Curry-Howard
----------------------------------------------
-* Constructive Proof
-
-  Program that should halt in theory but no one ever seen it.
-
-* Classical Proof
-
-  Program that no mortal but only god could run.
+> From Program that halts in theory but no one ever seen it,
+> to program that no mortal but only god could run.
