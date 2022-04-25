@@ -17,6 +17,15 @@ private
     ℓ : Level
 
 
+-- Binary operation for being inequal
+
+_≢_ : {X : Type ℓ}(x y : X) → Type ℓ
+x ≢ y = ¬ x ≡ y
+
+isProp≢ : {X : Type ℓ}{x y : X} → isProp (x ≢ y)
+isProp≢ = isProp¬ _
+
+
 -- Law of Excluded Middle and Double Negation Elimination
 -- (abbreviated as LEM and DNE respectively)
 
