@@ -16,6 +16,7 @@ private
   variable
     ℓ : Level
 
+
 -- Binary operation for being inequal
 
 _≢_ : {X : Type ℓ}(x y : X) → Type ℓ

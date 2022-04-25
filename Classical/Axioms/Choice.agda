@@ -28,8 +28,8 @@ AC2 = {ℓ ℓ' ℓ'' : Level}{X : Type ℓ}{Y : X → Type ℓ'}{Z : (x : X) �
   → ((x : X) → (y : Y x) → isSet (Z x y))
   → ((x : X) → (y : Y x) → ∥ Z x y ∥) → ∥ ((x : X) → (y : Y x) → Z x y) ∥
 
-module AxiomOfChoices (choice : AC) where
+module AxiomOfChoices (choose : AC) where
 
-  choice2 : AC2
-  choice2 isSetX isSetY isSetZ f =
-    choice isSetX (λ x → isSetΠ (isSetZ x)) (λ x → choice (isSetY x) (isSetZ x) (f x))
+  choose2 : AC2
+  choose2 isSetX isSetY isSetZ f =
+    choose isSetX (λ x → isSetΠ (isSetZ x)) (λ x → choose (isSetY x) (isSetZ x) (f x))

@@ -3,7 +3,7 @@
 Facts about Equivalences
 
 Copied from unreleased new version of cubical std-lib.
-Will be abandoned if new release come public.
+Will be abandoned if new release comes public.
 
 -}
 {-# OPTIONS --safe #-}
@@ -12,7 +12,6 @@ module Classical.Preliminary.Equiv where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Function
-
 
 private
   variable

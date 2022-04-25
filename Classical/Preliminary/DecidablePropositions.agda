@@ -21,7 +21,6 @@ open import Cubical.Data.Empty as Empty
 
 open import Cubical.Relation.Nullary
 
-
 private
   variable
     ℓ ℓ' : Level
