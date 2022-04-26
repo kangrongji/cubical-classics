@@ -1,4 +1,4 @@
 name: classics-0.1
 include: .
-depend: cubical
+depend: cubical-0.4
 flags: --cubical --no-import-sorts

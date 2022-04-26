@@ -36,7 +36,7 @@ isPropIsDecProp P = isPropDec (P .snd)
 
 -- Back and forth between boolean value and decidable propositions
 
-Bool→Dec→Bool* : (x : Bool) → Dec→Bool (DecBool→Type* {ℓ = ℓ} {x}) ≡ x
+Bool→Dec→Bool* : (x : Bool) → Dec→Bool (DecBool→Type* {ℓ = ℓ} {a = x}) ≡ x
 Bool→Dec→Bool* true  = refl
 Bool→Dec→Bool* false = refl
 
