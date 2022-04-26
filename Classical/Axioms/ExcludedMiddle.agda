@@ -14,6 +14,8 @@ open import Cubical.Foundations.Function
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Bool
 open import Cubical.Relation.Nullary
+open import Cubical.Relation.Nullary.DecidablePropositions
+  hiding (isPropIsDecProp)
 
 open import Classical.Preliminary.DecidablePropositions
 open import Classical.Axioms.Resizing
