@@ -1,6 +1,9 @@
 {-
 
-Impredicativity in Classical Mathematics
+This file should contain the very basic fact in classical world,
+that differs from constructive approach,
+usually the direct and fundamental corollary of the axioms.
+Better packing them up to be imported most conveniently.
 
 -}
 {-# OPTIONS --safe #-}
