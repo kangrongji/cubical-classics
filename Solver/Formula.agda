@@ -1,4 +1,3 @@
-{-# OPTIONS -W ignore #-}
 module Solver.Formula where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
@@ -17,6 +16,7 @@ open import Cubical.HITs.PropositionalTruncation
 open import Cubical.Relation.Nullary.Base
 open import Cubical.Relation.Nullary.Properties
 open import Cubical.Relation.Nullary.DecidablePropositions
+open import Classical.Preliminary.DecidablePropositions
 
 open import Classical.Preliminary.Bool
 
@@ -176,6 +176,7 @@ module _ {A : Type ℓ} where -- Should also be in agda-cubical
   [] : FinVec A 0
   [] = rec⊥ ∘ ¬Fin0
 
+  infixr 10 _∷_
   _∷_ : {n : ℕ} → A → FinVec A n → FinVec A (1 + n)
   (a ∷ v) i with fsplit i
   ... | inl _ = a
@@ -210,27 +211,50 @@ module NbE where
     = binFoldBool (λ τ → α (false ∷ τ))
     and binFoldBool (λ τ → α (true ∷ τ))
 
-  binFoldCorrect :
-      (Γ : FinVec Bool n)
-    → (α : FinVec Bool n → Bool)
-    → Bool→Type (binFoldBool α)
-    → Bool→Type (α Γ)
-  binFoldCorrect
-    = elimFinVec (λ Γ → ∀ α → (Bool→Type (binFoldBool α)) → Bool→Type (α Γ))
-      (λ α z → z) auxCon
-    where
-      auxCon : {k : ℕ} (a : Bool) (v : FinVec Bool k)
-        → (∀ α → Bool→Type (binFoldBool α) → Bool→Type (α v))
-        → ∀ α → Bool→Type (binFoldBool α) → Bool→Type (α (a ∷ v))
-      auxCon a v IH α H with a | -- Make a sneaky use of our lemma
-        Sound (λ b → binFoldBool (λ τ → α (b ∷ τ))) (false ᶠ ∧ᶠ true ᶠ) H
-      ... | true  | (pfalse , ptrue) = IH _ ptrue
-      ... | false | (pfalse , ptrue) = IH _ pfalse
+  abstract
+    binFoldCorrect :
+        (Γ : FinVec Bool n)
+      → (α : FinVec Bool n → Bool)
+      → Bool→Type (binFoldBool α)
+      → Bool→Type (α Γ)
+    binFoldCorrect
+      = elimFinVec (λ Γ → ∀ α → (Bool→Type (binFoldBool α)) → Bool→Type (α Γ))
+        (λ α z → z) auxCon
+      where
+        auxCon : {k : ℕ} (a : Bool) (v : FinVec Bool k)
+          → (∀ α → Bool→Type (binFoldBool α) → Bool→Type (α v))
+          → ∀ α → Bool→Type (binFoldBool α) → Bool→Type (α (a ∷ v))
+        auxCon a v IH α H with a | -- Make a sneaky use of our lemma
+          Sound (λ b → binFoldBool (λ τ → α (b ∷ τ))) (false ᶠ ∧ᶠ true ᶠ) H
+        ... | true  | (pfalse , ptrue) = IH _ ptrue
+        ... | false | (pfalse , ptrue) = IH _ pfalse
 
-  computeBool : (F : Formula (Fin n))
-    → {Bool→Type (binFoldBool (_⊨ F))}
-    → (P : FinVec Bool n)
-    → (Bool→Type ∘ P) ⊢ F
-  computeBool F {witness} P = Sound P F (binFoldCorrect P (_⊨ F) witness)
+    computeBool : (F : Formula (Fin n))
+      → {Bool→Type (binFoldBool (_⊨ F))}
+      → (P : FinVec Bool n)
+      → (Bool→Type ∘ P) ⊢ F
+    computeBool F {witness} P = Sound P F (binFoldCorrect P (_⊨ F) witness)
 
+    computeDec : (F : Formula (Fin n))
+      → {Bool→Type (binFoldBool (_⊨ F))}
+      → (P : FinVec (DecProp ℓ-zero) n)
+      → (fst ∘ fst ∘ P) ⊢ F
+    computeDec F {witness} P =
+      transport (λ i → (λ x → eq (P x) i) ⊢ F)
+        (computeBool F {witness} (DecProp→Bool ∘ P))
+      where
+        eq : (H : DecProp ℓ-zero)
+          → Bool→Type (DecProp→Bool H) ≡ H .fst .fst
+        eq ((H , pH) , dH) = {!   !}
+open NbE
 
+test : (P Q : Type)
+  → (pP : isProp P) (pQ : isProp Q)
+  → (dP : Dec P) (dQ : Dec Q)
+  → ((P → Q) → P) → P
+test P Q pP pQ dP dQ = computeDec (((p →ᶠ q) →ᶠ p) →ᶠ p)
+  (((P , pP), dP) ∷ ((Q , pQ), dQ) ∷ [])
+  where
+    p q : Formula (Fin 2)
+    p = fzero ᶠ
+    q = fsuc fzero ᶠ
