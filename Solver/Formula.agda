@@ -1,14 +1,16 @@
 {-# OPTIONS --safe #-}
 module Solver.Formula where
 open import Cubical.Foundations.Prelude
-open import Cubical.Foundations.HLevels
-open import Cubical.Foundations.Univalence
+open import Cubical.Foundations.HLevels using (isProp×; isPropΠ)
+open import Cubical.Foundations.Univalence using (ua)
 open import Cubical.Foundations.Function using (_∘_; const)
 open import Cubical.Data.Bool
 open import Cubical.Data.Unit
 open import Cubical.Data.Empty
+  using (⊥*; isProp⊥*; uninhabEquiv)
   renaming (rec to rec⊥)
 open import Cubical.Data.Sigma
+  using (_×_)
 open import Cubical.Data.Sum
   using (_⊎_; inl; inr)
   renaming (rec to rec⊎; map to map⊎)
@@ -16,9 +18,13 @@ open import Cubical.HITs.PropositionalTruncation
   using (∣_∣; squash; isPropPropTrunc)
   renaming (map to map∥∥)
 open import Cubical.Relation.Nullary.Base
+  using (Dec; yes; no; ¬_; ∥_∥)
 open import Cubical.Relation.Nullary.Properties
+  using (isProp¬; Dec∥∥)
 open import Cubical.Relation.Nullary.DecidablePropositions
+  using (DecProp)
 open import Classical.Preliminary.DecidablePropositions
+  using (DecProp→Bool)
 
 open import Classical.Preliminary.Bool
 
@@ -249,15 +255,15 @@ module NbE where
           → Bool→Type (DecProp→Bool H) ≡ H .fst .fst
         eq ((H , pH) , yes p) = sym (isContr→≡Unit (p , pH p))
         eq ((H , pH) , no ¬p) = ua (uninhabEquiv (λ z → z) ¬p)
-open NbE
+open NbE public
 
-test : (P Q : Type)
-  → (pP : isProp P) (pQ : isProp Q)
-  → (dP : Dec P) (dQ : Dec Q)
-  → ((P → Q) → P) → P
-test P Q pP pQ dP dQ = computeDec (((p →ᶠ q) →ᶠ p) →ᶠ p)
-  (((P , pP), dP) ∷ ((Q , pQ), dQ) ∷ [])
-  where
-    p q : Formula (Fin 2)
-    p = fzero ᶠ
-    q = fsuc fzero ᶠ
+private module test where
+  open import Cubical.Data.Fin.Literals
+  test : (P Q : Type)
+    → (pP : isProp P) (pQ : isProp Q)
+    → (dP : Dec P) (dQ : Dec Q)
+    → ((P → Q) → P) → P
+  test P Q pP pQ dP dQ = computeDec
+    (((0 ᶠ →ᶠ 1 ᶠ) →ᶠ 0 ᶠ) →ᶠ 0 ᶠ)
+    (((P , pP), dP) ∷
+    ((Q , pQ), dQ) ∷ [])
