@@ -1,14 +1,16 @@
 {-# OPTIONS --safe #-}
 module Solver.Formula where
 open import Cubical.Foundations.Prelude
-open import Cubical.Foundations.HLevels
-open import Cubical.Foundations.Univalence
+open import Cubical.Foundations.HLevels using (isProp×; isPropΠ)
+open import Cubical.Foundations.Univalence using (ua)
 open import Cubical.Foundations.Function using (_∘_; const)
 open import Cubical.Data.Bool
 open import Cubical.Data.Unit
 open import Cubical.Data.Empty
+  using (⊥*; isProp⊥*; uninhabEquiv)
   renaming (rec to rec⊥)
 open import Cubical.Data.Sigma
+  using (_×_)
 open import Cubical.Data.Sum
   using (_⊎_; inl; inr)
   renaming (rec to rec⊎; map to map⊎)
@@ -16,9 +18,13 @@ open import Cubical.HITs.PropositionalTruncation
   using (∣_∣; squash; isPropPropTrunc)
   renaming (map to map∥∥)
 open import Cubical.Relation.Nullary.Base
+  using (Dec; yes; no; ¬_; ∥_∥)
 open import Cubical.Relation.Nullary.Properties
+  using (isProp¬; Dec∥∥)
 open import Cubical.Relation.Nullary.DecidablePropositions
+  using (DecProp)
 open import Classical.Preliminary.DecidablePropositions
+  using (DecProp→Bool)
 
 open import Classical.Preliminary.Bool
 
@@ -70,7 +76,7 @@ data Formula (a : Type) : Type where
   ¬ᶠ_ : (F : Formula a) → Formula a
   _∧ᶠ_ _∨ᶠ_ _→ᶠ_ _↔ᶠ_ : (F G : Formula a) → Formula a
 
-private module _ {a : Type} where
+module Models {a : Type} where
   infix 30 _⊢_
   _⊢_ : (a → Type ℓ) → Formula a → Type ℓ
   Γ ⊢ (ϕ ᶠ) = Γ ϕ
@@ -165,7 +171,7 @@ private module _ {a : Type} where
     ... | false | true  | fˢ | fᶜ | gˢ | gᶜ = fᶜ (snd t (gˢ tt))
     ... | true  | false | fˢ | fᶜ | gˢ | gᶜ = gᶜ (fst t (fˢ tt))
     ... | true  | true  | fˢ | fᶜ | gˢ | gᶜ = tt
-
+open Models
 -- Next, we put the automation to use.
 
 open import Cubical.Data.Nat.Base
@@ -249,15 +255,16 @@ module NbE where
           → Bool→Type (DecProp→Bool H) ≡ H .fst .fst
         eq ((H , pH) , yes p) = sym (isContr→≡Unit (p , pH p))
         eq ((H , pH) , no ¬p) = ua (uninhabEquiv (λ z → z) ¬p)
-open NbE
+open NbE public
 
-test : (P Q : Type)
-  → (pP : isProp P) (pQ : isProp Q)
-  → (dP : Dec P) (dQ : Dec Q)
-  → ((P → Q) → P) → P
-test P Q pP pQ dP dQ = computeDec (((p →ᶠ q) →ᶠ p) →ᶠ p)
-  (((P , pP), dP) ∷ ((Q , pQ), dQ) ∷ [])
-  where
-    p q : Formula (Fin 2)
-    p = fzero ᶠ
-    q = fsuc fzero ᶠ
+module Literals {n : ℕ} where
+  open import Agda.Builtin.FromNat
+    renaming (Number to HasFromNat)
+  open import Cubical.Data.Fin.Literals
+  instance
+    fromNatFormula : HasFromNat (Formula (Fin (suc n)))
+    fromNatFormula = record
+      { Constraint = fromNatFin {n} .HasFromNat.Constraint
+      ; fromNat    = λ m ⦃ m≤n ⦄ → fromNatFin .HasFromNat.fromNat m ᶠ
+      }
+open Literals public
