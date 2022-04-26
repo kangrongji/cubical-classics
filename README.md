@@ -7,5 +7,5 @@ Though still a baby project at present, I hope someday it will have some importa
 
 We are open to advices and contributions!
 
-### Dependence
-This library depends on the [standard library of Cubical Agda](https://github.com/agda/cubical), keeping up with the newest (yet maybe not publicly released) version.
+### Dependency
+Depend on [standard library of Cubical Agda](https://github.com/agda/cubical), keeping up with the newest (maybe not publicly released yet) version.
