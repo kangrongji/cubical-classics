@@ -110,3 +110,26 @@ Drop→Resizing₀ drop = isEquiv-resize {drop = drop}
 
 Drop→Resizing : Drop → Resizing
 Drop→Resizing drop = Resizing₀→Resizing (Drop→Resizing₀ drop)
+
+
+{-
+
+  Subobject Classifier
+
+-}
+
+-- A formulation of subobject classifier
+
+isSubobjectClassifier : Type ℓ → Typeω
+isSubobjectClassifier Ω = {ℓ : Level}{X : Type ℓ} → (X → Ω) ≃ (X → hProp ℓ)
+
+getSubobjectClassifier :
+  {ℓ : Level}{Prop : Type ℓ} → ({ℓ : Level} → Prop ≃ hProp ℓ) → isSubobjectClassifier Prop
+getSubobjectClassifier Prop≃hProp = equiv→ (idEquiv _) Prop≃hProp
+
+
+-- Propositional Resizing implies the Existence of Subobject Classifier
+-- In particular, it is the type hProp of base level.
+
+Resizing→∃SubobjectClassifier : Resizing → isSubobjectClassifier (hProp ℓ-zero)
+Resizing→∃SubobjectClassifier resizing = getSubobjectClassifier (_ , resizing)
