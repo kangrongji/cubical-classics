@@ -27,3 +27,29 @@ computePropℓ : ∀ {ℓ} (F : Formula (Fin n))
   → (P : FinVec (hProp ℓ) n)
   → (fst ∘ P) ⊢ F
 computePropℓ F {witness} P = {! ? !}
+
+private module test (P Q R : Type) (pP : isProp P) (pQ : isProp Q) (pR : isProp R) where
+  open import Cubical.Data.Sigma
+    using (_×_)
+  open import Cubical.Data.Sum
+    using (_⊎_)
+  open import Cubical.Relation.Nullary.Base
+    using (¬_; ∥_∥)
+  
+  _↔_ : Type → Type → Type
+  P ↔ Q = (P → Q) × (Q → P)
+
+  infix 0 _∥⊎∥_
+  _∥⊎∥_ : Type → Type → Type
+  P ∥⊎∥ Q = ∥ P ⊎ Q ∥
+
+  open import Cubical.Data.Fin.Literals
+  test : (P × Q → R) ↔ (P → ¬ Q ∥⊎∥ R)
+  test = computeProp
+    ((p ∧ᶠ q →ᶠ r) ↔ᶠ (p →ᶠ ¬ᶠ q ∨ᶠ r))
+    ((P , pP) ∷ (Q , pQ) ∷ (R , pR) ∷ [])
+    where
+      p q r : Formula (Fin 3)
+      p = 0 ᶠ
+      q = 1 ᶠ
+      r = 2 ᶠ

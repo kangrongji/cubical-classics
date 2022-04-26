@@ -256,14 +256,3 @@ module NbE where
         eq ((H , pH) , yes p) = sym (isContr→≡Unit (p , pH p))
         eq ((H , pH) , no ¬p) = ua (uninhabEquiv (λ z → z) ¬p)
 open NbE public
-
-private module test where
-  open import Cubical.Data.Fin.Literals
-  test : (P Q : Type)
-    → (pP : isProp P) (pQ : isProp Q)
-    → (dP : Dec P) (dQ : Dec Q)
-    → ((P → Q) → P) → P
-  test P Q pP pQ dP dQ = computeDec
-    (((0 ᶠ →ᶠ 1 ᶠ) →ᶠ 0 ᶠ) →ᶠ 0 ᶠ)
-    (((P , pP), dP) ∷
-    ((Q , pQ), dQ) ∷ [])
