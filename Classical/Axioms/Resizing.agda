@@ -12,11 +12,10 @@ module Classical.Axioms.Resizing where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.Equiv.Properties
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Function
 open import Cubical.Foundations.Univalence
-
-open import Classical.Preliminary.Equiv
 
 private
   variable
@@ -109,3 +108,26 @@ Drop→Resizing₀ drop = isEquiv-resize {drop = drop}
 
 Drop→Resizing : Drop → Resizing
 Drop→Resizing drop = Resizing₀→Resizing (Drop→Resizing₀ drop)
+
+
+{-
+
+  Subobject Classifier
+
+-}
+
+-- A formulation of subobject classifier
+
+isSubobjectClassifier : Type ℓ → Typeω
+isSubobjectClassifier Ω = {ℓ : Level}{X : Type ℓ} → (X → Ω) ≃ (X → hProp ℓ)
+
+getSubobjectClassifier :
+  {ℓ : Level}{Prop : Type ℓ} → ({ℓ : Level} → Prop ≃ hProp ℓ) → isSubobjectClassifier Prop
+getSubobjectClassifier Prop≃hProp = equiv→ (idEquiv _) Prop≃hProp
+
+
+-- Propositional Resizing implies the Existence of Subobject Classifier
+-- In particular, it is the type hProp of base level.
+
+Resizing→∃SubobjectClassifier : Resizing → isSubobjectClassifier (hProp ℓ-zero)
+Resizing→∃SubobjectClassifier resizing = getSubobjectClassifier (_ , resizing)

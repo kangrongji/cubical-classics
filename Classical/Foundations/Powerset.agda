@@ -35,8 +35,7 @@ open import Classical.Preliminary.Bool
 open import Classical.Preliminary.Logic
 open import Classical.Axioms.ExcludedMiddle
 
-open import Classical.Foundations.Impredicativity
-  using (Prop ; isSetProp ; type ; bool)
+open import Classical.Foundations.Prelude
 
 private
   variable
