@@ -26,7 +26,6 @@ open import Cubical.Relation.Nullary
 
 open import Classical.Axioms.Choice
 open import Classical.Axioms.ExcludedMiddle
-open import Classical.Preliminary.Susp
 
 private
   variable
@@ -72,7 +71,8 @@ module _ {P : Type ℓ}(h : isProp P) where
 
   isPropΩΣP : (x : Susp P) → isProp (x ≡ x)
   isPropΩΣP north = isOfHLevelRespectEquiv 1 (Code≃ north) (isPropCode north)
-  isPropΩΣP south = isOfHLevelRespectEquiv 1 (compEquiv (Code≃ north) (congEquiv invSusp≃)) (isPropCode north)
+  isPropΩΣP south =
+    isOfHLevelRespectEquiv 1 (compEquiv (Code≃ north) (congEquiv (isoToEquiv invSuspIso))) (isPropCode north)
   isPropΩΣP (merid p i) =
     isProp→PathP (λ i → isPropIsProp {A = merid p i ≡ merid p i}) (isPropΩΣP north) (isPropΩΣP south) i
 
