@@ -76,7 +76,7 @@ data Formula (a : Type) : Type where
   ¬ᶠ_ : (F : Formula a) → Formula a
   _∧ᶠ_ _∨ᶠ_ _→ᶠ_ _↔ᶠ_ : (F G : Formula a) → Formula a
 
-private module _ {a : Type} where
+module Models {a : Type} where
   infix 30 _⊢_
   _⊢_ : (a → Type ℓ) → Formula a → Type ℓ
   Γ ⊢ (ϕ ᶠ) = Γ ϕ
@@ -171,7 +171,7 @@ private module _ {a : Type} where
     ... | false | true  | fˢ | fᶜ | gˢ | gᶜ = fᶜ (snd t (gˢ tt))
     ... | true  | false | fˢ | fᶜ | gˢ | gᶜ = gᶜ (fst t (fˢ tt))
     ... | true  | true  | fˢ | fᶜ | gˢ | gᶜ = tt
-
+open Models
 -- Next, we put the automation to use.
 
 open import Cubical.Data.Nat.Base
