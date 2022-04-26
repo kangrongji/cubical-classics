@@ -1,6 +1,8 @@
+{-# OPTIONS --safe #-}
 module Solver.Formula where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
+open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.Function using (_∘_; const)
 open import Cubical.Data.Bool
 open import Cubical.Data.Unit
@@ -245,7 +247,8 @@ module NbE where
       where
         eq : (H : DecProp ℓ-zero)
           → Bool→Type (DecProp→Bool H) ≡ H .fst .fst
-        eq ((H , pH) , dH) = {!   !}
+        eq ((H , pH) , yes p) = sym (isContr→≡Unit (p , pH p))
+        eq ((H , pH) , no ¬p) = ua (uninhabEquiv (λ z → z) ¬p)
 open NbE
 
 test : (P Q : Type)
