@@ -12,11 +12,10 @@ module Classical.Axioms.Resizing where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.Equiv.Properties
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Function
 open import Cubical.Foundations.Univalence
-
-open import Classical.Preliminary.Equiv
 
 private
   variable
