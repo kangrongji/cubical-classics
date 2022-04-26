@@ -41,18 +41,7 @@ isSetDecProp = isOfHLevelΣ 2 isSetHProp (λ P → isProp→isSet (isPropIsDecPr
 
 -- Back and forth between boolean value and decidable propositions
 
-Bool→Type* : Bool → Type ℓ
-Bool→Type* true  = Unit*
-Bool→Type* false = ⊥*
-
-DecBool→Type* : (x : Bool) → Dec (Bool→Type* {ℓ = ℓ} x)
-DecBool→Type* true  = yes tt*
-DecBool→Type* false = no  λ()
-
-isPropBool→Type* : (x : Bool) → isProp (Bool→Type* {ℓ = ℓ} x)
-isPropBool→Type* true = isContr→isProp isContrUnit*
-
-Bool→Dec→Bool* : (x : Bool) → Dec→Bool (DecBool→Type* {ℓ = ℓ} x) ≡ x
+Bool→Dec→Bool* : (x : Bool) → Dec→Bool (DecBool→Type* {ℓ = ℓ} {x}) ≡ x
 Bool→Dec→Bool* true  = refl
 Bool→Dec→Bool* false = refl
 
@@ -65,7 +54,7 @@ P→[Dec→Bool→Type*-P] _ (no ¬p) x = Empty.rec (¬p x)
 
 [DecProp→Bool→Type*-P]≃P : (P : Type ℓ)(h : isProp P)(dec : Dec P) → Bool→Type* {ℓ = ℓ'} (Dec→Bool dec) ≃ P
 [DecProp→Bool→Type*-P]≃P P h dec =
-  propBiimpl→Equiv (isPropBool→Type* _) h ([Dec→Bool→Type*-P]→P _ dec) (P→[Dec→Bool→Type*-P] _ dec)
+  propBiimpl→Equiv isPropBool→Type* h ([Dec→Bool→Type*-P]→P _ dec) (P→[Dec→Bool→Type*-P] _ dec)
 
 [DecProp→Bool→Type*-P]≡P : (P : Type ℓ)(h : isProp P)(dec : Dec P) → Bool→Type* {ℓ = ℓ} (Dec→Bool dec) ≡ P
 [DecProp→Bool→Type*-P]≡P P h dec = ua ([DecProp→Bool→Type*-P]≃P P h dec)
@@ -74,7 +63,7 @@ P→[Dec→Bool→Type*-P] _ (no ¬p) x = Empty.rec (¬p x)
 -- The type of boolean value is equivalent to the type of decidable propositions
 
 Bool→DecProp : Bool → DecProp ℓ
-Bool→DecProp b = (Bool→Type* b , isPropBool→Type* b) , DecBool→Type* b
+Bool→DecProp b = (Bool→Type* b , isPropBool→Type*) , DecBool→Type*
 
 DecProp→Bool : DecProp ℓ → Bool
 DecProp→Bool P = Dec→Bool (P .snd)
