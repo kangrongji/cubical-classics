@@ -20,6 +20,8 @@ open import Cubical.Data.Unit
 open import Cubical.Data.Empty as Empty
 
 open import Cubical.Relation.Nullary
+open import Cubical.Relation.Nullary.DecidablePropositions
+  hiding (isPropIsDecProp)
 
 
 private
@@ -29,15 +31,8 @@ private
 
 -- Decidable propositions
 
-DecProp : (ℓ : Level) → Type (ℓ-suc ℓ)
-DecProp ℓ = Σ[ P ∈ hProp ℓ ] Dec (P .fst)
-
 isPropIsDecProp : (P : hProp ℓ) → isProp (Dec (P .fst))
 isPropIsDecProp P = isPropDec (P .snd)
-
-isSetDecProp : isSet (DecProp ℓ)
-isSetDecProp = isOfHLevelΣ 2 isSetHProp (λ P → isProp→isSet (isPropIsDecProp P))
-
 
 -- Back and forth between boolean value and decidable propositions
 
