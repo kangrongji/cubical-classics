@@ -43,19 +43,20 @@ isPropLEMOfLevel = isPropImplicitΠ (λ _ → isPropΠ isPropDec)
 isPropDNEOfLevel : isProp (DNEOfLevel ℓ)
 isPropDNEOfLevel = isPropImplicitΠ (λ _ → isPropΠ2 (λ p _ → p))
 
+
 -- Equivalence between these two axioms
 
 LEMOfLevel→DNEOfLevel : LEMOfLevel ℓ → DNEOfLevel ℓ
-LEMOfLevel→DNEOfLevel decide isPropP ¬¬p =
-  case decide isPropP of λ
-    { (yes p) → p
-    ; (no ¬p) → Empty.rec (¬¬p ¬p) }
+LEMOfLevel→DNEOfLevel decide isPropP ¬¬p with decide isPropP
+... | yes p = p
+... | no ¬p = Empty.rec (¬¬p ¬p)
 
 DNEOfLevel→LEMOfLevel : DNEOfLevel ℓ → LEMOfLevel ℓ
 DNEOfLevel→LEMOfLevel elim¬¬ {P = P} isPropP = elim¬¬ (isPropDec isPropP) ¬¬dec
   where
   ¬¬dec : ¬ ¬ Dec P
   ¬¬dec ¬dec = ¬dec (yes (elim¬¬ isPropP λ ¬p → ¬dec (no ¬p)))
+
 
 -- The universal polymorphic or "global" version
 

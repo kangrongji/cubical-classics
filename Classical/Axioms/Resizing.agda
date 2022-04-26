@@ -84,7 +84,6 @@ Resizing→Drop resizing P .lower = invIsEq resizing P
 Resizing→Drop resizing P .dropEquiv =
   compEquiv (pathToEquiv (λ i → secIsEq resizing P (~ i) .fst)) (invEquiv LiftEquiv)
 
-
 module _
   {drop : Drop}{ℓ : Level} where
 

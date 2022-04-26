@@ -1,11 +1,14 @@
 {-
 
-Impredicative Powerset
+Classical Impredicative Powerset
 
 This file introduces a "powerset", thanks to Excluded Middle,
 behaving very similar to that in classical set theory.
 I think most of the following results only relies on the concept of impredicativity,
 so probably axiom like Propositional Resizing is enough to make sense of it.
+
+One can find a constructive and predicative version in the standard library of Cubical Agda,
+see "Cubical.Foundations.Powerset".
 
 TODO:
 Reorganize this file in better ways,

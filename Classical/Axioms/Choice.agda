@@ -28,6 +28,7 @@ AC2 = {ℓ ℓ' ℓ'' : Level}{X : Type ℓ}{Y : X → Type ℓ'}{Z : (x : X) �
   → ((x : X) → (y : Y x) → isSet (Z x y))
   → ((x : X) → (y : Y x) → ∥ Z x y ∥) → ∥ ((x : X) → (y : Y x) → Z x y) ∥
 
+
 module AxiomOfChoices (choose : AC) where
 
   choose2 : AC2
