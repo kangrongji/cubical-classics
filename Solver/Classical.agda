@@ -22,11 +22,14 @@ computeProp : (F : Formula (Fin n))
   → (fst ∘ P) ⊢ F
 computeProp F {witness} P = computeDec F {witness} (hProp→DecProp decide ∘ P)
 
-computePropℓ : ∀ {ℓ} (F : Formula (Fin n))
-  → {Bool→Type (binFoldBool (_⊨ F))}
-  → (P : FinVec (hProp ℓ) n)
-  → (fst ∘ P) ⊢ F
-computePropℓ F {witness} P = {! ? !}
+-- Evil syntax
+infixr -1 _⅋_
+_⅋_ = _∷_
+infixl 0 _⟧
+_⟧ : ∀ {ℓ}{A : Type ℓ} → A → FinVec A 1
+v ⟧ = v ∷ []
+infix -2 Solve_⟦_
+Solve_⟦_ = computeProp
 
 private module test (P Q R : Type) (pP : isProp P) (pQ : isProp Q) (pR : isProp R) where
   open import Cubical.Data.Sigma
@@ -43,13 +46,7 @@ private module test (P Q R : Type) (pP : isProp P) (pQ : isProp Q) (pR : isProp 
   _∥⊎∥_ : Type → Type → Type
   P ∥⊎∥ Q = ∥ P ⊎ Q ∥
 
-  open import Cubical.Data.Fin.Literals
   test : (P × Q → R) ↔ (P → ¬ Q ∥⊎∥ R)
-  test = computeProp
-    ((p ∧ᶠ q →ᶠ r) ↔ᶠ (p →ᶠ ¬ᶠ q ∨ᶠ r))
-    ((P , pP) ∷ (Q , pQ) ∷ (R , pR) ∷ [])
-    where
-      p q r : Formula (Fin 3)
-      p = 0 ᶠ
-      q = 1 ᶠ
-      r = 2 ᶠ
+  test = Solve (0 ∧ᶠ 1 →ᶠ 2) ↔ᶠ (0 →ᶠ ¬ᶠ 1 ∨ᶠ 2)
+    ⟦ P , pP ⅋ Q , pQ ⅋ R , pR ⟧
+

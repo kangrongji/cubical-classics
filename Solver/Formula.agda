@@ -256,3 +256,15 @@ module NbE where
         eq ((H , pH) , yes p) = sym (isContr→≡Unit (p , pH p))
         eq ((H , pH) , no ¬p) = ua (uninhabEquiv (λ z → z) ¬p)
 open NbE public
+
+module Literals {n : ℕ} where
+  open import Agda.Builtin.FromNat
+    renaming (Number to HasFromNat)
+  open import Cubical.Data.Fin.Literals
+  instance
+    fromNatFormula : HasFromNat (Formula (Fin (suc n)))
+    fromNatFormula = record
+      { Constraint = fromNatFin {n} .HasFromNat.Constraint
+      ; fromNat    = λ m ⦃ m≤n ⦄ → fromNatFin .HasFromNat.fromNat m ᶠ
+      }
+open Literals public
