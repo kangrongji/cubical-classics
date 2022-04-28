@@ -4,11 +4,14 @@ Classical Impredicative Powerset
 
 This file introduces a "powerset", thanks to Excluded Middle,
 behaving very similar to that in classical set theory.
-I think most of the following results only relies on the concept of impredicativity,
-so probably axiom like Propositional Resizing is enough to make sense of it.
+However, I think except for a few `Boolean facts`,
+most of the following results only relies on the concept of impredicativity,
+and one way to formulate that is the existence of subobject classifier
+(LEM or even Propostional Resizing are enough to guarantee its existence).
 
+This one is classical and impredicative.
 One can find a constructive and predicative version in the standard library of Cubical Agda,
-see "Cubical.Foundations.Powerset".
+see "https://github.com/agda/cubical/blob/master/Cubical/Foundations/Powerset.agda".
 
 TODO:
 Reorganize this file in better ways,

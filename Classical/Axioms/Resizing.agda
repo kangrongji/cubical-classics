@@ -116,7 +116,12 @@ Drop→Resizing drop = Resizing₀→Resizing (Drop→Resizing₀ drop)
 
 -}
 
--- A formulation of subobject classifier
+-- A (pre-)formulation of subobject classifier
+
+-- Warning: This is not a complete formulation.
+-- The object Ω should be a `Heyting algebra` and all equivalences should respect this.
+-- (hProp automatically admit that by considering usual logical operations on propositions)
+-- Moreover, the equivalences should commute with universe level lifting.
 
 isSubobjectClassifier : Type ℓ → Typeω
 isSubobjectClassifier Ω = {ℓ : Level}{X : Type ℓ} → (X → Ω) ≃ (X → hProp ℓ)

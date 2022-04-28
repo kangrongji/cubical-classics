@@ -14,7 +14,8 @@ open import Cubical.Data.Nat
 open import Cubical.Data.Nat.Order using ()
 open import Cubical.Data.NatPlusOne
 open import Cubical.Data.Int
-  renaming (_+_ to _+ℤ_ ;_·_ to _·ℤ_ ; _-_ to _-ℤ_)
+  hiding   (-Involutive)
+  renaming (_+_ to _+ℤ_ ;_·_ to _·ℤ_ ; _-_ to _-ℤ_ ; -_ to -ℤ_)
 open import Cubical.HITs.Rationals.QuoQ
 
 open import Cubical.Data.Sum
@@ -132,7 +133,7 @@ p / n = {!!}
 middle : (p q : ℚ) → ℚ
 middle p q = (p + q) / 2
 
-middle>l : p < q → p < middle p q
+middle>l : p < q → middle p q > p
 middle>l = {!!}
 
 middle<r : p < q → q > middle p q
@@ -156,6 +157,14 @@ p<q→p-q<0 = {!!}
 
 
 
+-Involutive : - (- p) ≡ p
+-Involutive = {!!}
+
+-reverse< : p < q → - p > - q
+-reverse< = {!!}
+
+-reverse<' : - p < - q → p > q
+-reverse<' = {!!}
 
 {-
 _<0 : ℚ → Type
@@ -168,3 +177,50 @@ _<0 : ℚ → Type
 _<_ : ℚ → ℚ → Type
 [ a / b ] < [ c / d ] = ℕ₊₁→ℤ b · ℕ₊₁→ℤ d · -}
 
+
+-- Special treatment on min/max values for use in real numbers
+
+record Min4 (x y z w : ℚ) : Type where
+  field
+    num : ℚ
+    <₁ : num < x
+    <₂ : num < y
+    <₃ : num < z
+    <₄ : num < w
+    greatest : {r : ℚ} → r < x → r < y → r < z → r < w → r < num
+
+record Max4 (x y z w : ℚ) : Type where
+  field
+    num : ℚ
+    >₁ : num < x
+    >₂ : num < y
+    >₃ : num < z
+    >₄ : num < w
+
+open Min4
+open Max4
+
+min4 : (x y z w : ℚ) → Min4 x y z w
+min4 = {!!}
+
+max4 : (x y z w : ℚ) → Max4 x y z w
+max4 = {!!}
+
+·interval-min : {x y z w : ℚ}{t s : ℚ} → x < t → t < y → z < s → s < w
+  → min4 (x · z) (x · w) (y · z) (y · w) .num < t · s
+·interval-min = {!!}
+
+·interval-max : {x y z w : ℚ}{t s : ℚ} → x < t → t < y → z < s → s < w
+  → max4 (x · z) (x · w) (y · z) (y · w) .num > t · s
+·interval-max = {!!}
+
+record Middle4 (x y z w : ℚ) : Type where
+  field
+    mid : ℚ
+    >₁ : x < mid
+    >₂ : z < mid
+    <₁ : mid < y
+    <₂ : mid < w
+
+middle4 : {x y z w : ℚ} → x < y → x < w → z < y → z < w → Middle4 x y z w
+middle4 = {!!}
