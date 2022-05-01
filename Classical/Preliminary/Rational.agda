@@ -45,6 +45,13 @@ isFieldℚ = {!!}
 inv : ¬ q ≡ 0 → ℚ
 inv q≢0 = isFieldℚ q≢0 .fst
 
+·-lInv : (q≢0 : ¬ q ≡ 0) → inv q≢0 · q ≡ 1
+·-lInv q≢0 = isFieldℚ q≢0 .snd .fst
+
+·-rInv : (q≢0 : ¬ q ≡ 0) → q · inv q≢0 ≡ 1
+·-rInv q≢0 = isFieldℚ q≢0 .snd .snd
+
+
 -- ℚ has total order
 
 infix 4 _≤_ _≥_
@@ -143,6 +150,9 @@ middle<r = {!!}
 +-<-+ : p < q → r < s → p + r < q + s
 +-<-+ = {!!}
 
+<-+ : p < q → r + p < r + q
+<-+ = {!!}
+
 <-+-pos : q > 0 → p + q > p
 <-+-pos = {!!}
 
@@ -155,6 +165,9 @@ p>q→p-q>0 = {!!}
 p<q→p-q<0 : p < q → p - q < 0
 p<q→p-q<0 = {!!}
 
+>0-+-pos : p > 0 → q > 0 → p + q > 0
+>0-+-pos = {!!}
+
 
 
 -Involutive : - (- p) ≡ p
@@ -165,6 +178,45 @@ p<q→p-q<0 = {!!}
 
 -reverse<' : - p < - q → p > q
 -reverse<' = {!!}
+
+-recog : p + q ≡ 0 → p ≡ - q
+-recog = {!!}
+
+q>0→q≢0 : q > 0 → ¬ q ≡ 0
+q>0→q≢0 = {!!}
+
+1q : ℚ
+1q = 1
+
+0q : ℚ
+0q = 0
+
+r>q>0→r/q>1 : (q>0 : q > 0) → r > q → r · inv (q>0→q≢0 {q = q} q>0) > 1q
+r>q>0→r/q>1 = {!!}
+
+p>0+q>1→pq>p : (p>0 : p > 0) → q > 1q → p · q > p
+p>0+q>1→pq>p = {!!}
+
+>0-·-pos : p > 0 → q > 0 → p · q > 0
+>0-·-pos = {!!}
+
+·-<-·-pos : p > 0 → r > 0 → p < q → r < s → p · r < q · s
+·-<-·-pos = {!!}
+
+-1<0 : - 1q < 0
+-1<0 = {!!}
+
+
+<-·-q>1 : p > 0 → q > 1 → p · r > p
+<-·-q>1 = {!!}
+
+p>q>0→p·q⁻¹>1 : (q>0 : q > 0) → p > q → p · inv (q>0→q≢0 {q = q} q>0) > 1q
+p>q>0→p·q⁻¹>1 = {!!}
+
+p>0→p⁻¹>0 : (p>0 : p > 0) → inv (q>0→q≢0 {q = p} p>0) > 0q
+p>0→p⁻¹>0 = {!!}
+
+
 
 {-
 _<0 : ℚ → Type

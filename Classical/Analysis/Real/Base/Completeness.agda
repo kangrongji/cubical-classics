@@ -4,7 +4,7 @@ The Real Number
 
 -}
 {-# OPTIONS --allow-unsolved-meta #-}
-module Classical.Analysis.Real.Completeness where
+module Classical.Analysis.Real.Base.Completeness where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
@@ -18,7 +18,7 @@ open import Classical.Preliminary.Rational
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
 
-open import Classical.Analysis.Real.Base
+open import Classical.Analysis.Real.Base.DedekindCut
 
 
 module Completeness (decide : LEM) where

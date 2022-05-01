@@ -3,7 +3,7 @@
 Voevodsky's Axiom of Propositional Resizing
 
 Notice that Resizing is a corollary of Excluded Middle,
-of which proof can be found in `Classical.Foundations.Impredicativity`.
+of which proof can be found in `Classical.Axiom.ExcludedMiddle`.
 
 -}
 {-# OPTIONS --safe #-}
