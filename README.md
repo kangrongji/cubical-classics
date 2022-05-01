@@ -8,4 +8,4 @@ Though still a baby project at present, I hope someday it will have some importa
 We are open to advices and contributions!
 
 ### Dependency
-Depend on [standard library of Cubical Agda](https://github.com/agda/cubical), keeping up with the newest (maybe not publicly released yet) version.
+It needs [the standard library of Cubical Agda](https://github.com/agda/cubical), keeping up with the newest (maybe not publicly released yet) version.
