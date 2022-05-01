@@ -4,7 +4,7 @@ The Real Number
 
 -}
 {-# OPTIONS --allow-unsolved-meta #-}
-module Classical.Analysis.Real.Base.Algebra where
+module Classical.Analysis.Real.Base.AlgebraicStructure where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
@@ -22,7 +22,7 @@ open import Classical.Foundations.Powerset
 open import Classical.Analysis.Real.Base.DedekindCut
 
 
-module ℝAlgebra (decide : LEM) where
+module AlgebraicStructure (decide : LEM) where
 
   open Powerset decide
   open Real     decide
@@ -241,16 +241,15 @@ module ℝAlgebra (decide : LEM) where
 
 
   private
-    take-distrib : (a : ℝ₊)(r w u v : ℚ)
-      → r ∈ a .fst .upper → u ∈ a .fst .upper → w > 0 → v > 0
-      → Σ[ x ∈ ℚ ] (x ∈ a .fst .upper) × (x · (w + v) < (r · w) + (u · v))
-    take-distrib a r w u v r∈upper u∈upper w>0 v>0 =
-      case trichotomy< r u
-      return (λ _ → Σ[ x ∈ ℚ ] (x ∈ a .fst .upper) × (x · (w + v) < (r · w) + (u · v))) of λ
-      { (lt r<u) → u , u∈upper , {!!}
-      ; (eq r≡u) → u , u∈upper , {!!}
-      ; (gt r>u) → r , r∈upper , {!!} }
-
+    upper-round2 : (a : ℝ)(p q : ℚ) → p ∈ a .upper → q ∈ a .upper → ∥ Σ[ r ∈ ℚ ] (r < p) × (r < q) × (r ∈ a .upper) ∥
+    upper-round2 a p q p∈upper q∈upper = Prop.map2
+      (λ (r , r<p , r∈upper) (s , s<q , s∈upper) →
+        case trichotomy< r s of λ
+        { (lt r<s) → r , r<p , <-trans r<s s<q , r∈upper
+        ; (eq r≡s) → s , subst (_< p) r≡s r<p , s<q , s∈upper
+        ; (gt r>s) → s , <-trans r>s r<p , s<q , s∈upper })
+      (a .upper-round p p∈upper)
+      (a .upper-round q q∈upper)
 
   ·ℝ₊-lDistrib : (a b c : ℝ₊) → (a ·ℝ₊ b) +ℝ₊ (a ·ℝ₊ c) ≡ a ·ℝ₊ (b +ℝ₊ c)
   ·ℝ₊-lDistrib a b c = path-ℝ₊ _ _ (≤ℝ-asym upper⊇ upper⊆)
@@ -261,18 +260,25 @@ module ℝAlgebra (decide : LEM) where
         Prop.rec2 (isProp∈ ((a ·ℝ₊ (b +ℝ₊ c)) .fst .upper))
         (λ (r , w , r∈upper , w∈upper , s≡r·w)
            (u , v , u∈upper , v∈upper , t≡u·v) →
-          let (x , x∈upper , x·[w+v]<[r·w]+[u·v]) =
-                take-distrib a r w u v r∈upper u∈upper
-                (q∈ℝ₊→q>0 b w w∈upper) (q∈ℝ₊→q>0 c v v∈upper)
-              x·[w+v]∈upper : x · (w + v) ∈ (a ·ℝ₊ (b +ℝ₊ c)) .fst .upper
-              x·[w+v]∈upper = Inhab→∈ (·upper₊ a (b +ℝ₊ c))
-                ∣ x , w + v , x∈upper ,
-                  Inhab→∈ (+upper₊ b c) ∣ w , v , w∈upper , v∈upper , refl ∣ , refl ∣
-              [r·w]+[u·v]≡q : (r · w) + (u · v) ≡ q
-              [r·w]+[u·v]≡q = (λ i → s≡r·w (~ i) + t≡u·v (~ i)) ∙ sym q≡s+t
-              x·[w+v]<q : x · (w + v) < q
-              x·[w+v]<q = subst (x · (w + v) <_) [r·w]+[u·v]≡q x·[w+v]<[r·w]+[u·v]
-          in  (a ·ℝ₊ (b +ℝ₊ c)) .fst .upper-close _ _ x·[w+v]∈upper x·[w+v]<q)
+          Prop.rec (isProp∈ ((a ·ℝ₊ (b +ℝ₊ c)) .fst .upper))
+          (λ (x , x<r , x<u , x∈upper) →
+            let x>0 = q∈ℝ₊→q>0 a x x∈upper
+                w>0 = q∈ℝ₊→q>0 b w w∈upper
+                v>0 = q∈ℝ₊→q>0 c v v∈upper
+                x·w+x·v<r·w+u·v : (x · w) + (x · v) < (r · w) + (u · v)
+                x·w+x·v<r·w+u·v = +-<-+ (·-<-·-pos-l x>0 w>0 x<r) (·-<-·-pos-l x>0 v>0 x<u)
+                x·[w+v]<r·w+u·v : x · (w + v) < (r · w) + (u · v)
+                x·[w+v]<r·w+u·v = subst (_< ((r · w) + (u · v))) (·-distribˡ x w v) x·w+x·v<r·w+u·v
+                x·[w+v]∈upper : x · (w + v) ∈ (a ·ℝ₊ (b +ℝ₊ c)) .fst .upper
+                x·[w+v]∈upper = Inhab→∈ (·upper₊ a (b +ℝ₊ c))
+                  ∣ x , w + v , x∈upper ,
+                    Inhab→∈ (+upper₊ b c) ∣ w , v , w∈upper , v∈upper , refl ∣ , refl ∣
+                r·w+u·v≡q : (r · w) + (u · v) ≡ q
+                r·w+u·v≡q = (λ i → s≡r·w (~ i) + t≡u·v (~ i)) ∙ sym q≡s+t
+                x·[w+v]<q : x · (w + v) < q
+                x·[w+v]<q = subst (x · (w + v) <_) r·w+u·v≡q x·[w+v]<r·w+u·v
+            in  (a ·ℝ₊ (b +ℝ₊ c)) .fst .upper-close _ _ x·[w+v]∈upper x·[w+v]<q)
+            (upper-round2 (a .fst) r u r∈upper u∈upper))
         (∈→Inhab (·upper₊ a b) s∈upper)
         (∈→Inhab (·upper₊ a c) t∈upper))
       (∈→Inhab (+upper₊ (a ·ℝ₊ b) (a ·ℝ₊ c)) q∈upper)
@@ -299,19 +305,3 @@ module ℝAlgebra (decide : LEM) where
 
   --isFieldℝ : (a : ℝ) → ¬ a ≡ 0 → {!!}
   --isFieldℝ = {!!} -}
-
-
-
-  {-
-
-    Absolute Value
-
-  -}
-
-  -0≡0 : -ℝ 0 ≡ 0
-  -0≡0 = sym (+ℝ-rUnit (-ℝ 0)) ∙ +ℝ-lInverse 0
-
-  absℝ : ℝ → ℝ₊
-  absℝ a with dichotomyℝ a 0
-  ... | ge a≥0 = a , a≥0
-  ... | lt a<0 = -ℝ a , subst (_≤ℝ (-ℝ a)) -0≡0 (<ℝ-reverse a 0 a<0)

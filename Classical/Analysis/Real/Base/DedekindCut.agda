@@ -8,16 +8,11 @@ module Classical.Analysis.Real.Base.DedekindCut where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
-open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
-open import Cubical.Data.NatPlusOne
-open import Cubical.Data.Int.MoreInts.QuoInt
-  using    (pos ; neg)
 open import Cubical.HITs.Rationals.QuoQ
-  renaming ([_/_] to [[_/_]])
+open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 
-open import Classical.Preliminary.PropositionalTruncation as Prop
 open import Classical.Preliminary.Rational
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
@@ -113,11 +108,11 @@ module Real (decide : LEM) where
 
   instance
     fromNatℝ : HasFromNat ℝ
-    fromNatℝ = record { Constraint = λ _ → Unit ; fromNat = λ n → ℚ→ℝ [[ pos n / 1 ]] }
+    fromNatℝ = record { Constraint = λ _ → Unit ; fromNat = λ n → ℚ→ℝ (ℕ→ℚPos n) }
 
   instance
     fromNegℝ : HasFromNeg ℝ
-    fromNegℝ = record { Constraint = λ _ → Unit ; fromNeg = λ n → ℚ→ℝ [[ neg n / 1 ]] }
+    fromNegℝ = record { Constraint = λ _ → Unit ; fromNeg = λ n → ℚ→ℝ (ℕ→ℚNeg n) }
 
 
   {-
@@ -129,27 +124,15 @@ module Real (decide : LEM) where
   _≤ℝ_ : ℝ → ℝ → Type
   a ≤ℝ b = b .upper ⊆ a .upper
 
-  isProp≤ℝ : {a b : ℝ} → isProp (a ≤ℝ b)
-  isProp≤ℝ = isProp⊆
-
   _≥ℝ_ : ℝ → ℝ → Type
   a ≥ℝ b = b ≤ℝ a
+
+  isProp≤ℝ : {a b : ℝ} → isProp (a ≤ℝ b)
+  isProp≤ℝ = isProp⊆
 
   ≤ℝ-asym : {a b : ℝ} → a ≤ℝ b → b ≤ℝ a → a ≡ b
   ≤ℝ-asym a≤b b≤a = path-ℝ _ _ (bi⊆→≡ b≤a a≤b)
 
-  _<ℝ_ : ℝ → ℝ → Type
-  a <ℝ b = a ≤ℝ b × ∥ Σ[ q ∈ ℚ ] ((r : ℚ) → r ∈ b .upper → q < r) × q ∈ a .upper ∥
-
-  _>ℝ_ : ℝ → ℝ → Type
-  a >ℝ b = b <ℝ a
-
-  data Dichotomyℝ (a b : ℝ) : Type where
-    ge : a ≥ℝ b → Dichotomyℝ a b
-    lt : a <ℝ b → Dichotomyℝ a b
-
-  dichotomyℝ : (a b : ℝ) → Dichotomyℝ a b
-  dichotomyℝ = {!!}
 
   {-
 
@@ -184,10 +167,6 @@ module Real (decide : LEM) where
           <-trans (-reverse< (p<s∈upper q q∈upper)) r>-p)
         (∈→Inhab (-upper a) r∈upper))
     (a .upper-inhab)
-
-
-  <ℝ-reverse : (a b : ℝ) → a <ℝ b → (-ℝ b) ≤ℝ (-ℝ a)
-  <ℝ-reverse = {!!}
 
 
   -- Addition

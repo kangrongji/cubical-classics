@@ -13,10 +13,10 @@ open import Cubical.Data.Nat
   renaming (_+_ to _+ℕ_ ; _·_ to _·ℕ_)
 open import Cubical.Data.Nat.Order using ()
 open import Cubical.Data.NatPlusOne
-open import Cubical.Data.Int
-  hiding   (-Involutive)
-  renaming (_+_ to _+ℤ_ ;_·_ to _·ℤ_ ; _-_ to _-ℤ_ ; -_ to -ℤ_)
+open import Cubical.Data.Int.MoreInts.QuoInt
+  using    (pos ; neg)
 open import Cubical.HITs.Rationals.QuoQ
+  renaming ([_/_] to [[_/_]])
 
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
@@ -28,8 +28,19 @@ private
   variable
     p q r s : ℚ
 
---open import Classical.Preliminary.Int
-  --renaming (_<_ to _<ℤ_)
+
+{-
+
+  Inclusion from Natural Numbers
+
+-}
+
+ℕ→ℚPos : ℕ → ℚ
+ℕ→ℚPos n = [[ pos n / 1 ]]
+
+ℕ→ℚNeg : ℕ → ℚ
+ℕ→ℚNeg n = [[ neg n / 1 ]]
+
 
 {-
 
@@ -203,6 +214,10 @@ p>0+q>1→pq>p = {!!}
 ·-<-·-pos : p > 0 → r > 0 → p < q → r < s → p · r < q · s
 ·-<-·-pos = {!!}
 
+·-<-·-pos-l : p > 0 → r > 0 → p < q → p · r < q · r
+·-<-·-pos-l = {!!}
+
+
 -1<0 : - 1q < 0
 -1<0 = {!!}
 
@@ -215,64 +230,3 @@ p>q>0→p·q⁻¹>1 = {!!}
 
 p>0→p⁻¹>0 : (p>0 : p > 0) → inv (q>0→q≢0 {q = p} p>0) > 0q
 p>0→p⁻¹>0 = {!!}
-
-
-
-{-
-_<0 : ℚ → Type
-[ a , b ] <0 = (a ·ℤ ℕ₊₁→ℤ b) <ℤ 0
--}
-
-
-
-{-
-_<_ : ℚ → ℚ → Type
-[ a / b ] < [ c / d ] = ℕ₊₁→ℤ b · ℕ₊₁→ℤ d · -}
-
-
--- Special treatment on min/max values for use in real numbers
-
-record Min4 (x y z w : ℚ) : Type where
-  field
-    num : ℚ
-    <₁ : num < x
-    <₂ : num < y
-    <₃ : num < z
-    <₄ : num < w
-    greatest : {r : ℚ} → r < x → r < y → r < z → r < w → r < num
-
-record Max4 (x y z w : ℚ) : Type where
-  field
-    num : ℚ
-    >₁ : num < x
-    >₂ : num < y
-    >₃ : num < z
-    >₄ : num < w
-
-open Min4
-open Max4
-
-min4 : (x y z w : ℚ) → Min4 x y z w
-min4 = {!!}
-
-max4 : (x y z w : ℚ) → Max4 x y z w
-max4 = {!!}
-
-·interval-min : {x y z w : ℚ}{t s : ℚ} → x < t → t < y → z < s → s < w
-  → min4 (x · z) (x · w) (y · z) (y · w) .num < t · s
-·interval-min = {!!}
-
-·interval-max : {x y z w : ℚ}{t s : ℚ} → x < t → t < y → z < s → s < w
-  → max4 (x · z) (x · w) (y · z) (y · w) .num > t · s
-·interval-max = {!!}
-
-record Middle4 (x y z w : ℚ) : Type where
-  field
-    mid : ℚ
-    >₁ : x < mid
-    >₂ : z < mid
-    <₁ : mid < y
-    <₂ : mid < w
-
-middle4 : {x y z w : ℚ} → x < y → x < w → z < y → z < w → Middle4 x y z w
-middle4 = {!!}
