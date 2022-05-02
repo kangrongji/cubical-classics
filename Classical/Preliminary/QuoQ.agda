@@ -7,32 +7,35 @@ Facts about Rational Numbers
 module Classical.Preliminary.QuoQ where
 
 open import Cubical.Foundations.Prelude
-open import Cubical.Foundations.HLevels
-open import Cubical.Foundations.Function
-open import Cubical.Foundations.Univalence
-
-open import Cubical.Data.Sum
-open import Cubical.Data.Sigma
-open import Cubical.Data.Empty
-
-open import Cubical.Data.Nat using (ℕ)
-open import Cubical.Data.NatPlusOne
-open import Cubical.HITs.SetQuotients as SetQuot hiding (_/_)
-open import Cubical.Data.Int.MoreInts.QuoInt
-  using    (ℤ ; pos ; neg)
-  renaming (_·_ to _·ℤ_)
-open import Cubical.HITs.Rationals.QuoQ
-  renaming ([_/_] to [[_/_]])
-open import Cubical.Algebra.Ring
 open import Cubical.Algebra.CommRing
+open import Cubical.Algebra.RingSolver.Reflection
 
+-- It seems there are bugs when applying ring solver to explicit ring.
+-- The following is a work-around.
+private
+  module Helpers {ℓ : Level}(𝓡 : CommRing ℓ) where
+    open CommRingStr (𝓡 .snd)
+
+    helper1 : (x y : 𝓡 .fst) → (x · y) · 1r ≡ 1r · (y · x)
+    helper1 = solve 𝓡
+
+    helper2 : (x y : 𝓡 .fst) → ((- x) · (- y)) · 1r ≡ 1r · (y · x)
+    helper2 = solve 𝓡
+
+
+open import Cubical.Foundations.Prelude
+open import Cubical.Data.Sigma
+open import Cubical.Data.Empty as Empty
+open import Cubical.Data.NatPlusOne
+open import Cubical.HITs.Rationals.QuoQ using (ℚ)
+open import Cubical.Algebra.Ring
 open import Cubical.Relation.Nullary
 
-open import Classical.Preliminary.QuoInt using (ℤOrder ; ℕ₊₁→ℤ>0 ; -1·n≡-n)
-open import Classical.Preliminary.CommRing.Instances.QuoQ using ()
-  renaming (ℚ to ℚRing)
-open import Classical.Preliminary.QuoQ.Order using (ℚOrder)
-open import Classical.Preliminary.OrderedRing
+open import Classical.Preliminary.QuoQ.Base public
+open import Classical.Preliminary.QuoQ.Field using (ℚField) public
+open import Classical.Preliminary.QuoQ.Order using (ℚOrder) public
+open import Classical.Algebra.Field
+open import Classical.Algebra.OrderedRing
 
 private
   variable
@@ -41,44 +44,11 @@ private
 
 {-
 
-  Inclusion from Natural Numbers
-
--}
-
-ℕ→ℚPos : ℕ → ℚ
-ℕ→ℚPos n = [[ pos n / 1 ]]
-
-ℕ→ℚNeg : ℕ → ℚ
-ℕ→ℚNeg n = [[ neg n / 1 ]]
-
-
-{-
-
-  ℚ is a Field
-
--}
-
--- ℚ is a field
-
-isFieldℚ : ¬ q ≡ 0 → Σ[ p ∈ ℚ ] (p · q ≡ 1) × (q · p ≡ 1)
-isFieldℚ = {!!}
-
-inv : ¬ q ≡ 0 → ℚ
-inv q≢0 = isFieldℚ q≢0 .fst
-
-·-lInv : (q≢0 : ¬ q ≡ 0) → inv q≢0 · q ≡ 1
-·-lInv q≢0 = isFieldℚ q≢0 .snd .fst
-
-·-rInv : (q≢0 : ¬ q ≡ 0) → q · inv q≢0 ≡ 1
-·-rInv q≢0 = isFieldℚ q≢0 .snd .snd
-
-
-{-
-
   The Ordering of ℚ
 
 -}
 
+open FieldStr       ℚField
 open OrderedRingStr ℚOrder
 
 -- Compatibility
@@ -88,13 +58,6 @@ open OrderedRingStr ℚOrder
 
 mult-pres-≥0 : p ≥ 0 → q ≥ 0 → p · q ≥ 0
 mult-pres-≥0 = {!!}
-
-
-
-
-
-
-
 
 --------------
 

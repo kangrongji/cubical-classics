@@ -26,7 +26,7 @@ open import Classical.Preliminary.QuoInt
   using    (ℤOrder ; ℕ₊₁→ℤ>0 ; -1·n≡-n)
 open import Classical.Preliminary.CommRing.Instances.QuoQ using ()
   renaming (ℚ to ℚRing)
-open import Classical.Preliminary.OrderedRing
+open import Classical.Algebra.OrderedRing
 
 private
   variable

@@ -28,13 +28,14 @@ private
 
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Sigma
-open import Cubical.HITs.Rationals.QuoQ
+open import Cubical.Data.Nat.Literals public
+open import Cubical.HITs.Rationals.QuoQ using (ℚ)
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 
 open import Classical.Preliminary.QuoQ
-open import Classical.Preliminary.QuoQ.Order using (ℚOrder)
-open import Classical.Preliminary.OrderedRing
+open import Classical.Algebra.Field
+open import Classical.Algebra.OrderedRing
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
 
@@ -46,6 +47,7 @@ module Basics (decide : LEM) where
 
   open Powerset decide
 
+  open FieldStr       ℚField
   open OrderedRingStr ℚOrder
 
 
@@ -303,7 +305,7 @@ module Basics (decide : LEM) where
   private
     alg-helper' : (a b c d : ℚ)(d≢0 : ¬ d ≡ 0) → d ≡ a · b → c ≡ a · (b · (c · inv d≢0))
     alg-helper' a b c d d≢0 d≡a·b =
-        sym (·-identityʳ c) ∙ (λ i → c · ·-rInv d≢0 (~ i))
+        sym (·Rid c) ∙ (λ i → c · ·-rInv d≢0 (~ i))
       ∙ (λ i → c · (d≡a·b i · inv d≢0)) ∙ helper1' a b c (inv d≢0)
 
   _·ℝ₊_ : (a b : ℝ₊) → ℝ₊

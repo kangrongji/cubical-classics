@@ -3,7 +3,7 @@
 The Real Number
 
 -}
-{-# OPTIONS --allow-unsolved-meta #-}
+{-# OPTIONS --allow-unsolved-meta --experimental-lossy-unification #-}
 module Classical.Analysis.Real.Base.Order where
 
 open import Cubical.Foundations.Prelude
@@ -12,12 +12,12 @@ open import Cubical.Foundations.Function
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
-open import Cubical.HITs.Rationals.QuoQ
+open import Cubical.HITs.Rationals.QuoQ using (ℚ)
 open import Cubical.Relation.Nullary
 
 open import Classical.Preliminary.QuoQ
-open import Classical.Preliminary.QuoQ.Order using (ℚOrder)
-open import Classical.Preliminary.OrderedRing
+open import Classical.Algebra.Field
+open import Classical.Algebra.OrderedRing
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
 
@@ -33,6 +33,7 @@ module Order (decide : LEM) where
   open Algebra  decide
   open DedekindCut
 
+  open FieldStr       ℚField
   open OrderedRingStr ℚOrder
 
   {-

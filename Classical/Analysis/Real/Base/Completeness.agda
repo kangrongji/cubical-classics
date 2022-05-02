@@ -13,7 +13,7 @@ open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.HITs.Rationals.QuoQ
   renaming (_-_ to _-ℚ_)
 
-open import Classical.Preliminary.Rational
+open import Classical.Preliminary.QuoQ
   renaming (_≤_ to _≤ℚ_ ; _<_ to _<ℚ_ ; _>_ to _>ℚ_)
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset

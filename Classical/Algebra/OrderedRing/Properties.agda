@@ -4,7 +4,7 @@
 
 -}
 {-# OPTIONS --safe #-}
-module Classical.Preliminary.OrderedRing.Properties where
+module Classical.Algebra.OrderedRing.Properties where
 
 open import Cubical.Foundations.Prelude
 
@@ -18,7 +18,7 @@ open import Cubical.Algebra.RingSolver.Reflection
 
 open import Cubical.Relation.Nullary
 
-open import Classical.Preliminary.OrderedRing.Base
+open import Classical.Algebra.OrderedRing.Base
 
 private
   variable

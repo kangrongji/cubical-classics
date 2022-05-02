@@ -4,7 +4,7 @@ Totally Ordered Commutative Ring
 
 -}
 {-# OPTIONS --safe #-}
-module Classical.Preliminary.OrderedRing.Base where
+module Classical.Algebra.OrderedRing.Base where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels

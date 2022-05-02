@@ -37,7 +37,7 @@ open import Cubical.Data.Sum
 
 open import Classical.Preliminary.CommRing.Instances.QuoInt
   renaming (ℤ to ℤRing)
-open import Classical.Preliminary.OrderedRing
+open import Classical.Algebra.OrderedRing
 
 private
   variable

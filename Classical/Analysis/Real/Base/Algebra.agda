@@ -31,12 +31,12 @@ open import Cubical.Foundations.Function
 open import Cubical.Data.Empty
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
-open import Cubical.HITs.Rationals.QuoQ
+open import Cubical.HITs.Rationals.QuoQ using (ℚ)
 open import Cubical.Relation.Nullary
 
 open import Classical.Preliminary.QuoQ
-open import Classical.Preliminary.QuoQ.Order using (ℚOrder)
-open import Classical.Preliminary.OrderedRing
+open import Classical.Algebra.Field
+open import Classical.Algebra.OrderedRing
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
 
@@ -53,6 +53,7 @@ module Algebra (decide : LEM) where
   open Basics   decide
   open DedekindCut
 
+  open FieldStr       ℚField
   open OrderedRingStr ℚOrder
 
   {-
@@ -79,7 +80,7 @@ module Algebra (decide : LEM) where
     where
     upper⊆ : (a b : ℝ){q : ℚ} → q ∈ (a +ℝ b) .upper → q ∈ (b +ℝ a) .upper
     upper⊆ a b {q = q} q∈upper = Inhab→∈ (+upper b a) (Prop.map
-      (λ (s , t , s∈upper , t∈upper , q≡s+t) → t , s , t∈upper , s∈upper , q≡s+t ∙ +-comm s t)
+      (λ (s , t , s∈upper , t∈upper , q≡s+t) → t , s , t∈upper , s∈upper , q≡s+t ∙ +Comm s t)
       (∈→Inhab (+upper a b) q∈upper))
 
 
@@ -94,7 +95,7 @@ module Algebra (decide : LEM) where
         (λ (r , w , r∈upper , w∈upper , t≡r+w) →
           s + r , w ,
           Inhab→∈ (+upper a b) ∣ s , r , s∈upper , r∈upper , refl ∣ ,
-          w∈upper , q≡s+t ∙ (λ i → s + t≡r+w i) ∙ +-assoc s r w)
+          w∈upper , q≡s+t ∙ (λ i → s + t≡r+w i) ∙ +Assoc s r w)
         (∈→Inhab (+upper b c) t∈upper))
       (∈→Inhab (+upper a (b +ℝ c)) q∈upper))
 
@@ -106,7 +107,7 @@ module Algebra (decide : LEM) where
         (λ (r , w , r∈upper , w∈upper , s≡r+w) →
           r , w + t ,
           r∈upper , Inhab→∈ (+upper b c) ∣ w , t , w∈upper , t∈upper , refl ∣ ,
-          q≡s+t ∙ (λ i → s≡r+w i + t) ∙ sym (+-assoc r w t))
+          q≡s+t ∙ (λ i → s≡r+w i + t) ∙ sym (+Assoc r w t))
         (∈→Inhab (+upper a b) s∈upper))
       (∈→Inhab (+upper (a +ℝ b) c) q∈upper))
 
@@ -143,7 +144,7 @@ module Algebra (decide : LEM) where
               s+t>s-s : s + t > s - s
               s+t>s-s = <-trans (<-+ {r = s} -p>-s) (<-+ {r = s} t>-p)
               s+t>0 : s + t > 0
-              s+t>0 = subst (s + t >_) (+-inverseʳ s) s+t>s-s
+              s+t>0 = subst (s + t >_) (+Rinv s) s+t>s-s
               q>0 : q > 0
               q>0 = subst (_> 0) (sym q≡s+t) s+t>0
           in  Inhab→∈ (0 <P_) q>0)
@@ -156,7 +157,7 @@ module Algebra (decide : LEM) where
       Prop.rec (isProp∈ ((a +ℝ (-ℝ a)) .upper))
       (λ (r , s , s<q∈upper , r<s , r+q∈upper) →
         Inhab→∈ (+upper a (-ℝ a)) ∣ q + r , - r ,
-        subst (_∈ a .upper) (+-comm r q) r+q∈upper ,
+        subst (_∈ a .upper) (+Comm r q) r+q∈upper ,
         Inhab→∈ (-upper a) ∣ s , s<q∈upper , -reverse< r<s ∣ ,
         helper2 q r ∣)
       (archimedes a q)
@@ -187,7 +188,7 @@ module Algebra (decide : LEM) where
     where
     upper⊆ : (a b : ℝ₊){q : ℚ} → q ∈ (a ·ℝ₊ b) .fst .upper → q ∈ (b ·ℝ₊ a) .fst .upper
     upper⊆ (a , a≥0) (b , b≥0) {q = q} q∈upper = Inhab→∈ (·upper b a) (Prop.map
-      (λ (s , t , s∈upper , t∈upper , q≡s·t) → t , s , t∈upper , s∈upper , q≡s·t ∙ ·-comm s t)
+      (λ (s , t , s∈upper , t∈upper , q≡s·t) → t , s , t∈upper , s∈upper , q≡s·t ∙ ·Comm s t)
       (∈→Inhab (·upper a b) q∈upper))
 
 
@@ -202,7 +203,7 @@ module Algebra (decide : LEM) where
         (λ (r , w , r∈upper , w∈upper , t≡r·w) →
           s · r , w ,
           Inhab→∈ (·upper₊ a b) ∣ s , r , s∈upper , r∈upper , refl ∣ ,
-          w∈upper , q≡s·t ∙ (λ i → s · t≡r·w i) ∙ ·-assoc s r w)
+          w∈upper , q≡s·t ∙ (λ i → s · t≡r·w i) ∙ ·Assoc s r w)
         (∈→Inhab (·upper₊ b c) t∈upper))
       (∈→Inhab (·upper₊ a (b ·ℝ₊ c)) q∈upper))
 
@@ -214,14 +215,14 @@ module Algebra (decide : LEM) where
         (λ (r , w , r∈upper , w∈upper , s≡r·w) →
           r , w · t ,
           r∈upper , Inhab→∈ (·upper₊ b c) ∣ w , t , w∈upper , t∈upper , refl ∣ ,
-          q≡s·t ∙ (λ i → s≡r·w i · t) ∙ sym (·-assoc r w t))
+          q≡s·t ∙ (λ i → s≡r·w i · t) ∙ sym (·Assoc r w t))
         (∈→Inhab (·upper₊ a b) s∈upper))
       (∈→Inhab (·upper₊ (a ·ℝ₊ b) c) q∈upper))
 
 
   private
     alg-helper : (p q : ℚ)(p≢0 : ¬ p ≡ 0) → q ≡ p · (q · inv p≢0)
-    alg-helper p q p≢0 = sym (·-identityʳ q) ∙ (λ i → q · ·-rInv p≢0 (~ i)) ∙ helper3 p q (inv p≢0)
+    alg-helper p q p≢0 = sym (·Rid q) ∙ (λ i → q · ·-rInv p≢0 (~ i)) ∙ helper3 p q (inv p≢0)
 
 
   ·ℝ₊-rZero : (a : ℝ₊) → a ·ℝ₊ 0₊ ≡ 0₊
@@ -292,7 +293,7 @@ module Algebra (decide : LEM) where
                 x·w+x·v<r·w+u·v : (x · w) + (x · v) < (r · w) + (u · v)
                 x·w+x·v<r·w+u·v = +-<-+ (·-<-·-pos-l x>0 w>0 x<r) (·-<-·-pos-l x>0 v>0 x<u)
                 x·[w+v]<r·w+u·v : x · (w + v) < (r · w) + (u · v)
-                x·[w+v]<r·w+u·v = subst (_< ((r · w) + (u · v))) (·-distribˡ x w v) x·w+x·v<r·w+u·v
+                x·[w+v]<r·w+u·v = subst (_< ((r · w) + (u · v))) (sym (·Rdist+ x w v)) x·w+x·v<r·w+u·v
                 x·[w+v]∈upper : x · (w + v) ∈ (a ·ℝ₊ (b +ℝ₊ c)) .fst .upper
                 x·[w+v]∈upper = Inhab→∈ (·upper₊ a (b +ℝ₊ c))
                   ∣ x , w + v , x∈upper ,
@@ -316,7 +317,7 @@ module Algebra (decide : LEM) where
           s · r , s · w ,
           Inhab→∈ (·upper₊ a b) ∣ s , r , s∈upper , r∈upper , refl ∣ ,
           Inhab→∈ (·upper₊ a c) ∣ s , w , s∈upper , w∈upper , refl ∣ ,
-          q≡s·t ∙ cong (s ·_) t≡r+w ∙ sym (·-distribˡ s r w))
+          q≡s·t ∙ cong (s ·_) t≡r+w ∙ ·Rdist+ s r w)
         (∈→Inhab (+upper₊ b c) t∈upper))
       (∈→Inhab (·upper₊ a (b +ℝ₊ c)) q∈upper))
 
