@@ -3,10 +3,29 @@
 The Real Number
 
 -}
-{-# OPTIONS --allow-unsolved-meta #-}
-module Classical.Analysis.Real.Base.AlgebraicStructure where
+{-# OPTIONS --allow-unsolved-meta --experimental-lossy-unification #-}
+module Classical.Analysis.Real.Base.Algebra where
 
 open import Cubical.Foundations.Prelude
+open import Cubical.Algebra.CommRing
+open import Cubical.Algebra.RingSolver.Reflection
+
+-- It seems there are bugs when applying ring solver to explicit ring.
+-- The following is a work-around.
+private
+  module Helpers {ℓ : Level}(𝓡 : CommRing ℓ) where
+    open CommRingStr (𝓡 .snd)
+
+    helper1 : (q r : 𝓡 .fst) → q ≡ r + (q - r)
+    helper1 = solve 𝓡
+
+    helper2 : (q r : 𝓡 .fst) → q ≡ (q + r) - r
+    helper2 = solve 𝓡
+
+    helper3 : (p q r : 𝓡 .fst) → q · (p · r) ≡ p · (q · r)
+    helper3 = solve 𝓡
+
+
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Function
 open import Cubical.Data.Empty
@@ -15,19 +34,26 @@ open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.HITs.Rationals.QuoQ
 open import Cubical.Relation.Nullary
 
-open import Classical.Preliminary.Rational
+open import Classical.Preliminary.QuoQ
+open import Classical.Preliminary.QuoQ.Order using (ℚOrder)
+open import Classical.Preliminary.OrderedRing
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
 
 open import Classical.Analysis.Real.Base.DedekindCut
 
 
-module AlgebraicStructure (decide : LEM) where
+open Helpers (ℚOrder .fst)
+
+
+module Algebra (decide : LEM) where
 
   open Powerset decide
-  open Real     decide
 
+  open Basics   decide
   open DedekindCut
+
+  open OrderedRingStr ℚOrder
 
   {-
 
@@ -99,10 +125,8 @@ module AlgebraicStructure (decide : LEM) where
     upper⊇ {q = q} q∈upper = Prop.rec (isProp∈ ((a +ℝ 0) .upper))
       (λ (r , r<q , r∈upper) →
         Inhab→∈ (+upper a 0) ∣ r , q - r , r∈upper ,
-        Inhab→∈ (0 <P_) (p>q→p-q>0 r<q) , helper q r ∣)
+        Inhab→∈ (0 <P_) (p>q→p-q>0 r<q) , helper1 q r ∣)
       (a .upper-round q q∈upper)
-      where helper : (q r : ℚ) → q ≡ r + (q - r)
-            helper = {!!}
 
 
   +ℝ-rInverse : (a : ℝ) → a +ℝ (-ℝ a) ≡ 0
@@ -134,10 +158,9 @@ module AlgebraicStructure (decide : LEM) where
         Inhab→∈ (+upper a (-ℝ a)) ∣ q + r , - r ,
         subst (_∈ a .upper) (+-comm r q) r+q∈upper ,
         Inhab→∈ (-upper a) ∣ s , s<q∈upper , -reverse< r<s ∣ ,
-        helper q r ∣)
+        helper2 q r ∣)
       (archimedes a q)
-      where helper : (q r : ℚ) → q ≡ (q + r) - r
-            helper = {!!}
+
 
   +ℝ-lUnit : (a : ℝ) → 0 +ℝ a ≡ a
   +ℝ-lUnit a = +ℝ-Comm 0 a ∙ +ℝ-rUnit a
@@ -196,6 +219,11 @@ module AlgebraicStructure (decide : LEM) where
       (∈→Inhab (·upper₊ (a ·ℝ₊ b) c) q∈upper))
 
 
+  private
+    alg-helper : (p q : ℚ)(p≢0 : ¬ p ≡ 0) → q ≡ p · (q · inv p≢0)
+    alg-helper p q p≢0 = sym (·-identityʳ q) ∙ (λ i → q · ·-rInv p≢0 (~ i)) ∙ helper3 p q (inv p≢0)
+
+
   ·ℝ₊-rZero : (a : ℝ₊) → a ·ℝ₊ 0₊ ≡ 0₊
   ·ℝ₊-rZero a = path-ℝ₊ _ _ (≤ℝ-asym upper⊇ upper⊆)
     where
@@ -210,10 +238,8 @@ module AlgebraicStructure (decide : LEM) where
             p≢0 = q>0→q≢0 p>0
             p⁻¹ = inv p≢0 in
         Inhab→∈ (·upper₊ a 0₊) ∣ p , q · p⁻¹ , p∈upper ,
-        Inhab→∈ (0 <P_) (>0-·-pos q>0 (p>0→p⁻¹>0 p>0)) , helper p q p≢0 ∣)
+        Inhab→∈ (0 <P_) (>0-·-pos q>0 (p>0→p⁻¹>0 p>0)) , alg-helper p q p≢0 ∣)
       (a .fst .upper-inhab)
-      where helper : (p q : ℚ)(p≢0 : ¬ p ≡ 0) → q ≡ p · (q · inv p≢0)
-            helper = {!!}
 
 
   ·ℝ₊-rUnit : (a : ℝ₊) → a ·ℝ₊ 1₊ ≡ a
@@ -234,17 +260,15 @@ module AlgebraicStructure (decide : LEM) where
             r≢0 = q>0→q≢0 r>0
             r⁻¹ = inv r≢0 in
         Inhab→∈ (·upper₊ a 1₊) ∣ r , q · r⁻¹ , r∈upper ,
-        Inhab→∈ (1 <P_) (p>q>0→p·q⁻¹>1 r>0 r<q) , helper q r r≢0 ∣)
+        Inhab→∈ (1 <P_) (p>q>0→p·q⁻¹>1 r>0 r<q) , alg-helper r q r≢0 ∣)
       (a .fst .upper-round q q∈upper)
-      where helper : (q r : ℚ)(r≢0 : ¬ r ≡ 0) → q ≡ r · (q · inv r≢0)
-            helper = {!!}
 
 
   private
     upper-round2 : (a : ℝ)(p q : ℚ) → p ∈ a .upper → q ∈ a .upper → ∥ Σ[ r ∈ ℚ ] (r < p) × (r < q) × (r ∈ a .upper) ∥
     upper-round2 a p q p∈upper q∈upper = Prop.map2
       (λ (r , r<p , r∈upper) (s , s<q , s∈upper) →
-        case trichotomy< r s of λ
+        case trichotomy r s of λ
         { (lt r<s) → r , r<p , <-trans r<s s<q , r∈upper
         ; (eq r≡s) → s , subst (_< p) r≡s r<p , s<q , s∈upper
         ; (gt r>s) → s , <-trans r>s r<p , s<q , s∈upper })

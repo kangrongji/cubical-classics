@@ -15,21 +15,25 @@ open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.HITs.Rationals.QuoQ
 open import Cubical.Relation.Nullary
 
-open import Classical.Preliminary.Rational
+open import Classical.Preliminary.QuoQ
+open import Classical.Preliminary.QuoQ.Order using (ℚOrder)
+open import Classical.Preliminary.OrderedRing
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
 
 open import Classical.Analysis.Real.Base.DedekindCut
-open import Classical.Analysis.Real.Base.AlgebraicStructure
+open import Classical.Analysis.Real.Base.Algebra
 
 
 module Order (decide : LEM) where
 
   open Powerset decide
-  open Real     decide
 
+  open Basics   decide
+  open Algebra  decide
   open DedekindCut
-  open AlgebraicStructure decide
+
+  open OrderedRingStr ℚOrder
 
   {-
 
@@ -42,6 +46,21 @@ module Order (decide : LEM) where
 
   _>ℝ_ : ℝ → ℝ → Type
   a >ℝ b = b <ℝ a
+
+
+  -- Strictness
+
+  <ℝ→≤ℝ : {a b : ℝ} → a <ℝ b → a ≤ℝ b
+  <ℝ→≤ℝ = {!!}
+
+  <ℝ→≢ : {a b : ℝ} → a <ℝ b → a ≡ b → ⊥
+  <ℝ→≢ = {!!}
+
+  ≤ℝ+≢→<ℝ : {a b : ℝ} → a ≤ℝ b → ¬ a ≡ b → a <ℝ b
+  ≤ℝ+≢→<ℝ = {!!}
+
+
+  -- Properties
 
   data Dichotomyℝ (a b : ℝ) : Type where
     ge : a ≥ℝ b → Dichotomyℝ a b

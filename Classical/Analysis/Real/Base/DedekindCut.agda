@@ -3,24 +3,51 @@
 The Real Number
 
 -}
-{-# OPTIONS --allow-unsolved-meta #-}
+{-# OPTIONS --allow-unsolved-meta --experimental-lossy-unification #-}
 module Classical.Analysis.Real.Base.DedekindCut where
 
 open import Cubical.Foundations.Prelude
+open import Cubical.Algebra.CommRing
+open import Cubical.Algebra.RingSolver.Reflection
+
+-- It seems there are bugs when applying ring solver to explicit ring.
+-- The following is a work-around.
+private
+  module Helpers {ℓ : Level}(𝓡 : CommRing ℓ) where
+    open CommRingStr (𝓡 .snd)
+
+    helper1 : (a b c d : 𝓡 .fst) → c + ((a + b) - d) ≡ a + (b + (c - d))
+    helper1 = solve 𝓡
+
+    helper2 : (c d : 𝓡 .fst) → c ≡ c + (d - d)
+    helper2 = solve 𝓡
+
+    helper1' : (a b c d : 𝓡 .fst) → c · ((a · b) · d) ≡ a · (b · (c · d))
+    helper1' = solve 𝓡
+
+
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Sigma
 open import Cubical.HITs.Rationals.QuoQ
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 
-open import Classical.Preliminary.Rational
+open import Classical.Preliminary.QuoQ
+open import Classical.Preliminary.QuoQ.Order using (ℚOrder)
+open import Classical.Preliminary.OrderedRing
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
 
 
-module Real (decide : LEM) where
+open Helpers (ℚOrder .fst)
+
+
+module Basics (decide : LEM) where
 
   open Powerset decide
+
+  open OrderedRingStr ℚOrder
+
 
   {-
 
@@ -30,13 +57,16 @@ module Real (decide : LEM) where
 
   record DedekindCut : Type where
     field
+
       upper : ℙ ℚ
       upper-inhab : ∥ Σ[ q ∈ ℚ ] q ∈ upper ∥
       upper-close : (r : ℚ)(q : ℚ) → q ∈ upper → q < r → r ∈ upper
       upper-round : (q : ℚ) → q ∈ upper → ∥ Σ[ r ∈ ℚ ] (r < q) × (r ∈ upper) ∥
       lower-inhab : ∥ Σ[ q ∈ ℚ ] ((r : ℚ) → r ∈ upper → q < r) ∥
 
+
   open DedekindCut
+
 
   -- Dedekind Real Number
 
@@ -98,7 +128,7 @@ module Real (decide : LEM) where
   ℚ→ℝ q .upper = specify (q <P_)
   ℚ→ℝ q .upper-inhab = ∣ q + 1 , Inhab→∈ (q <P_) q+1>q ∣
   ℚ→ℝ q .upper-close r s s∈upper r>s = Inhab→∈ (q <P_) (<-trans (∈→Inhab (q <P_) s∈upper) r>s)
-  ℚ→ℝ q .upper-round r r∈upper = ∣ middle q r , middle<r r>q , Inhab→∈ (q <P_) (middle>l r>q) ∣
+  ℚ→ℝ q .upper-round r r∈upper = ∣ middle q r , middle<r {p = q} {q = r} r>q , Inhab→∈ (q <P_) (middle>l r>q) ∣
     where r>q : r > q
           r>q = ∈→Inhab (q <P_) r∈upper
   ℚ→ℝ q .lower-inhab = ∣ q - 1 , (λ r r∈upper → <-trans q-1<q (∈→Inhab (q <P_) r∈upper)) ∣
@@ -176,7 +206,7 @@ module Real (decide : LEM) where
 
   private
     alg-helper : (a b c d : ℚ) → d ≡ a + b → c ≡ a + (b + (c - d))
-    alg-helper = {!!}
+    alg-helper a b c d d≡a+b = helper2 c d ∙ (λ i → c + (d≡a+b i - d)) ∙ helper1 a b c d
 
   _+ℝ_ : ℝ → ℝ → ℝ
   (a +ℝ b) .upper = specify (+upper a b)
@@ -272,7 +302,9 @@ module Real (decide : LEM) where
 
   private
     alg-helper' : (a b c d : ℚ)(d≢0 : ¬ d ≡ 0) → d ≡ a · b → c ≡ a · (b · (c · inv d≢0))
-    alg-helper' = {!!}
+    alg-helper' a b c d d≢0 d≡a·b =
+        sym (·-identityʳ c) ∙ (λ i → c · ·-rInv d≢0 (~ i))
+      ∙ (λ i → c · (d≡a·b i · inv d≢0)) ∙ helper1' a b c (inv d≢0)
 
   _·ℝ₊_ : (a b : ℝ₊) → ℝ₊
   ((a , a≥0) ·ℝ₊ (b , b≥0)) .fst .upper = specify (·upper a b)

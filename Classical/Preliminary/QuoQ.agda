@@ -4,25 +4,35 @@ Facts about Rational Numbers
 
 -}
 {-# OPTIONS --allow-unsolved-meta #-}
-module Classical.Preliminary.Rational where
+module Classical.Preliminary.QuoQ where
 
 open import Cubical.Foundations.Prelude
-
-open import Cubical.Data.Empty
-open import Cubical.Data.Nat
-  renaming (_+_ to _+ℕ_ ; _·_ to _·ℕ_)
-open import Cubical.Data.Nat.Order using ()
-open import Cubical.Data.NatPlusOne
-open import Cubical.Data.Int.MoreInts.QuoInt
-  using    (pos ; neg)
-open import Cubical.HITs.Rationals.QuoQ
-  renaming ([_/_] to [[_/_]])
+open import Cubical.Foundations.HLevels
+open import Cubical.Foundations.Function
+open import Cubical.Foundations.Univalence
 
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
+open import Cubical.Data.Empty
 
+open import Cubical.Data.Nat using (ℕ)
+open import Cubical.Data.NatPlusOne
+open import Cubical.HITs.SetQuotients as SetQuot hiding (_/_)
+open import Cubical.Data.Int.MoreInts.QuoInt
+  using    (ℤ ; pos ; neg)
+  renaming (_·_ to _·ℤ_)
+open import Cubical.HITs.Rationals.QuoQ
+  renaming ([_/_] to [[_/_]])
+open import Cubical.Algebra.Ring
+open import Cubical.Algebra.CommRing
 
-open import Cubical.Relation.Nullary hiding (∣_∣)
+open import Cubical.Relation.Nullary
+
+open import Classical.Preliminary.QuoInt using (ℤOrder ; ℕ₊₁→ℤ>0 ; -1·n≡-n)
+open import Classical.Preliminary.CommRing.Instances.QuoQ using ()
+  renaming (ℚ to ℚRing)
+open import Classical.Preliminary.QuoQ.Order using (ℚOrder)
+open import Classical.Preliminary.OrderedRing
 
 private
   variable
@@ -44,7 +54,7 @@ private
 
 {-
 
-  ℚ is a Totally Ordered Field
+  ℚ is a Field
 
 -}
 
@@ -63,27 +73,13 @@ inv q≢0 = isFieldℚ q≢0 .fst
 ·-rInv q≢0 = isFieldℚ q≢0 .snd .snd
 
 
--- ℚ has total order
+{-
 
-infix 4 _≤_ _≥_
+  The Ordering of ℚ
 
-_≤_ : ℚ → ℚ → Type
-_≤_ = {!!}
+-}
 
-_≥_ : ℚ → ℚ → Type
-p ≥ q = q ≤ p
-
-≤-refl : q ≤ q
-≤-refl = {!!}
-
-≤-trans : p ≤ q → q ≤ r → p ≤ r
-≤-trans = {!!}
-
-≤-asym : p ≤ q → q ≤ p → p ≡ q
-≤-asym = {!!}
-
-≤-total : (p ≤ q) ⊎ (q ≤ p)
-≤-total = {!!}
+open OrderedRingStr ℚOrder
 
 -- Compatibility
 
@@ -102,41 +98,9 @@ mult-pres-≥0 = {!!}
 
 --------------
 
-ℕ→ℚ : ℕ → ℚ
-ℕ→ℚ n = {!!}
-
-
-_<_ : ℚ → ℚ → Type
-_<_ = {!!}
-
-
-_>_ : ℚ → ℚ → Type
-p > q = q < p
-
-infix 4 _<_ _>_
-
-isProp< : isProp (p < q)
-isProp< = {!!}
-
-
-data Trichotomy (p q : ℚ) : Type where
-  lt : p < q → Trichotomy p q
-  eq : p ≡ q → Trichotomy p q
-  gt : p > q → Trichotomy p q
-
-trichotomy< : (p q : ℚ) → Trichotomy p q
-trichotomy< p q = {!!}
-
-<-trans : p < q → q < r → p < r
-<-trans = {!!}
-
-<-asym : p < q → q < p → ⊥
-<-asym = {!!}
 
 ¬q<q : ¬ q < q
-¬q<q {q = q} h = <-asym {p = q} {q = q} h h
-
-
+¬q<q {q = q} h = <-asym {x = q} {y = q} h h
 
 
 q-1<q : q - 1 < q
