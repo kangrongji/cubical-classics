@@ -119,14 +119,14 @@ module Algebra (decide : LEM) where
     upper⊆ {q = q} q∈upper = Prop.rec (isProp∈ (a .upper))
       (λ (s , t , s∈upper , t∈upper , q≡s+t) →
         subst (_∈ a .upper) (sym q≡s+t)
-          (a .upper-close (s + t) s s∈upper (<-+-pos (∈→Inhab (0 <P_) t∈upper))))
+          (a .upper-close (s + t) s s∈upper (+-rPos→> (∈→Inhab (0 <P_) t∈upper))))
       (∈→Inhab (+upper a 0) q∈upper)
 
     upper⊇ : {q : ℚ} → q ∈ a .upper → q ∈ (a +ℝ 0) .upper
     upper⊇ {q = q} q∈upper = Prop.rec (isProp∈ ((a +ℝ 0) .upper))
       (λ (r , r<q , r∈upper) →
         Inhab→∈ (+upper a 0) ∣ r , q - r , r∈upper ,
-        Inhab→∈ (0 <P_) (p>q→p-q>0 r<q) , helper1 q r ∣)
+        Inhab→∈ (0 <P_) (>→Diff>0 r<q) , helper1 q r ∣)
       (a .upper-round q q∈upper)
 
 
@@ -140,9 +140,9 @@ module Algebra (decide : LEM) where
           let p<s : p < s
               p<s = p<r∈upper s s∈upper
               -p>-s : - p > - s
-              -p>-s = -reverse< p<s
+              -p>-s = -Reverse< p<s
               s+t>s-s : s + t > s - s
-              s+t>s-s = <-trans (<-+ {r = s} -p>-s) (<-+ {r = s} t>-p)
+              s+t>s-s = <-trans (+-lPres< {z = s} -p>-s) (+-lPres< {z = s} t>-p)
               s+t>0 : s + t > 0
               s+t>0 = subst (s + t >_) (+Rinv s) s+t>s-s
               q>0 : q > 0
@@ -158,7 +158,7 @@ module Algebra (decide : LEM) where
       (λ (r , s , s<q∈upper , r<s , r+q∈upper) →
         Inhab→∈ (+upper a (-ℝ a)) ∣ q + r , - r ,
         subst (_∈ a .upper) (+Comm r q) r+q∈upper ,
-        Inhab→∈ (-upper a) ∣ s , s<q∈upper , -reverse< r<s ∣ ,
+        Inhab→∈ (-upper a) ∣ s , s<q∈upper , -Reverse< r<s ∣ ,
         helper2 q r ∣)
       (archimedes a q)
 
@@ -236,10 +236,10 @@ module Algebra (decide : LEM) where
       (λ (p , p∈upper) →
         let q>0 = ∈→Inhab (0 <P_) q∈upper
             p>0 = q∈ℝ₊→q>0 a p p∈upper
-            p≢0 = q>0→q≢0 p>0
+            p≢0 = >-arefl p>0
             p⁻¹ = inv p≢0 in
         Inhab→∈ (·upper₊ a 0₊) ∣ p , q · p⁻¹ , p∈upper ,
-        Inhab→∈ (0 <P_) (>0-·-pos q>0 (p>0→p⁻¹>0 p>0)) , alg-helper p q p≢0 ∣)
+        Inhab→∈ (0 <P_) (·-Pres>0 q>0 (p>0→p⁻¹>0 p>0)) , alg-helper p q p≢0 ∣)
       (a .fst .upper-inhab)
 
 
@@ -251,17 +251,17 @@ module Algebra (decide : LEM) where
       (λ (s , t , s∈upper , t∈upper , q≡s·t) →
         let s>0 = q∈ℝ₊→q>0 a s s∈upper in
         subst (_∈ a .fst .upper) (sym q≡s·t)
-          (a .fst .upper-close (s · t) s s∈upper (<-·-q>1 s>0 (∈→Inhab (1 <P_) t∈upper))))
+          (a .fst .upper-close (s · t) s s∈upper (·-Pos·>1→> s>0 (∈→Inhab (1 <P_) t∈upper))))
       (∈→Inhab (·upper₊ a 1₊) q∈upper)
 
     upper⊇ : {q : ℚ} → q ∈ a .fst .upper → q ∈ (a ·ℝ₊ 1₊) .fst .upper
     upper⊇ {q = q} q∈upper = Prop.rec (isProp∈ ((a ·ℝ₊ 1₊) .fst .upper))
       (λ (r , r<q , r∈upper) →
         let r>0 = q∈ℝ₊→q>0 a r r∈upper
-            r≢0 = q>0→q≢0 r>0
+            r≢0 = >-arefl r>0
             r⁻¹ = inv r≢0 in
         Inhab→∈ (·upper₊ a 1₊) ∣ r , q · r⁻¹ , r∈upper ,
-        Inhab→∈ (1 <P_) (p>q>0→p·q⁻¹>1 r>0 r<q) , alg-helper r q r≢0 ∣)
+        Inhab→∈ (1 <P_) (p>q>0→p·q⁻¹>1  r>0 r<q) , alg-helper r q r≢0 ∣)
       (a .fst .upper-round q q∈upper)
 
 
@@ -291,7 +291,7 @@ module Algebra (decide : LEM) where
                 w>0 = q∈ℝ₊→q>0 b w w∈upper
                 v>0 = q∈ℝ₊→q>0 c v v∈upper
                 x·w+x·v<r·w+u·v : (x · w) + (x · v) < (r · w) + (u · v)
-                x·w+x·v<r·w+u·v = +-<-+ (·-<-·-pos-l x>0 w>0 x<r) (·-<-·-pos-l x>0 v>0 x<u)
+                x·w+x·v<r·w+u·v = +-Pres< (·-rPosPres< w>0 x<r) (·-rPosPres< v>0 x<u)
                 x·[w+v]<r·w+u·v : x · (w + v) < (r · w) + (u · v)
                 x·[w+v]<r·w+u·v = subst (_< ((r · w) + (u · v))) (sym (·Rdist+ x w v)) x·w+x·v<r·w+u·v
                 x·[w+v]∈upper : x · (w + v) ∈ (a ·ℝ₊ (b +ℝ₊ c)) .fst .upper

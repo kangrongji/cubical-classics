@@ -1,3 +1,8 @@
+{-
+
+ℚ is a Field
+
+-}
 {-# OPTIONS --safe #-}
 module Classical.Preliminary.QuoQ.Field where
 
@@ -31,8 +36,9 @@ open import Cubical.Data.Int.MoreInts.QuoInt
            ; ·-zeroˡ to ·ℤ-zeroˡ
            ; ·-zeroʳ to ·ℤ-zeroʳ
            ; ·-identityʳ to ·ℤ-identityʳ
-           ; ·-comm to ·ℤ-comm)
-open import Cubical.HITs.SetQuotients as SetQuot
+           ; ·-comm to ·ℤ-comm
+           ; ·-assoc to ·ℤ-assoc)
+open import Cubical.HITs.SetQuotients as SetQuot hiding (_/_)
 open import Cubical.HITs.Rationals.QuoQ
   using    (ℚ ; ℕ₊₁→ℤ ; isEquivRel∼)
 
@@ -47,12 +53,6 @@ open import Classical.Preliminary.CommRing.Instances.QuoInt
 open import Classical.Preliminary.CommRing.Instances.QuoQ
   renaming (ℚ to ℚRing)
 
-
-{-
-
-  ℚ is a Field
-
--}
 
 -- A rational number is zero if and only if its numerator is zero
 
@@ -94,3 +94,22 @@ isFieldℚ = SetQuot.elimProp (λ q → isPropΠ (λ _ → inverseUniqueness q))
 
 ℚField : Field ℓ-zero
 ℚField = ℚRing , isFieldℚ
+
+
+{-
+
+  Some properties sbout ℚ being a field
+
+-}
+
+1/n·n≡1 : (n : ℕ₊₁) →  [ 1 , n ] · [ ℕ₊₁→ℤ n , 1 ] ≡ 1
+1/n·n≡1 n = eq/ _ _ (helper1 1 (ℕ₊₁→ℤ n))
+
+_/_ : ℚ → ℕ₊₁ → ℚ
+q / n = q · [ 1 , n ]
+
+·-/-rInv : (q : ℚ)(n : ℕ₊₁) → (q / n) · [ ℕ₊₁→ℤ n , 1 ] ≡ q
+·-/-rInv q n = sym (·Assoc q _ _) ∙ (λ i → q · 1/n·n≡1 n i) ∙ ·Rid q
+
+·-/-lInv : (q : ℚ)(n : ℕ₊₁) → [ ℕ₊₁→ℤ n , 1 ] · (q / n) ≡ q
+·-/-lInv q n = ·Comm _ (q / n) ∙ ·-/-rInv q n

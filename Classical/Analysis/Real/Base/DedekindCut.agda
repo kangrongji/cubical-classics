@@ -1,9 +1,9 @@
 {-
 
-The Real Number
+The Dedekind Cut
 
 -}
-{-# OPTIONS --allow-unsolved-meta --experimental-lossy-unification #-}
+{-# OPTIONS --safe --experimental-lossy-unification #-}
 module Classical.Analysis.Real.Base.DedekindCut where
 
 open import Cubical.Foundations.Prelude
@@ -196,7 +196,7 @@ module Basics (decide : LEM) where
     (λ (q , q∈upper) →
       - q , λ r r∈upper → Prop.rec isProp<
         (λ (p , p<s∈upper , r>-p) →
-          <-trans (-reverse< (p<s∈upper q q∈upper)) r>-p)
+          <-trans (-Reverse< (p<s∈upper q q∈upper)) r>-p)
         (∈→Inhab (-upper a) r∈upper))
     (a .upper-inhab)
 
@@ -219,7 +219,7 @@ module Basics (decide : LEM) where
   (a +ℝ b) .upper-close r q q∈upper q<r = Prop.rec (isProp∈ ((a +ℝ b) .upper))
     (λ (s , t , s∈upper , t∈upper , q≡s+t) →
       let t+r-q∈upper : (t + (r - q)) ∈ b .upper
-          t+r-q∈upper = b .upper-close _ _ t∈upper (<-+-pos (p>q→p-q>0 q<r))
+          t+r-q∈upper = b .upper-close _ _ t∈upper (+-rPos→> (>→Diff>0 q<r))
           r≡s+t+r-q : r ≡ s + (t + (r - q))
           r≡s+t+r-q = alg-helper s t r q q≡s+t
       in  Inhab→∈ (+upper a b) ∣ s , t + (r - q) , s∈upper , t+r-q∈upper , r≡s+t+r-q ∣)
@@ -227,7 +227,7 @@ module Basics (decide : LEM) where
   (a +ℝ b) .upper-round q q∈upper = Prop.rec squash
     (λ (s , t , s∈upper , t∈upper , q≡s+t) → Prop.map2
       (λ (s' , s'<s , s'∈upper) (t' , t'<t , t'∈upper) →
-        s' + t' , subst (s' + t' <_) (sym q≡s+t) (+-<-+ s'<s t'<t) ,
+        s' + t' , subst (s' + t' <_) (sym q≡s+t) (+-Pres< s'<s t'<t) ,
         Inhab→∈ (+upper a b) ∣ s' , t' , s'∈upper , t'∈upper , refl ∣)
       (a .upper-round s s∈upper) (b .upper-round t t∈upper))
     (∈→Inhab (+upper a b) q∈upper)
@@ -236,7 +236,7 @@ module Basics (decide : LEM) where
         p + q , λ r r∈upper → Prop.rec isProp<
           (λ (s , t , s∈upper , t∈upper , r≡s+t) →
             subst (p + q <_) (sym r≡s+t)
-            (+-<-+ (p<r∈upper s s∈upper) (q<r∈upper t t∈upper)))
+            (+-Pres< (p<r∈upper s s∈upper) (q<r∈upper t t∈upper)))
           (∈→Inhab (+upper a b) r∈upper))
     (a .lower-inhab) (b .lower-inhab)
 
@@ -261,10 +261,10 @@ module Basics (decide : LEM) where
   -- Zero and Unit
 
   0₊ : ℝ₊
-  0₊ = 0 , {!!}
+  0₊ = 0 , ≡→⊆ refl
 
   1₊ : ℝ₊
-  1₊ = 1 , {!!}
+  1₊ = 1 , λ q∈upper → Inhab→∈ (0 <P_) (<-trans 1>0 (∈→Inhab (1 <P_) q∈upper))
 
 
   -- Addition
@@ -279,7 +279,7 @@ module Basics (decide : LEM) where
     (λ (s , t , s∈upper , t∈upper , q≡s+t) →
       let s>0 = ∈→Inhab (0 <P_) (a≥0 s∈upper)
           t>0 = ∈→Inhab (0 <P_) (b≥0 t∈upper)
-      in  Inhab→∈ (0 <P_) (subst (_> 0) (sym q≡s+t) (>0-+-pos s>0 t>0)))
+      in  Inhab→∈ (0 <P_) (subst (_> 0) (sym q≡s+t) (+-Pres>0 s>0 t>0)))
     (∈→Inhab (+upper a b) q∈upper)
 
 
@@ -299,7 +299,7 @@ module Basics (decide : LEM) where
   q∈·upper→q>0 a b a≥0 b≥0 q q∈upper = Prop.rec isProp<
     (λ (s , t , s∈upper , t∈upper , q≡s·t) →
       subst (_> 0) (sym q≡s·t)
-        (>0-·-pos (≥ℝ0+q∈upper→q>0 a a≥0 s∈upper) (≥ℝ0+q∈upper→q>0 b b≥0 t∈upper)))
+        (·-Pres>0 (≥ℝ0+q∈upper→q>0 a a≥0 s∈upper) (≥ℝ0+q∈upper→q>0 b b≥0 t∈upper)))
     (∈→Inhab (·upper a b) q∈upper)
 
   private
@@ -317,12 +317,14 @@ module Basics (decide : LEM) where
   ((a , a≥0) ·ℝ₊ (b , b≥0)) .fst .upper-close r q q∈upper q<r =
     Prop.rec (isProp∈ (((a , a≥0) ·ℝ₊ (b , b≥0)) .fst .upper))
     (λ (s , t , s∈upper , t∈upper , q≡s·t) →
-      let q≢0 : ¬ q ≡ 0
-          q≢0 = q>0→q≢0 (q∈·upper→q>0 a b a≥0 b≥0 q q∈upper)
+      let q>0 : q > 0
+          q>0 = q∈·upper→q>0 a b a≥0 b≥0 q q∈upper
+          q≢0 : ¬ q ≡ 0
+          q≢0 = >-arefl q>0
           q⁻¹ = inv q≢0
           t·r·q⁻¹∈upper : (t · (r · q⁻¹)) ∈ b .upper
           t·r·q⁻¹∈upper = b .upper-close _ _ t∈upper
-            (p>0+q>1→pq>p (≥ℝ0+q∈upper→q>0 b b≥0 t∈upper) (r>q>0→r/q>1 _ q<r))
+            (·-Pos·>1→> (≥ℝ0+q∈upper→q>0 b b≥0 t∈upper) (p>q>0→p·q⁻¹>1 q>0 q<r))
           r≡s·t·r·q⁻¹ : r ≡ s · (t · (r · q⁻¹))
           r≡s·t·r·q⁻¹ = alg-helper' s t r q q≢0 q≡s·t
       in  Inhab→∈ (·upper a b) ∣ s , t · (r · q⁻¹) , s∈upper , t·r·q⁻¹∈upper , r≡s·t·r·q⁻¹ ∣)
@@ -331,7 +333,7 @@ module Basics (decide : LEM) where
     (λ (s , t , s∈upper , t∈upper , q≡s·t) → Prop.map2
       (λ (s' , s'<s , s'∈upper) (t' , t'<t , t'∈upper) →
         s' · t' , subst (s' · t' <_) (sym q≡s·t)
-          (·-<-·-pos (≥ℝ0+q∈upper→q>0 a a≥0 s'∈upper) (≥ℝ0+q∈upper→q>0 b b≥0 t'∈upper) s'<s t'<t) ,
+          (·-PosPres> (≥ℝ0+q∈upper→q>0 a a≥0 s'∈upper) (≥ℝ0+q∈upper→q>0 b b≥0 t'∈upper) s'<s t'<t) ,
         Inhab→∈ (·upper a b) ∣ s' , t' , s'∈upper , t'∈upper , refl ∣ )
       (a .upper-round s s∈upper) (b .upper-round t t∈upper))
     (∈→Inhab (·upper a b) q∈upper)
@@ -342,5 +344,5 @@ module Basics (decide : LEM) where
     (λ (s , t , s∈upper , t∈upper , q≡s·t) →
       let s>0 = ∈→Inhab (0 <P_) (a≥0 s∈upper)
           t>0 = ∈→Inhab (0 <P_) (b≥0 t∈upper)
-      in  Inhab→∈ (0 <P_) (subst (_> 0) (sym q≡s·t) (>0-·-pos s>0 t>0)))
+      in  Inhab→∈ (0 <P_) (subst (_> 0) (sym q≡s·t) (·-Pres>0 s>0 t>0)))
     (∈→Inhab (·upper a b) q∈upper)

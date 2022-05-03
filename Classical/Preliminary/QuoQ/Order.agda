@@ -7,6 +7,19 @@ Ordering of Rational Numbers
 module Classical.Preliminary.QuoQ.Order where
 
 open import Cubical.Foundations.Prelude
+open import Cubical.Algebra.CommRing
+open import Cubical.Algebra.RingSolver.Reflection
+
+-- It seems there are bugs when applying ring solver to explicit ring.
+-- The following is a work-around.
+private
+  module Helpers {ℓ : Level}(𝓡 : CommRing ℓ) where
+    open CommRingStr (𝓡 .snd)
+
+    helper1 : 1r · 1r + (- 0r) · 1r ≡ 1r
+    helper1 = solve 𝓡
+
+
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Univalence
 
@@ -116,3 +129,15 @@ trichotomy>0 = elimProp (isPropTrichotomy>0 ℚRing _>0 isProp>0 >0-asym) tricho
 
 ℚOrder : OrderedRing _ _
 ℚOrder = ℚRing , orderstr _>0 isProp>0 >0-asym >0-+ >0-· trichotomy>0
+
+
+{-
+
+  Basic Facts
+
+-}
+
+open Helpers (ℤOrder .fst)
+
+1>0 : 1 > 0
+1>0 = subst (_> 0) helper1 _
