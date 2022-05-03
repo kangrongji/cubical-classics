@@ -59,11 +59,21 @@ module Archimedes (decide : LEM) where
   open OrderedRingStr ℚOrder
 
 
+  archimedesℚ : (p q : ℚ)(p<q : p < q)(ε : ℚ)(ε>0 : ε > 0)
+    → 
+
+
   archimedes' : (a : ℝ)(ε : ℚ)(ε>0 : ε > 0)
     → (p : ℚ)  → Σ[ s ∈ ℚ ] ((q : ℚ) → q ∈ a .upper → s < q) × (p < s)
     → Σ[ r ∈ ℚ ] Σ[ s ∈ ℚ ] ((q : ℚ) → q ∈ a .upper → s < q) × (p < r) × (r < s) × (r + ε) ∈ a .upper
   archimedes' = {!!}
 
+
   archimedes : (a : ℝ)(ε : ℚ)(ε>0 : ε > 0)
     → ∥ Σ[ r ∈ ℚ ] Σ[ s ∈ ℚ ] ((q : ℚ) → q ∈ a .upper → s < q) × (r < s) × (r + ε) ∈ a .upper ∥
-  archimedes = {!!}
+  archimedes a ε ε>0 = Prop.map
+    (λ (q , q<r∈upper) →
+      let (r , s , s<t∈upper , p<r , r<s , r+ε∈upper) =
+            archimedes' a ε ε>0 (q - 1) (q , q<r∈upper , q-1<q)
+      in   r , s , s<t∈upper , r<s , r+ε∈upper)
+    (a .lower-inhab)
