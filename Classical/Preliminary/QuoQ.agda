@@ -19,6 +19,12 @@ private
     helper1 : (p q : 𝓡 .fst) → ((p + q) + (1r + 1r) · (- p)) ≡ q - p
     helper1 = solve 𝓡
 
+    helper2 : (p p⁻¹ q⁻¹ : 𝓡 .fst) → p · (p⁻¹ · q⁻¹) ≡ (p · p⁻¹) · q⁻¹
+    helper2 = solve 𝓡
+
+    helper3 : (q p⁻¹ q⁻¹ : 𝓡 .fst) → q · (p⁻¹ · q⁻¹) ≡ (q · q⁻¹) · p⁻¹
+    helper3 = solve 𝓡
+
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Data.Sigma
@@ -100,3 +106,19 @@ p>q>0→p·q⁻¹>1 : (q>0 : q > 0) → p > q → p · inv (>-arefl {x = q} q>0)
 p>q>0→p·q⁻¹>1 {q = q} {p = p} q>0 p>q =
   subst (p · inv (>-arefl {x = q} q>0) >_) (·-rInv (>-arefl {x = q} q>0))
     (·-rPosPres< {x = inv (>-arefl {x = q} q>0)} {y = q} {z = p} (p>0→p⁻¹>0 {p = q} q>0) p>q)
+
+inv-Reverse< : (p>0 : p > 0)(q>0 : q > 0) → p > q → inv (>-arefl {x = p} p>0) < inv (>-arefl {x = q} q>0)
+inv-Reverse< {p = p} {q = q} p>0 q>0 p>q = q⁻¹>p⁻¹
+  where p≢0 = >-arefl {x = p} p>0
+        q≢0 = >-arefl {x = q} q>0
+        p⁻¹ = inv p≢0
+        q⁻¹ = inv q≢0
+        p⁻¹·q⁻¹>0 : p⁻¹ · q⁻¹ > 0
+        p⁻¹·q⁻¹>0 = ·-Pres>0 {x = p⁻¹} {y = q⁻¹} (p>0→p⁻¹>0 {p = p} p>0) (p>0→p⁻¹>0 {p = q} q>0)
+        p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹ : (p · p⁻¹) · q⁻¹ > (q · q⁻¹) · p⁻¹
+        p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹ = transport (λ i → helper2 p p⁻¹ q⁻¹ i > helper3 q p⁻¹ q⁻¹ i)
+          (·-rPosPres< {x = p⁻¹ · q⁻¹} {y = q} {z = p} p⁻¹·q⁻¹>0 p>q)
+        1·q⁻¹>1·p⁻¹ : 1 · q⁻¹ > 1 · p⁻¹
+        1·q⁻¹>1·p⁻¹ = transport (λ i → ·-rInv p≢0 i · q⁻¹ > ·-rInv q≢0 i · p⁻¹) p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹
+        q⁻¹>p⁻¹ : q⁻¹ > p⁻¹
+        q⁻¹>p⁻¹ = transport (λ i → ·Lid q⁻¹ i > ·Lid p⁻¹ i) 1·q⁻¹>1·p⁻¹

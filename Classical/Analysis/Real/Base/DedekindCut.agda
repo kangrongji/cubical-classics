@@ -346,3 +346,39 @@ module Basics (decide : LEM) where
           t>0 = ∈→Inhab (0 <P_) (b≥0 t∈upper)
       in  Inhab→∈ (0 <P_) (subst (_> 0) (sym q≡s·t) (·-Pres>0 s>0 t>0)))
     (∈→Inhab (·upper a b) q∈upper)
+
+
+  -- Multiplicative Inverse
+
+  inv-upper : (a : ℝ)(x : ℚ) → hProp ℓ-zero
+  inv-upper a x = ∥ Σ[ p ∈ ℚ ] Σ[ p>0 ∈ p > 0 ] ((r : ℚ) → r ∈ a .upper → p < r) × (x > inv (>-arefl p>0)) ∥ , squash
+
+  invℝ₊ : (a : ℝ)(q : ℚ) → q > 0 → ((r : ℚ) → r ∈ a .upper → q < r) → ℝ₊
+  invℝ₊ a _ _ _ .fst .upper = specify (inv-upper a)
+  invℝ₊ a q₀ q₀>0 q₀<r∈upper .fst .upper-inhab =
+    let q₀⁻¹ = inv (>-arefl q₀>0) in
+    ∣ q₀⁻¹ + 1 , Inhab→∈ (inv-upper a) ∣ q₀ , q₀>0 , q₀<r∈upper , q+1>q {q = q₀⁻¹} ∣ ∣
+  invℝ₊ a _ _ _ .fst .upper-close r q q∈upper q<r =
+    Prop.rec (isProp∈ (invℝ₊ a _ _ _ .fst .upper))
+    (λ (p , p>0 , p<r∈upper , q>p⁻¹) →
+      Inhab→∈ (inv-upper a) ∣ p , p>0 , p<r∈upper , <-trans q>p⁻¹ q<r ∣)
+    (∈→Inhab (inv-upper a) q∈upper)
+  invℝ₊ a _ _ _ .fst .upper-round q q∈upper = Prop.map
+    (λ (p , p>0 , p<r∈upper , q>p⁻¹) →
+      let p⁻¹ = inv (>-arefl p>0) in
+      middle p⁻¹ q , middle<r q>p⁻¹  , Inhab→∈ (inv-upper a) ∣ p , p>0 , p<r∈upper , middle>l q>p⁻¹ ∣)
+    (∈→Inhab (inv-upper a) q∈upper)
+  invℝ₊ a q₀ q₀>0 q₀<r∈upper .fst .lower-inhab = Prop.map
+    (λ (q , q∈upper) →
+      let q>0 = <-trans q₀>0 (q₀<r∈upper q q∈upper)
+          q⁻¹ = inv (>-arefl q>0) in
+      q⁻¹ , λ r r∈upper → Prop.rec isProp<
+        (λ (p , p>0 , p<s∈upper , r>p⁻¹) →
+          <-trans (inv-Reverse< _ _ (p<s∈upper q q∈upper)) r>p⁻¹)
+        (∈→Inhab (inv-upper a) r∈upper))
+    (a .upper-inhab)
+  invℝ₊ a _ _ _ .snd q∈upper =
+    Prop.rec (isProp∈ (0 .upper))
+    (λ (p , p>0 , p<r∈upper , q>p⁻¹) →
+      Inhab→∈ (0 <P_) (<-trans (p>0→p⁻¹>0 p>0) q>p⁻¹))
+    (∈→Inhab (inv-upper a) q∈upper)

@@ -322,11 +322,7 @@ module Algebra (decide : LEM) where
       (∈→Inhab (·upper₊ a (b +ℝ₊ c)) q∈upper))
 
 
-  {-
+    -- Multiplicative Inverse
 
-    Multiplicative Inverse
-
-  -}
-
-  --isFieldℝ : (a : ℝ) → ¬ a ≡ 0 → {!!}
-  --isFieldℝ = {!!} -}
+    --isFieldℝ : (a : ℝ) → ¬ a ≡ 0 → {!!}
+    --isFieldℝ = {!!} -}
