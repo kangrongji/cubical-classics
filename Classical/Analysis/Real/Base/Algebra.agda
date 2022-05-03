@@ -25,6 +25,9 @@ private
     helper3 : (p q r : 𝓡 .fst) → q · (p · r) ≡ p · (q · r)
     helper3 = solve 𝓡
 
+    helper4 : (q r : 𝓡 .fst) → r + (r · (q - 1r)) ≡ r · q
+    helper4 = solve 𝓡
+
 
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Function
@@ -41,6 +44,7 @@ open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
 
 open import Classical.Analysis.Real.Base.DedekindCut
+open import Classical.Analysis.Real.Base.Archimedes
 
 
 open Helpers (ℚOrder .fst)
@@ -48,26 +52,15 @@ open Helpers (ℚOrder .fst)
 
 module Algebra (decide : LEM) where
 
-  open Powerset decide
+  open Powerset   decide
 
-  open Basics   decide
+  open Basics     decide
+  open Archimedes decide
   open DedekindCut
 
   open FieldStr       ℚField
   open OrderedRingStr ℚOrder
 
-  {-
-
-    A Lemma about Archimedean-ness
-
-  -}
-
-  --archimedes : (a : ℝ)(ε : ℚ) → ∥ Σ[ r ∈ ℚ ] ((q : ℚ) → q ∈ a .upper → r < q) × (r + ε) ∈ a .upper ∥
-  --archimedes = {!!}
-
-  archimedes : (a : ℝ)(ε : ℚ)
-    → ∥ Σ[ r ∈ ℚ ] Σ[ s ∈ ℚ ] ((q : ℚ) → q ∈ a .upper → s < q) × (r < s) × (r + ε) ∈ a .upper ∥
-  archimedes = {!!}
 
   {-
 
@@ -160,7 +153,7 @@ module Algebra (decide : LEM) where
         subst (_∈ a .upper) (+Comm r q) r+q∈upper ,
         Inhab→∈ (-upper a) ∣ s , s<q∈upper , -Reverse< r<s ∣ ,
         helper2 q r ∣)
-      (archimedes a q)
+      (archimedes a q q>0)
 
 
   +ℝ-lUnit : (a : ℝ) → 0 +ℝ a ≡ a
@@ -322,7 +315,75 @@ module Algebra (decide : LEM) where
       (∈→Inhab (·upper₊ a (b +ℝ₊ c)) q∈upper))
 
 
-    -- Multiplicative Inverse
+  -- Multiplicative Inverse
 
-    --isFieldℝ : (a : ℝ) → ¬ a ≡ 0 → {!!}
-    --isFieldℝ = {!!} -}
+  module _
+    (a₊@(a , a≥0) : ℝ₊)(q₀ : ℚ)(q₀>0 : q₀ > 0)
+    (q₀<r∈upper : ((r : ℚ) → r ∈ a .upper → q₀ < r)) where
+
+    private
+      a⁻¹ : ℝ₊
+      a⁻¹ = invℝ₊ a q₀ q₀>0 q₀<r∈upper
+
+      a·a⁻¹ = (a₊ ·ℝ₊ a⁻¹) .fst
+
+      ineq-helper : (r q q' : ℚ) → q - 1 > 0 → r > q' → r + (q' · (q - 1)) < r · q
+      ineq-helper r q q' q-1>0 r>q' = subst (r + (q' · (q - 1)) <_) (helper4 q r) r+·<r+·
+        where r+·<r+· : r + (q' · (q - 1)) < r + (r · (q - 1))
+              r+·<r+· = +-lPres< (·-rPosPres< q-1>0 r>q')
+
+
+    ·ℝ₊-rInv : a·a⁻¹ ≡ 1
+    ·ℝ₊-rInv = ≤ℝ-asym upper⊇ upper⊆
+      where
+      upper⊆ : {q : ℚ} → q ∈ a·a⁻¹ .upper → q ∈ 1 .upper
+      upper⊆ {q = q} q∈upper = Prop.rec (isProp∈ (1 .upper))
+        (λ (s , t , s∈upper , t∈upper , q≡s·t) → Prop.rec (isProp∈ (1 .upper))
+          (λ (p , p>0 , p<r∈upper , t>p⁻¹) →
+            let p<s : p < s
+                p<s = p<r∈upper s s∈upper
+                s>0 : s > 0
+                s>0 = <-trans q₀>0 (q₀<r∈upper s s∈upper)
+                p⁻¹ = inv (>-arefl p>0)
+                s⁻¹ = inv (>-arefl s>0)
+                p⁻¹>s⁻¹ : p⁻¹ > s⁻¹
+                p⁻¹>s⁻¹ = inv-Reverse< s>0 p>0 p<s
+                s·t>s·s⁻¹ : s · t > s · s⁻¹
+                s·t>s·s⁻¹ = <-trans (·-lPosPres< {x = s} s>0 p⁻¹>s⁻¹) (·-lPosPres< {x = s} s>0 t>p⁻¹)
+                s·t>1 : s · t > 1
+                s·t>1 = subst (s · t >_) (·-rInv (>-arefl s>0)) s·t>s·s⁻¹
+                q>1 : q > 1
+                q>1 = subst (_> 1) (sym q≡s·t) s·t>1
+            in  Inhab→∈ (1 <P_) q>1)
+          (∈→Inhab (inv-upper a) t∈upper))
+        (∈→Inhab (·upper₊ a₊ a⁻¹) q∈upper)
+
+      upper⊇ : {q : ℚ} → q ∈ 1 .upper → q ∈ a·a⁻¹ .upper
+      upper⊇ {q = q} q∈upper =
+        let q>1 = ∈→Inhab (1 <P_) q∈upper
+            q-1>0 : q - 1 > 0
+            q-1>0 = subst (q - 1 >_) (+Rinv 1) (+-rPres< {z = - 1} q>1)
+            q' = middle 0 q₀
+            q'>0 : q' > 0
+            q'>0 = middle>l q₀>0
+            q'<q₀ : q' < q₀
+            q'<q₀ = middle<r q₀>0
+            ε = q' · (q - 1)
+            ε>0 : ε > 0
+            ε>0 = ·-Pres>0 q'>0 q-1>0
+            (r , s , s<q∈upper , q'<r , r<s , r+ε∈upper) =
+              archimedes' a ε ε>0 q' (q₀ , q₀<r∈upper , q'<q₀)
+            r+ε<r·q : r + ε < r · q
+            r+ε<r·q = ineq-helper r q q' q-1>0 q'<r
+            r·q∈upper : r · q ∈ a .upper
+            r·q∈upper = a .upper-close _ _ r+ε∈upper r+ε<r·q
+            r>0 : r > 0
+            r>0 = <-trans q'>0 q'<r
+            r⁻¹ = inv (>-arefl r>0)
+            s>0 : s > 0
+            s>0 = <-trans r>0 r<s
+            r⁻¹∈upper : r⁻¹ ∈ a⁻¹ .fst .upper
+            r⁻¹∈upper = Inhab→∈ (inv-upper a)
+              ∣ s , s>0 , s<q∈upper , inv-Reverse< s>0 r>0 r<s ∣
+        in  Inhab→∈ (·upper₊ a₊ a⁻¹)
+            ∣ r · q , r⁻¹ , r·q∈upper , r⁻¹∈upper , alg-helper r q (>-arefl r>0) ∙ ·Assoc r q r⁻¹ ∣
