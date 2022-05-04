@@ -1,6 +1,6 @@
 {-
 
-The Real Number
+Algebraic Operations on Dedekind Cuts
 
 -}
 {-# OPTIONS --safe #-}
