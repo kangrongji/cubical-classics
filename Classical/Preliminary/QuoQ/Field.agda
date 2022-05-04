@@ -23,7 +23,6 @@ private
     helper2 = solve 𝓡
 
 
-open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
 
 open import Cubical.Data.Sigma

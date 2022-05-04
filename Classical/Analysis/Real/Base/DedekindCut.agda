@@ -28,6 +28,7 @@ private
 
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Sigma
+open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Nat.Literals public
 open import Cubical.HITs.Rationals.QuoQ using (ℚ)
 open import Cubical.HITs.PropositionalTruncation as Prop
@@ -58,6 +59,8 @@ module Basics (decide : LEM) where
   -}
 
   record DedekindCut : Type where
+    no-eta-equality
+
     field
 
       upper : ℙ ℚ
@@ -168,7 +171,36 @@ module Basics (decide : LEM) where
 
   {-
 
-    Algebraic Operations of ℝ
+    Non-membership of upper cut
+
+  -}
+
+  module _ (a : ℝ)(q : ℚ) where
+
+    ¬∈upper→<upper : ¬ q ∈ a .upper → (r : ℚ) → r ∈ a .upper → q < r
+    ¬∈upper→<upper ¬q∈upper r r∈upper = case-split (trichotomy q r)
+      where
+      case-split : Trichotomy q r → q < r
+      case-split (lt q<r) = q<r
+      case-split (eq q≡r) = Empty.rec (¬q∈upper (subst (_∈ a .upper) (sym q≡r) r∈upper))
+      case-split (gt q>r) = Empty.rec (¬q∈upper (a .upper-close _ _ r∈upper q>r))
+
+    <upper→¬∈upper : ((r : ℚ) → r ∈ a .upper → q < r) → ¬ q ∈ a .upper
+    <upper→¬∈upper q<r∈upper = case-split (decide (isProp∈ (a .upper)))
+      where
+      case-split : Dec (q ∈ a .upper) → ¬ q ∈ a .upper
+      case-split (yes p) _ = <-arefl (q<r∈upper q p) refl
+      case-split (no ¬p) = ¬p
+
+
+  ¬∈upper-close : (a : ℝ)(p q : ℚ) → ¬ q ∈ a .upper → p < q → ¬ p ∈ a .upper
+  ¬∈upper-close a p q ¬q∈upper p<q =
+    <upper→¬∈upper a _ (λ r r∈upper → <-trans p<q (¬∈upper→<upper a _ ¬q∈upper r r∈upper))
+
+
+  {-
+
+    Basic algebraic operations of ℝ
 
   -}
 

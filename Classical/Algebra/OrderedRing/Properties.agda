@@ -151,6 +151,12 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
   ... | eq x≡y = eq (sym (+Lid _) ∙ (λ i → x≡y (~ i) + x) ∙ helper4 x y)
   ... | gt x>y = lt x>y
 
+  dec< : (x y : R) → Dec (x < y)
+  dec< x y with trichotomy x y
+  ... | lt x<y = yes x<y
+  ... | eq x≡y = no (λ p → <-arefl p x≡y)
+  ... | gt x>y = no (λ p → <-asym  p x>y)
+
 
   +-Pres< : x < y → z < w → x + z < y + w
   +-Pres< x<y z<w = subst (_>0) (helper5 _ _ _ _) (>0-+ _ _ x<y z<w)
@@ -314,6 +320,15 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
           0≡x·y = sym (0RightAnnihilates x) ∙ (λ i → x · 0≡y i)
 
 
+  +-rPos→≥ : x ≥ 0r → y + x ≥ y
+  +-rPos→≥ (inl x>0) = inl (+-rPos→> x>0)
+  +-rPos→≥ {y = y} (inr 0≡x) = inr (sym (+Rid y) ∙ (λ i → y + 0≡x i))
+
+  +-rNeg→≤ : x ≤ 0r → y + x ≤ y
+  +-rNeg→≤ (inl x<0) = inl (+-rNeg→< x<0)
+  +-rNeg→≤ {y = y} (inr x≡0) = inr ((λ i → y + x≡0 i) ∙ +Rid y)
+
+
   {-
 
     Ordered Ring is Integral
@@ -331,3 +346,20 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
 
   ·-rCancel : ¬ x ≡ 0r → y · x ≡ z · x → y ≡ z
   ·-rCancel x≢0 y·x≡z·x = ·-lCancel x≢0 (·Comm _ _ ∙ y·x≡z·x ∙ ·Comm _ _)
+
+
+  {-
+
+    Strict & Non-strict Together
+
+  -}
+
+  <≤-trans : x < y → y ≤ z → x < z
+  <≤-trans x<y (inl y<z) = <-trans x<y y<z
+  <≤-trans {x = x} x<y (inr y≡z) = subst (x <_) y≡z x<y
+
+
+  ·-PosPres>≥ : x > 0r → z > 0r → x < y → z ≤ w → x · z < y · w
+  ·-PosPres>≥ x>0 z>0 x<y (inl z<w) = ·-PosPres> x>0 z>0 x<y z<w
+  ·-PosPres>≥ {x = x} {z = z} {y = y} x>0 z>0 x<y (inr z≡w) =
+    subst (λ w → x · z < y · w) z≡w (·-rPosPres< z>0 x<y)

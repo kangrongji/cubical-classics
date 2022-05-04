@@ -3,7 +3,7 @@
 The Real Number
 
 -}
-{-# OPTIONS --allow-unsolved-meta --experimental-lossy-unification #-}
+{-# OPTIONS --safe --experimental-lossy-unification #-}
 module Classical.Analysis.Real.Base.Algebra where
 
 open import Cubical.Foundations.Prelude
@@ -332,7 +332,6 @@ module Algebra (decide : LEM) where
         where r+·<r+· : r + (q' · (q - 1)) < r + (r · (q - 1))
               r+·<r+· = +-lPres< (·-rPosPres< q-1>0 r>q')
 
-
     ·ℝ₊-rInv : a·a⁻¹ ≡ 1
     ·ℝ₊-rInv = ≤ℝ-asym upper⊇ upper⊆
       where
@@ -370,20 +369,22 @@ module Algebra (decide : LEM) where
             q'<q₀ = middle<r q₀>0
             ε = q' · (q - 1)
             ε>0 : ε > 0
-            ε>0 = ·-Pres>0 q'>0 q-1>0
-            (r , s , s<q∈upper , q'<r , r<s , r+ε∈upper) =
-              archimedes' a ε ε>0 q' (q₀ , q₀<r∈upper , q'<q₀)
-            r+ε<r·q : r + ε < r · q
-            r+ε<r·q = ineq-helper r q q' q-1>0 q'<r
-            r·q∈upper : r · q ∈ a .upper
-            r·q∈upper = a .upper-close _ _ r+ε∈upper r+ε<r·q
-            r>0 : r > 0
-            r>0 = <-trans q'>0 q'<r
-            r⁻¹ = inv (>-arefl r>0)
-            s>0 : s > 0
-            s>0 = <-trans r>0 r<s
-            r⁻¹∈upper : r⁻¹ ∈ a⁻¹ .fst .upper
-            r⁻¹∈upper = Inhab→∈ (inv-upper a)
-              ∣ s , s>0 , s<q∈upper , inv-Reverse< s>0 r>0 r<s ∣
-        in  Inhab→∈ (·upper₊ a₊ a⁻¹)
-            ∣ r · q , r⁻¹ , r·q∈upper , r⁻¹∈upper , alg-helper r q (>-arefl r>0) ∙ ·Assoc r q r⁻¹ ∣
+            ε>0 = ·-Pres>0 q'>0 q-1>0 in
+        Prop.rec (isProp∈ (a·a⁻¹ .upper))
+          (λ (r , s , s<q∈upper , q'<r , r<s , r+ε∈upper) →
+            let r+ε<r·q : r + ε < r · q
+                r+ε<r·q = ineq-helper r q q' q-1>0 q'<r
+                r·q∈upper : r · q ∈ a .upper
+                r·q∈upper = a .upper-close _ _ r+ε∈upper r+ε<r·q
+                r>0 : r > 0
+                r>0 = <-trans q'>0 q'<r
+                r⁻¹ = inv (>-arefl r>0)
+                s>0 : s > 0
+                s>0 = <-trans r>0 r<s
+                r⁻¹∈upper : r⁻¹ ∈ a⁻¹ .fst .upper
+                r⁻¹∈upper = Inhab→∈ (inv-upper a)
+                  ∣ s , s>0 , s<q∈upper , inv-Reverse< s>0 r>0 r<s ∣
+            in  Inhab→∈ (·upper₊ a₊ a⁻¹)
+                  ∣ r · q , r⁻¹ , r·q∈upper , r⁻¹∈upper ,
+                    alg-helper r q (>-arefl r>0) ∙ ·Assoc r q r⁻¹ ∣)
+          (archimedes' a ε ε>0 q' (q₀ , q₀<r∈upper , q'<q₀))

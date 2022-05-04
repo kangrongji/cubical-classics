@@ -19,8 +19,13 @@ private
     helper1 : (x y : 𝓡 .fst) → (- x) · y ≡ - (x · y)
     helper1 = solve 𝓡
 
+    helper2 : (a b : 𝓡 .fst) → a - b ≡ (a - 1r) + 1r - b
+    helper2 = solve 𝓡
 
-open import Cubical.Foundations.Prelude
+    helper3 : (b : 𝓡 .fst) → b + 1r - b ≡ 1r
+    helper3 = solve 𝓡
+
+
 open import Cubical.Data.Nat
   using    (ℕ ; zero ; suc)
   renaming (_+_ to _+ℕ_ ; _·_ to _·ℕ_)
@@ -98,3 +103,48 @@ open OrderedRingStr ℤOrder
 
 -1·n≡-n : (n : ℤ) → -1 · n ≡ - n
 -1·n≡-n n = helper1 1 n ∙ (λ i → - (·Lid n i))
+
+
+possucn-1≡1 : (n : ℕ) → pos (suc n) - 1 ≡ pos n
+possucn-1≡1 n = +Comm (pos (suc n)) (- 1)
+
+n>0→n≥1 : (n : ℤ) → n > 0 → n ≥ 1
+n>0→n≥1 (pos (suc zero)) _ = inr refl
+n>0→n≥1 n@(pos (suc (suc a))) _ = inl (subst (_>0) (sym (possucn-1≡1 (suc a))) _)
+n>0→n≥1 n@(neg (suc (suc _))) n>0 = Empty.rec (transport (sym (>0≡>0r n)) n>0)
+
+possucn>posn : (n : ℕ) → pos (suc n) > pos n
+possucn>posn n = subst (_>0) (sym possucn-posn≡1) _
+  where possucn-posn≡1 : pos (suc n) - pos n ≡ 1
+        possucn-posn≡1 = helper2 (pos (suc n)) (pos n) ∙ (λ i → possucn-1≡1 n i + 1 - pos n) ∙ helper3 (pos n)
+
+n>0→posm≡n : (n : ℤ) → n > 0 → Σ[ m ∈ ℕ ] pos m ≡ n
+n>0→posm≡n (pos n) _ = n , refl
+n>0→posm≡n (neg n) n>0 = Empty.rec (transport (sym (>0≡>0r (neg n))) n>0)
+
+
+{-
+
+  "Archimedean-ness" of ℤ
+
+-}
+
+archimedes : (a b : ℤ) → b > 0 → Σ[ n ∈ ℕ ] pos n · b > a
+archimedes a (neg b) b>0 = Empty.rec (transport (sym (>0≡>0r (neg b))) b>0)
+archimedes a (pos b) b>0 with trichotomy a 0
+... | lt a<0 = 1 , <-trans {x = a} {y = 0} {z = 1 · pos b} a<0 (subst (_> 0) (sym (·Lid (pos b))) b>0)
+... | eq a≡0 = 1 , subst (1 · pos b >_) (sym a≡0) (subst (_> 0) (sym (·Lid (pos b))) b>0)
+... | gt a>0 = suc an , subst (pos (suc an) · (pos b) >_) (·Rid a) posn·b>a·1
+  where an = n>0→posm≡n a a>0 .fst
+        p = n>0→posm≡n a a>0 .snd
+        possucm>a : pos (suc an) > a
+        possucm>a = subst (pos (suc an) >_) p (possucn>posn an)
+        posn·b>a·1 : pos (suc an) · (pos b) > a · 1
+        posn·b>a·1 = ·-PosPres>≥ {x = a} {y = pos (suc an)} a>0 _ possucm>a (n>0→n≥1 (pos b) b>0)
+
+archimedes' : (a b : ℤ) → b > 0 → Σ[ n ∈ ℕ ] pos n · b + a > 0
+archimedes' a b b>0 =
+  let (n , posn·b>-a) = archimedes (- a) b b>0
+      posn·b+a>-a+a : pos n · b + a > - a + a
+      posn·b+a>-a+a = +-rPres< {x = - a} {y = pos n · b} {z = a} posn·b>-a
+  in  n , subst (pos n · b + a >_) (+Linv a) posn·b+a>-a+a

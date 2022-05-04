@@ -26,7 +26,6 @@ private
     helper3 = solve 𝓡
 
 
-open import Cubical.Foundations.Prelude
 open import Cubical.Data.Sigma
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.NatPlusOne

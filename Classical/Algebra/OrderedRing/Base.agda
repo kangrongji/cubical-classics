@@ -65,6 +65,7 @@ module _ (𝓡 : CommRing ℓ) where
   record OrderStrOnCommRing {ℓ' : Level} : Type (ℓ-suc (ℓ-max ℓ ℓ')) where
 
     constructor orderstr
+    no-eta-equality
 
     field
 
