@@ -8,14 +8,15 @@ module Classical.Algebra.OrderedRing.Properties where
 
 open import Cubical.Foundations.Prelude
 
+open import Cubical.Data.Unit
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
+open import Cubical.Data.Nat using (ℕ ; zero ; suc)
 
 open import Cubical.Algebra.Ring
 open import Cubical.Algebra.CommRing
 open import Cubical.Algebra.RingSolver.Reflection
-
 open import Cubical.Relation.Nullary
 
 open import Classical.Algebra.OrderedRing.Base
@@ -74,6 +75,12 @@ private
     helper15 : (x y : 𝓡 .fst) → (x - 0r) · (y - 1r) ≡ (x · y) - x
     helper15 = solve 𝓡
 
+    helper16 : 1r - 0r ≡ 1r
+    helper16 = solve 𝓡
+
+    helper17 : (n q : 𝓡 .fst) → (1r + n) · q ≡ (n · q) + q
+    helper17 = solve 𝓡
+
 
 module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
 
@@ -87,12 +94,12 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
 
   open Helpers 𝓡
 
-  private
-    variable
-      x y z w : R
 
   private
     isSetR = is-set
+
+    variable
+      x y z w : R
 
 
   {-
@@ -331,6 +338,23 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
 
   {-
 
+    Strict & Non-strict Together
+
+  -}
+
+  <≤-trans : x < y → y ≤ z → x < z
+  <≤-trans x<y (inl y<z) = <-trans x<y y<z
+  <≤-trans {x = x} x<y (inr y≡z) = subst (x <_) y≡z x<y
+
+
+  ·-PosPres>≥ : x > 0r → z > 0r → x < y → z ≤ w → x · z < y · w
+  ·-PosPres>≥ x>0 z>0 x<y (inl z<w) = ·-PosPres> x>0 z>0 x<y z<w
+  ·-PosPres>≥ {x = x} {z = z} {y = y} x>0 z>0 x<y (inr z≡w) =
+    subst (λ w → x · z < y · w) z≡w (·-rPosPres< z>0 x<y)
+
+
+  {-
+
     Ordered Ring is Integral
 
   -}
@@ -350,16 +374,88 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
 
   {-
 
-    Strict & Non-strict Together
+    Inclusion from Natural Numbers
 
   -}
 
-  <≤-trans : x < y → y ≤ z → x < z
-  <≤-trans x<y (inl y<z) = <-trans x<y y<z
-  <≤-trans {x = x} x<y (inr y≡z) = subst (x <_) y≡z x<y
+  1>0 : 1r > 0r
+  1>0 = subst (_>0) (sym helper16) (>0-1r)
 
 
-  ·-PosPres>≥ : x > 0r → z > 0r → x < y → z ≤ w → x · z < y · w
-  ·-PosPres>≥ x>0 z>0 x<y (inl z<w) = ·-PosPres> x>0 z>0 x<y z<w
-  ·-PosPres>≥ {x = x} {z = z} {y = y} x>0 z>0 x<y (inr z≡w) =
-    subst (λ w → x · z < y · w) z≡w (·-rPosPres< z>0 x<y)
+  ℕ→R-Pos : ℕ → R
+  ℕ→R-Pos 0 = 0r
+  ℕ→R-Pos 1 = 1r
+  ℕ→R-Pos (suc (suc n)) = 1r + ℕ→R-Pos (suc n)
+
+  ℕ→R-Neg : ℕ → R
+  ℕ→R-Neg n = - ℕ→R-Pos n
+
+  ℕ→R-PosSuc : (n : ℕ) → ℕ→R-Pos (suc n) ≡ 1r + ℕ→R-Pos n
+  ℕ→R-PosSuc zero = sym (+Rid 1r)
+  ℕ→R-PosSuc (suc n) = refl
+
+
+  ℕ→R-PosSuc>0 : (n : ℕ) → ℕ→R-Pos (suc n) > 0r
+  ℕ→R-PosSuc>0 zero = 1>0
+  ℕ→R-PosSuc>0 (suc n) = +-Pres>0 1>0 (ℕ→R-PosSuc>0 n)
+
+  ℕ→R-Pos≥0 : (n : ℕ) → ℕ→R-Pos n ≥ 0r
+  ℕ→R-Pos≥0 zero = inr refl
+  ℕ→R-Pos≥0 (suc n) = inl (ℕ→R-PosSuc>0 n)
+
+  ℕ→R-NegSuc<0 : (n : ℕ) → ℕ→R-Neg (suc n) < 0r
+  ℕ→R-NegSuc<0 n = -Reverse>0 (ℕ→R-PosSuc>0 n)
+
+  ℕ→R-Neg≤0 : (n : ℕ) → ℕ→R-Neg n ≤ 0r
+  ℕ→R-Neg≤0 zero = inr 0Selfinverse
+  ℕ→R-Neg≤0 (suc n) = inl (ℕ→R-NegSuc<0 n)
+
+
+  -1r : R
+  -1r = - 1r
+
+  2r : R
+  2r = 1r + 1r
+
+  -1<0 : -1r < 0r
+  -1<0 = ℕ→R-NegSuc<0 0
+
+  2>0 : 2r > 0r
+  2>0 = ℕ→R-PosSuc>0 1
+
+
+  q+1>q : {q : R} → q + 1r > q
+  q+1>q {q = q} = +-rPos→> {x = 1r} {y = q} 1>0
+
+  q-1<q : {q : R} → q - 1r < q
+  q-1<q {q = q} = +-rNeg→< {x = -1r} {y = q} -1<0
+
+
+
+  {-
+
+    Scalar multiplication by natural numbers
+
+  -}
+
+  _⋆_ : ℕ → R → R
+  n ⋆ q = ℕ→R-Pos n · q
+
+
+  0⋆q≡0 : (q : R) → 0 ⋆ q ≡ 0r
+  0⋆q≡0 q = 0LeftAnnihilates q
+
+  1⋆q≡q : (q : R) → 1 ⋆ q ≡ q
+  1⋆q≡q q = ·Lid q
+
+  sucn⋆q≡n⋆q+q : (n : ℕ)(q : R) → (suc n) ⋆ q ≡ (n ⋆ q) + q
+  sucn⋆q≡n⋆q+q n q = (λ i → ℕ→R-PosSuc n i · q) ∙ helper17 (ℕ→R-Pos n) q
+
+  sucn⋆q>0 : (n : ℕ)(q : R) → q > 0r → (suc n) ⋆ q > 0r
+  sucn⋆q>0 zero q q>0 = subst (_> 0r) (sym (1⋆q≡q q)) q>0
+  sucn⋆q>0 (suc n) q q>0 = subst (_> 0r) (sym (sucn⋆q≡n⋆q+q (suc n) q))
+    (+-Pres>0 {x = suc n ⋆ q} (sucn⋆q>0 n q q>0) q>0)
+
+  n⋆q≥0 : (n : ℕ)(q : R) → q > 0r → n ⋆ q ≥ 0r
+  n⋆q≥0 zero q _ = inr (sym (0⋆q≡0 q))
+  n⋆q≥0 (suc n) q q>0 = inl (sucn⋆q>0 n q q>0)

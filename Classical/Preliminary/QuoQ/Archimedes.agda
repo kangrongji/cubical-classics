@@ -48,47 +48,36 @@ open import Classical.Preliminary.QuoQ.Order
   using    (ℚOrder)
 open import Classical.Preliminary.Nat
 open import Classical.Algebra.OrderedRing
+open import Classical.Algebra.OrderedRing.Archimedes
 
 
 open CommRingStr    (ℚOrder .fst .snd)
-open OrderedRingStr  ℚOrder
-
-open OrderedRingStr  ℤOrder
-  using    ()
+open OrderedRingStr  ℚOrder renaming (_⋆_ to _⋆'_)
+open OrderedRingStr  ℤOrder using    ()
   renaming (_<_ to _<ℤ_ ; _>_ to _>ℤ_
            ; ·-Pres>0 to ·ℤ-Pres>0)
 
 open Helpers (ℤOrder .fst)
-open Helpers (ℚOrder .fst) using () renaming (helper3 to helper3ℚ)
+open Helpers (ℚOrder .fst) using ()
+  renaming (helper3 to helper3ℚ)
 
 
--- Direct multiplication by natural numbers
+-- An alternative scalar multiplication by natural numbers
 
 _⋆_ : ℕ → ℚ → ℚ
 n ⋆ q = [ pos n , 1 ] · q
 
-0⋆q≡0 : (q : ℚ) → 0 ⋆ q ≡ 0
-0⋆q≡0 q = ·-zeroˡ q
-
-1⋆q≡q : (q : ℚ) → 1 ⋆ q ≡ q
-1⋆q≡q q = ·-identityˡ q
-
-sucn⋆q≡n⋆q+q : (n : ℕ)(q : ℚ) → (suc n) ⋆ q ≡ (n ⋆ q) + q
-sucn⋆q≡n⋆q+q n q = (λ i → path n i · q) ∙ helper3ℚ ([ pos n , 1 ]) q
-  where path : (n : ℕ) → [ pos (suc n) , 1 ] ≡ 1 + [ pos n , 1 ]
-        path n = eq/ _ _ (helper2 (pos n))
-
-sucn⋆q>0 : (n : ℕ)(q : ℚ) → q > 0 → (suc n) ⋆ q > 0
-sucn⋆q>0 zero q q>0 = subst (_> 0) (sym (1⋆q≡q q)) q>0
-sucn⋆q>0 (suc n) q q>0 = subst (_> 0) (sym (sucn⋆q≡n⋆q+q (suc n) q))
-  (+-Pres>0 {x = suc n ⋆ q} (sucn⋆q>0 n q q>0) q>0)
-
-n⋆q≥0 : (n : ℕ)(q : ℚ) → q > 0 → n ⋆ q ≥ 0
-n⋆q≥0 zero q _ = inr (sym (0⋆q≡0 q))
-n⋆q≥0 (suc n) q q>0 = inl (sucn⋆q>0 n q q>0)
+⋆≡⋆' : (n : ℕ)(q : ℚ) → n ⋆ q ≡ n ⋆' q
+⋆≡⋆' 0 q = ·-zeroˡ q ∙ sym (0⋆q≡0 q)
+⋆≡⋆' (suc n) q = sucn⋆q≡n⋆q+q' n q ∙ (λ i → ⋆≡⋆' n q i + q) ∙ sym (sucn⋆q≡n⋆q+q n q)
+  where
+  sucn⋆q≡n⋆q+q' : (n : ℕ)(q : ℚ) → (suc n) ⋆ q ≡ (n ⋆ q) + q
+  sucn⋆q≡n⋆q+q' n q = (λ i → path n i · q) ∙ helper3ℚ ([ pos n , 1 ]) q
+    where path : (n : ℕ) → [ pos (suc n) , 1 ] ≡ 1 + [ pos n , 1 ]
+          path n = eq/ _ _ (helper2 (pos n))
 
 
--- Archimedean-ness of ℚ
+-- Archimedean-ness of ℚ, using the alternative product
 
 private
   archimedes-helper : (x y : ℤ × ℕ₊₁) → [ y ] > 0 → Σ[ n ∈ ℕ ] n ⋆ [ y ] > [ x ]
@@ -111,3 +100,9 @@ archimedes q ε ε>0 = case-split (dec< q (zero ⋆ ε))
   case-split (yes p) = zero , p
   case-split (no ¬p) = find (λ n → isProp< {x = q} {y = n ⋆ ε})
     (λ n → dec< q (n ⋆ ε)) ¬p (∥archimedes∥ q ε ε>0)
+
+
+-- Archimedean-ness of ℚ
+
+isArchimedeanℚ : isArchimedean ℚOrder
+isArchimedeanℚ = transport (λ i → (q ε : ℚ) → ε > 0 → Σ[ n ∈ ℕ ] ⋆≡⋆' n ε i > q) archimedes

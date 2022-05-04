@@ -71,6 +71,7 @@ module _ (𝓡 : CommRing ℓ) where
 
       _>0 : R → Type ℓ'
       isProp>0 : (x : R) → isProp (x >0)
+      >0-1r : 1r >0
       >0-asym : (x : R) → x >0 → (- x) >0 → ⊥
       >0-+ : (x y : R) → x >0 → y >0 → (x + y) >0
       >0-· : (x y : R) → x >0 → y >0 → (x · y) >0

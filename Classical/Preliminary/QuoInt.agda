@@ -92,7 +92,7 @@ trichotomy>0 (pos (suc _)) = gt _
 -}
 
 ℤOrder : OrderedRing _ _
-ℤOrder = ℤRing , orderstr _>0 isProp>0 >0-asym >0-+ >0-· trichotomy>0
+ℤOrder = ℤRing , orderstr _>0 isProp>0 _ >0-asym >0-+ >0-· trichotomy>0
 
 open OrderedRingStr ℤOrder
 

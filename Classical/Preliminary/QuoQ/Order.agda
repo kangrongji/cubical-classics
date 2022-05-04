@@ -128,16 +128,8 @@ trichotomy>0 = elimProp (isPropTrichotomy>0 ℚRing _>0 isProp>0 >0-asym) tricho
 -}
 
 ℚOrder : OrderedRing _ _
-ℚOrder = ℚRing , orderstr _>0 isProp>0 >0-asym >0-+ >0-· trichotomy>0
-
-
-{-
-
-  Basic Facts
-
--}
-
-open Helpers (ℤOrder .fst)
-
-1>0 : 1 > 0
-1>0 = subst (_> 0) helper1 _
+ℚOrder = ℚRing , orderstr _>0 isProp>0 1>0' >0-asym >0-+ >0-· trichotomy>0
+  where
+  open Helpers (ℤOrder .fst)
+  1>0' : 1 > 0
+  1>0' = subst (_> 0) helper1 _

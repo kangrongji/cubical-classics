@@ -35,21 +35,19 @@ open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 
 open import Classical.Preliminary.QuoQ
-open import Classical.Algebra.Field
-open import Classical.Algebra.OrderedRing
+open import Classical.Algebra.OrderedField
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
 
 
-open Helpers (ℚOrder .fst)
+open Helpers (ℚOrderedField .fst .fst)
 
 
 module Basics (decide : LEM) where
 
   open Powerset decide
 
-  open FieldStr       ℚField
-  open OrderedRingStr ℚOrder
+  open OrderedFieldStr ℚOrderedField
 
 
   {-
