@@ -9,6 +9,7 @@ module Classical.Algebra.OrderedField.DedekindCut.Order where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Function
+open import Cubical.Data.Bool
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
@@ -61,8 +62,8 @@ module Order (decide : LEM)
   <𝕂→≤𝕂 : {a b : 𝕂} → a <𝕂 b → a ≤𝕂 b
   <𝕂→≤𝕂 = {!!}
 
-  <𝕂→≢ : {a b : 𝕂} → a <𝕂 b → a ≡ b → ⊥
-  <𝕂→≢ = {!!}
+  <𝕂→arefl : {a b : 𝕂} → a <𝕂 b → a ≡ b → ⊥
+  <𝕂→arefl = {!!}
 
   ≤𝕂+≢→<𝕂 : {a b : 𝕂} → a ≤𝕂 b → ¬ a ≡ b → a <𝕂 b
   ≤𝕂+≢→<𝕂 = {!!}
@@ -80,6 +81,8 @@ module Order (decide : LEM)
   <𝕂-reverse : (a b : 𝕂) → a <𝕂 b → (-𝕂 b) ≤𝕂 (-𝕂 a)
   <𝕂-reverse = {!!}
 
+  <≤𝕂-asym : (a b : 𝕂) → a <𝕂 b → b ≥𝕂 a → ⊥
+  <≤𝕂-asym = {!!}
 
   -- Two lemmas for convenient case-splitting
 
@@ -114,43 +117,89 @@ module Order (decide : LEM)
 
   {-
 
+    Sign
+
+  -}
+
+  Sign : Type
+  Sign = Bool
+
+  pattern pos = false
+  pattern neg = true
+
+  sign : 𝕂 → Sign
+  sign a with dichotomy𝕂 a 𝟘
+  ... | ge a≥0 = pos
+  ... | lt a<0 = neg
+
+  signed : Sign → 𝕂₊ → 𝕂
+  signed pos a = a .fst
+  signed neg a = -𝕂 a .fst
+
+
+  sign-abs-≡ : (a : 𝕂) → signed (sign a) (abs𝕂 a) ≡ a
+  sign-abs-≡ = {!!}
+
+  abs-signed : (s : Sign)(a : 𝕂₊) → abs𝕂 (signed s a) ≡ a
+  abs-signed = {!!}
+
+  sign-signed : (s : Sign)(a : 𝕂₊) → sign (signed s a) ≡ s
+  sign-signed = {!!}
+
+  sign≥0 : (a : 𝕂) → a ≥𝕂 𝟘 → sign a ≡ pos
+  sign≥0 = {!!}
+
+  sign<0 : (a : 𝕂) → a <𝕂 𝟘 → sign a ≡ neg
+  sign<0 = {!!}
+
+
+  --signed0 : (s : Sign) → signed s 𝟘₊ ≡ s
+  --signed0 = {!!}
+
+
+  {-
+
     Multiplication
 
   -}
 
+  _·s_ : Sign → Sign → Sign
+  _·s_ = _⊕_
+
   _·𝕂_ : 𝕂 → 𝕂 → 𝕂
-  (a ·𝕂 b) with dichotomy𝕂 a 𝟘 | dichotomy𝕂 b 𝟘
-  ... | ge _ | ge _ = ((abs𝕂 a) ·𝕂₊ (abs𝕂 b)) .fst
-  ... | lt _ | lt _ = ((abs𝕂 a) ·𝕂₊ (abs𝕂 b)) .fst
-  ... | ge _ | lt _ = -𝕂 (((abs𝕂 a) ·𝕂₊ (abs𝕂 b)) .fst)
-  ... | lt _ | ge _ = -𝕂 (((abs𝕂 a) ·𝕂₊ (abs𝕂 b)) .fst)
+  (a ·𝕂 b) = signed (sign a ·s sign b) ((abs𝕂 a) ·𝕂₊ (abs𝕂 b))
+
 
   ·𝕂-Comm : (a b : 𝕂) → a ·𝕂 b ≡ b ·𝕂 a
-  ·𝕂-Comm a b i with dichotomy𝕂 a 𝟘 | dichotomy𝕂 b 𝟘
-  ... | ge _ | ge _ = ·𝕂₊-Comm (abs𝕂 a) (abs𝕂 b) i .fst
-  ... | lt _ | lt _ = ·𝕂₊-Comm (abs𝕂 a) (abs𝕂 b) i .fst
-  ... | ge _ | lt _ = -𝕂 (·𝕂₊-Comm (abs𝕂 a) (abs𝕂 b) i .fst)
-  ... | lt _ | ge _ = -𝕂 (·𝕂₊-Comm (abs𝕂 a) (abs𝕂 b) i .fst)
+  ·𝕂-Comm a b i = signed (⊕-comm (sign a) (sign b) i) (·𝕂₊-Comm (abs𝕂 a) (abs𝕂 b) i)
 
-
-  neg-·𝕂 : (a b : 𝕂) → ((-𝕂 a) ·𝕂 b) ≡ -𝕂 (a ·𝕂 b)
-  neg-·𝕂 a b = {!!} --with dichotomy𝕂 a 0 | dichotomy𝕂 b 0 | dichotomy𝕂 (-𝕂 a) 0
-
-  ·𝕂-neg : (a b : 𝕂) → (a ·𝕂 (-𝕂 b)) ≡ -𝕂 (a ·𝕂 b)
-  ·𝕂-neg a b = ·𝕂-Comm a (-𝕂 b) ∙ neg-·𝕂 b a ∙ cong (-𝕂_) (·𝕂-Comm b a)
-
-  neg-·𝕂-neg : (a b : 𝕂) → ((-𝕂 a) ·𝕂 (-𝕂 b)) ≡ a ·𝕂 b
-  neg-·𝕂-neg a b = neg-·𝕂 a (-𝕂 b) ∙ cong (-𝕂_) (·𝕂-neg a b) ∙ -𝕂-Involutive (a ·𝕂 b)
-
-
-{-
   ·𝕂-Assoc : (a b c : 𝕂) → a ·𝕂 (b ·𝕂 c) ≡ (a ·𝕂 b) ·𝕂 c
-  ·𝕂-Assoc a b c i with dichotomy𝕂 a 0 | dichotomy𝕂 b 0 | dichotomy𝕂 c 0
-  ... | ge _ | ge _ | ge _ = ·𝕂₊-Assoc (abs𝕂 a) (abs𝕂 b) (abs𝕂 c) i .fst
-  ... | ge _ | ge _ | lt _ = {!!}
-  ... | lt _ | lt _ | ge _ = {!!}
-  ... | lt _ | lt _ | lt _ = {!!}
-  ... | ge _ | lt _ | ge _ = {!!}
-  ... | ge _ | lt _ | lt _ = {!!}
-  ... | lt _ | ge _ | ge _ = {!!}
-  ... | lt _ | ge _ | lt _ = {!!}-}
+  ·𝕂-Assoc a b c =
+    let left≡   = λ i → signed (sign a ·s sign-signed (sign b ·s sign c) ((abs𝕂 b) ·𝕂₊ (abs𝕂 c)) i)
+          ((abs𝕂 a) ·𝕂₊ abs-signed (sign b ·s sign c) ((abs𝕂 b) ·𝕂₊ (abs𝕂 c)) i)
+        right≡  = λ i → signed (sign-signed (sign a ·s sign b) ((abs𝕂 a) ·𝕂₊ (abs𝕂 b)) i ·s sign c)
+          (abs-signed (sign a ·s sign b) ((abs𝕂 a) ·𝕂₊ (abs𝕂 b)) i ·𝕂₊ (abs𝕂 c))
+        middle≡ = λ i → signed (⊕-assoc (sign a) (sign b) (sign c) i) (·𝕂₊-Assoc (abs𝕂 a) (abs𝕂 b) (abs𝕂 c) i)
+    in  left≡ ∙ middle≡ ∙ sym right≡
+
+
+  ·𝕂-lDistb-PosPos : (a b c : 𝕂)
+    → a ≥𝕂 𝟘 → b ≥𝕂 𝟘 → c ≥𝕂 𝟘 → (b +𝕂 c) ≥𝕂 𝟘
+    → (a ·𝕂 b) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
+  ·𝕂-lDistb-PosPos = {!!}
+
+  ·𝕂-lDistb-PosNeg : (a b c : 𝕂)
+    → a ≥𝕂 𝟘 → b ≥𝕂 𝟘 → c <𝕂 𝟘 → (b +𝕂 c) ≥𝕂 𝟘
+    → (a ·𝕂 b) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
+  ·𝕂-lDistb-PosNeg a b c = {!!}
+    where
+    helper1 : (a ·𝕂 (b +𝕂 c)) +𝕂 (a ·𝕂 (-𝕂 c)) ≡ a ·𝕂 ((b +𝕂 c) +𝕂 (-𝕂 c))
+    helper1 = {!!}
+    helper2 : a ·𝕂 ((b +𝕂 c) +𝕂 (-𝕂 c)) ≡ a ·𝕂 b
+    helper2 = {!!}
+
+  ·𝕂-lDistb-Pos : (a b c : 𝕂)
+    → a ≥𝕂 𝟘 → (b +𝕂 c) ≥𝕂 𝟘
+    → (a ·𝕂 b) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
+  ·𝕂-lDistb-Pos a b c = {!!}
+
