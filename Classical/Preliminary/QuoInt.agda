@@ -8,7 +8,7 @@ module Classical.Preliminary.QuoInt where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Algebra.CommRing
-open import Cubical.Algebra.RingSolver.Reflection
+open import Cubical.Algebra.CommRingSolver.Reflection
 
 -- It seems there are bugs when applying ring solver to explicit ring.
 -- The following is a work-around.

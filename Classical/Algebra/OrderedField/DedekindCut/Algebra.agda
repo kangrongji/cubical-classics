@@ -14,13 +14,13 @@ open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
-open import Cubical.Algebra.RingSolver.Reflection
+open import Cubical.Algebra.CommRingSolver.Reflection
 
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
+
 open import Classical.Algebra.OrderedRing.Archimedes
 open import Classical.Algebra.OrderedField
-
 open import Classical.Algebra.OrderedField.DedekindCut.Base
 open import Classical.Algebra.OrderedField.DedekindCut.Archimedes
 

@@ -12,7 +12,7 @@ open import Cubical.Data.Nat using (ℕ ; zero ; suc)
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
-open import Cubical.Algebra.RingSolver.Reflection
+open import Cubical.Algebra.CommRingSolver.Reflection
 
 open import Classical.Preliminary.Nat
 open import Classical.Axioms.ExcludedMiddle
