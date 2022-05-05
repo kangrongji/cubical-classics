@@ -12,7 +12,7 @@ open import Cubical.HITs.Rationals.QuoQ using (ℚ)
 
 open import Classical.Preliminary.QuoQ.Field using (isFieldℚ)
 open import Classical.Preliminary.QuoQ.Order using (ℚOrder)
-open import Classical.Preliminary.QuoQ.Archimedes using (isArchimedeanℚ)
+open import Classical.Preliminary.QuoQ.Archimedes using (isArchimedeanℚ) public
 open import Classical.Algebra.OrderedRing.Archimedes
 open import Classical.Algebra.OrderedField
 

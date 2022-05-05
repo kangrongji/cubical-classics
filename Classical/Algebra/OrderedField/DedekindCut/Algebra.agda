@@ -3,7 +3,7 @@
 Algebraic Operations on Dedekind Cuts
 
 -}
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --experimental-lossy-unification #-}
 module Classical.Algebra.OrderedField.DedekindCut.Algebra where
 
 open import Cubical.Foundations.Prelude
@@ -260,6 +260,9 @@ module Algebra (decide : LEM)
   ·𝕂₊-lZero : (a : 𝕂₊) → 𝟘₊ ·𝕂₊ a ≡ 𝟘₊
   ·𝕂₊-lZero a = ·𝕂₊-Comm 𝟘₊ a ∙ ·𝕂₊-rZero a
 
+  ·𝕂₊-lUnit : (a : 𝕂₊) → 𝟙₊ ·𝕂₊ a ≡ a
+  ·𝕂₊-lUnit a = ·𝕂₊-Comm 𝟙₊ a ∙ ·𝕂₊-rUnit a
+
 
   private
     upper-round2 : (a : 𝕂)(p q : K) → p ∈ a .upper → q ∈ a .upper → ∥ Σ[ r ∈ K ] (r < p) × (r < q) × (r ∈ a .upper) ∥
@@ -335,8 +338,8 @@ module Algebra (decide : LEM)
         where r+·<r+· : r + (q' · (q - 1r)) < r + (r · (q - 1r))
               r+·<r+· = +-lPres< (·-rPosPres< q-1>0 r>q')
 
-    ·𝕂₊-rInv : a·a⁻¹ ≡ 𝟙
-    ·𝕂₊-rInv = ≤𝕂-asym upper⊇ upper⊆
+    ·𝕂₊-rInv' : a·a⁻¹ ≡ 𝟙
+    ·𝕂₊-rInv' = ≤𝕂-asym upper⊇ upper⊆
       where
       upper⊆ : {q : K} → q ∈ a·a⁻¹ .upper → q ∈ 𝟙 .upper
       upper⊆ {q = q} q∈upper = Prop.rec (isProp∈ (𝟙 .upper))

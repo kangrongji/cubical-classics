@@ -7,13 +7,16 @@ Multiplicative Structure on Dedekind Cuts
 module Classical.Algebra.OrderedField.DedekindCut.Multiplication where
 
 open import Cubical.Foundations.Prelude
+open import Cubical.Foundations.HLevels
 open import Cubical.Data.Empty as Empty
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
 
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
 
+open import Classical.Algebra.Field
 open import Classical.Algebra.OrderedRing
 open import Classical.Algebra.OrderedRing.Archimedes
 open import Classical.Algebra.OrderedField
@@ -301,11 +304,13 @@ module Multiplication (decide : LEM)
 
   -}
 
+  private
+    ·𝕂-Pos-helper : (a b : 𝕂) → a >𝕂 𝟘 → b >𝕂 𝟘 → ((abs𝕂 a) ·𝕂₊ (abs𝕂 b)) .fst ≡ a ·𝕂 b
+    ·𝕂-Pos-helper a b a>0 b>0 = sym (·pos-helper a b (<𝕂→≤𝕂 {a = 𝟘} {b = a} a>0) (<𝕂→≤𝕂 {a = 𝟘} {b = b} b>0))
+
   ·𝕂'-Pres>0 : (a b : 𝕂) → a >𝕂 𝟘 → b >𝕂 𝟘 → (a ·𝕂 b) >𝕂 𝟘
-  ·𝕂'-Pres>0 a b a>0 b>0 = subst (_>𝕂 𝟘) path (·𝕂-Pres>0 (abs𝕂 a) (abs𝕂 b) (abs>0 a a>0) (abs>0 b b>0))
-    where
-    path : ((abs𝕂 a) ·𝕂₊ (abs𝕂 b)) .fst ≡ a ·𝕂 b
-    path = sym (·pos-helper a b (<𝕂→≤𝕂 {a = 𝟘} {b = a} a>0) (<𝕂→≤𝕂 {a = 𝟘} {b = b} b>0))
+  ·𝕂'-Pres>0 a b a>0 b>0 =
+    subst (_>𝕂 𝟘) (·𝕂-Pos-helper a b a>0 b>0) (·𝕂-Pres>0 (abs𝕂 a) (abs𝕂 b) (abs>0 a a>0) (abs>0 b b>0))
 
   trichotomy>𝕂0 : (a : 𝕂) → Trichotomy>0 𝕂CommRing (_>𝕂 𝟘) a
   trichotomy>𝕂0 a = case-split (trichotomy𝕂 a 𝟘)
@@ -329,3 +334,86 @@ module Multiplication (decide : LEM)
     Multiplicative Inverse
 
   -}
+
+  isInv𝕂₊ : (a : 𝕂₊) → Type (ℓ-max ℓ ℓ')
+  isInv𝕂₊ a =  Σ[ a' ∈ 𝕂₊ ] (a ·𝕂₊ a') .fst ≡ 𝟙
+
+  isPropIsInv : (a : 𝕂₊) → isProp (isInv𝕂₊ a)
+  isPropIsInv a (x , p) (y , q) i .fst = x≡y i
+    where
+    x≡y : x ≡ y
+    x≡y = sym (·𝕂₊-rUnit x)
+      ∙ (λ i → x ·𝕂₊ path-𝕂₊ (a ·𝕂₊ y) 𝟙₊ q (~ i))
+      ∙ ·𝕂₊-Assoc x a y
+      ∙ (λ i → ·𝕂₊-Comm x a i ·𝕂₊ y)
+      ∙ (λ i → path-𝕂₊ (a ·𝕂₊ x) 𝟙₊ p i ·𝕂₊ y)
+      ∙ ·𝕂₊-lUnit y
+  isPropIsInv a u@(x , p) v@(y , q) i .snd j =
+    isSet→SquareP (λ _ _ → isSet𝕂) p q
+      (λ i → (a ·𝕂₊ isPropIsInv a u v i .fst) .fst) refl i j
+
+  ·𝕂₊-rInv : (a : 𝕂₊) → a .fst >𝕂 𝟘 → isInv𝕂₊ a
+  ·𝕂₊-rInv a = Prop.rec (isPropIsInv a)
+    (λ (q , q<r∈a , q∈𝟘) →
+      let q>0 = q∈𝕂₊→q>0 𝟘₊ q q∈𝟘 in
+      inv𝕂₊ (a .fst) q q>0 q<r∈a , ·𝕂₊-rInv' a q q>0 q<r∈a)
+
+  inv𝕂₊>0 : (a : 𝕂₊)(a⁻¹ : isInv𝕂₊ a) → a⁻¹ .fst .fst >𝕂 𝟘
+  inv𝕂₊>0 a ((a' , a'≥0) , p) with split≤𝕂 𝟘 a' a'≥0
+  ... | lt 0<a' = 0<a'
+  ... | eq 0≡a' = Empty.rec (<𝕂-arefl 1>𝕂0 𝟘≡𝟙)
+    where 𝟘≡𝟙 : 𝟘 ≡ 𝟙
+          𝟘≡𝟙 = (λ i → ·𝕂₊-rZero a (~ i) .fst)
+            ∙ (λ i → (a ·𝕂₊ path-𝕂₊ 𝟘₊ (a' , a'≥0) 0≡a' i) .fst) ∙ p
+
+
+  isInv𝕂 : (a : 𝕂) → Type (ℓ-max ℓ ℓ')
+  isInv𝕂 a = Σ[ a' ∈ 𝕂 ] a ·𝕂 a' ≡ 𝟙
+
+  module _ (a : 𝕂)(a>0 : a >𝕂 𝟘) where
+
+    private
+      a₊ : 𝕂₊
+      a₊ = a , <𝕂→≤𝕂 {a = 𝟘} {b = a} a>0
+      Σa⁻¹ = ·𝕂₊-rInv a₊ a>0
+      a₊⁻¹ = Σa⁻¹ .fst
+      a⁻¹ = Σa⁻¹ .fst .fst
+      a⁻¹>0 = inv𝕂₊>0 _ Σa⁻¹
+
+    ·𝕂-rInv-Pos : isInv𝕂 a
+    ·𝕂-rInv-Pos .fst = a⁻¹
+    ·𝕂-rInv-Pos .snd =
+        sym (·𝕂-Pos-helper a a⁻¹ a>0 a⁻¹>0)
+      ∙ (λ i → (path-𝕂₊ (abs𝕂 a) a₊ (abs≥0 a (a₊ .snd)) i
+          ·𝕂₊ path-𝕂₊ (abs𝕂 a⁻¹) a₊⁻¹ (abs≥0 a⁻¹ (a₊⁻¹ .snd)) i) .fst)
+      ∙ Σa⁻¹ .snd
+
+
+  ·𝕂-rInv-Neg : (a : 𝕂)(a<0 : a <𝕂 𝟘) → isInv𝕂 a
+  ·𝕂-rInv-Neg a a<0 = -𝕂 -a⁻¹ , ·𝕂-neg a -a⁻¹ ∙ sym (neg-·𝕂 a -a⁻¹) ∙  Σ-a⁻¹ .snd
+    where Σ-a⁻¹ : isInv𝕂 (-𝕂 a)
+          Σ-a⁻¹ = ·𝕂-rInv-Pos (-𝕂 a) (-reverse<0 a a<0)
+          -a⁻¹ : 𝕂
+          -a⁻¹ = Σ-a⁻¹ .fst
+
+
+  ·𝕂-rInv : (a : 𝕂) → ¬ a ≡ 𝟘 → isInv𝕂 a
+  ·𝕂-rInv a ¬a≡0 = case-split (trichotomy𝕂 a 𝟘)
+    where
+    case-split : Trichotomy𝕂 a 𝟘 → isInv𝕂 a
+    case-split (gt a>0) = ·𝕂-rInv-Pos a a>0
+    case-split (lt a<0) = ·𝕂-rInv-Neg a a<0
+    case-split (eq a≡0) = Empty.rec (¬a≡0 a≡0)
+
+
+  {-
+
+    Ordered Field Instance
+
+  -}
+
+  isField𝕂 : isField 𝕂CommRing
+  isField𝕂 = ·𝕂-rInv
+
+  𝕂OrderedField : OrderedField (ℓ-max ℓ ℓ') (ℓ-max ℓ ℓ')
+  𝕂OrderedField = 𝕂OrderedRing , isField𝕂
