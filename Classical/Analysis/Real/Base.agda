@@ -15,18 +15,3 @@ module Real (decide : LEM) where
 
 
   abstract
-
-    ℝ : Type
-    ℝ = ℝDedekind
-
-    ℚ→ℝ : ℚ → ℝ
-    ℚ→ℝ = ℚ→ℝDedekind
-
-    _≤_ : ℝ → ℝ → Type
-    _≤_ = _≤ℝ_
-
-    _+_ : ℝ → ℝ → ℝ
-    _+_ = _+ℝ_
-
-    -_ : ℝ → ℝ
-    -_ = -ℝ_

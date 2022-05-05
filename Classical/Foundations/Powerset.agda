@@ -175,6 +175,29 @@ module Powerset (decide : LEM) where
   ...   | nope q = (p ∙ sym q) i
 
 
+  ∀∈+¬∈→⊆ : {A B : ℙ X} → ((x : X) → ∥ (x ∈ B) ⊎ (¬ x ∈ A) ∥) → A ⊆ B
+  ∀∈+¬∈→⊆ {B = B} ∀∈+¬∈ {x = x} x∈A = Prop.rec (isProp∈ B)
+    (λ { (inl x∈B) → x∈B ; (inr ¬x∈A) → Empty.rec (¬x∈A x∈A) }) (∀∈+¬∈ x)
+
+
+  -- There always merely exists element outside a non-subset against another subset
+
+  module _ {A B : ℙ X}(¬A⊆B : ¬ A ⊆ B) where
+
+    private
+      P = ∥ Σ[ x ∈ X ] (¬ x ∈ B) × (x ∈ A) ∥
+      isPropP : isProp ∥ Σ[ x ∈ X ] (¬ x ∈ B) × (x ∈ A) ∥
+      isPropP = squash
+
+    open ClassicalLogic decide
+
+    ⊈→∃ : ∥ Σ[ x ∈ X ] (¬ x ∈ B) × (x ∈ A) ∥
+    ⊈→∃ with decide isPropP
+    ... | yes p = p
+    ... | no ¬p = Empty.rec (¬A⊆B (∀∈+¬∈→⊆
+      (¬∃¬×→∀+¬ (λ _ → isProp∈ B) (λ _ → isProp∈ A) ¬p)))
+
+
   {-
 
     Boolean Algebraic Operations

@@ -1,3 +1,8 @@
+{-
+
+Datatype to decsribe the sign of element in ordered ring
+
+-}
 {-# OPTIONS --safe #-}
 module Classical.Algebra.OrderedField.DedekindCut.Signature where
 
@@ -62,6 +67,13 @@ neg ≥0s = ⊥
 -s-· neg neg = refl
 
 
+pos≢nul : ¬ pos ≡ nul
+pos≢nul p = subst (λ { nul → ⊥ ; pos → Unit ; neg → Unit }) p _
+
+neg≢nul : ¬ neg ≡ nul
+neg≢nul p = subst (λ { nul → ⊥ ; pos → Unit ; neg → Unit }) p _
+
+
 data TrichotomySign (x : Sign) : Type where
   ≡pos : x ≡ pos → TrichotomySign x
   ≡nul : x ≡ nul → TrichotomySign x
@@ -73,12 +85,6 @@ trichotomySign nul = ≡nul refl
 trichotomySign neg = ≡neg refl
 
 
-pos≢nul : ¬ pos ≡ nul
-pos≢nul p = subst (λ { nul → ⊥ ; pos → Unit ; neg → Unit }) p _
-
-neg≢nul : ¬ neg ≡ nul
-neg≢nul p = subst (λ { nul → ⊥ ; pos → Unit ; neg → Unit }) p _
-
 data DichotomySign (x : Sign) : Type where
   ≡nul :   x ≡ nul → DichotomySign x
   ≢nul : ¬ x ≡ nul → DichotomySign x
@@ -87,6 +93,7 @@ dichotomySign : (x : Sign) → DichotomySign x
 dichotomySign nul = ≡nul refl
 dichotomySign pos = ≢nul pos≢nul
 dichotomySign neg = ≢nul neg≢nul
+
 
 integralSign : (x y : Sign) → ¬ x ≡ nul → ¬ y ≡ nul → ¬ (x ·s y) ≡ nul
 integralSign pos pos ¬x≡nul ¬y≡nul = pos≢nul

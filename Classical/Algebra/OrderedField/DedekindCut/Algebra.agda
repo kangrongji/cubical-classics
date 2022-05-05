@@ -7,7 +7,6 @@ Algebraic Operations on Dedekind Cuts
 module Classical.Algebra.OrderedField.DedekindCut.Algebra where
 
 open import Cubical.Foundations.Prelude
-open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Function
 
 open import Cubical.Data.Sigma

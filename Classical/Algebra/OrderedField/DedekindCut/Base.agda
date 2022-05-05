@@ -163,6 +163,9 @@ module Basics (decide : LEM)
   isProp≤𝕂 : {a b : 𝕂} → isProp (a ≤𝕂 b)
   isProp≤𝕂 = isProp⊆
 
+  ≤𝕂-refl : {a b : 𝕂} → a ≡ b → a ≤𝕂 b
+  ≤𝕂-refl a≡b {x = q} q∈upper = subst (λ p → q ∈ p .upper) (sym a≡b) q∈upper
+
   ≤𝕂-asym : {a b : 𝕂} → a ≤𝕂 b → b ≤𝕂 a → a ≡ b
   ≤𝕂-asym a≤b b≤a = path-𝕂 _ _ (bi⊆→≡ b≤a a≤b)
 
