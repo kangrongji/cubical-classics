@@ -2,6 +2,9 @@
 module Classical.Algebra.OrderedField.DedekindCut.Signature where
 
 open import Cubical.Foundations.Prelude
+open import Cubical.Data.Unit
+open import Cubical.Data.Empty as Empty
+open import Cubical.Relation.Nullary
 
 
 data Sign : Type where
@@ -18,6 +21,11 @@ _·s_ : Sign → Sign → Sign
 pos ·s x = x
 nul ·s x = nul
 neg ·s x = -s x
+
+_≥0s : Sign → Type
+pos ≥0s = Unit
+nul ≥0s = Unit
+neg ≥0s = ⊥
 
 ·s-Comm : (x y : Sign) → x ·s y ≡ y ·s x
 ·s-Comm pos pos = refl
@@ -52,3 +60,41 @@ neg ·s x = -s x
 -s-· neg pos = refl
 -s-· neg nul = refl
 -s-· neg neg = refl
+
+
+data TrichotomySign (x : Sign) : Type where
+  ≡pos : x ≡ pos → TrichotomySign x
+  ≡nul : x ≡ nul → TrichotomySign x
+  ≡neg : x ≡ neg → TrichotomySign x
+
+trichotomySign : (x : Sign) → TrichotomySign x
+trichotomySign pos = ≡pos refl
+trichotomySign nul = ≡nul refl
+trichotomySign neg = ≡neg refl
+
+
+pos≢nul : ¬ pos ≡ nul
+pos≢nul p = subst (λ { nul → ⊥ ; pos → Unit ; neg → Unit }) p _
+
+neg≢nul : ¬ neg ≡ nul
+neg≢nul p = subst (λ { nul → ⊥ ; pos → Unit ; neg → Unit }) p _
+
+data DichotomySign (x : Sign) : Type where
+  ≡nul :   x ≡ nul → DichotomySign x
+  ≢nul : ¬ x ≡ nul → DichotomySign x
+
+dichotomySign : (x : Sign) → DichotomySign x
+dichotomySign nul = ≡nul refl
+dichotomySign pos = ≢nul pos≢nul
+dichotomySign neg = ≢nul neg≢nul
+
+integralSign : (x y : Sign) → ¬ x ≡ nul → ¬ y ≡ nul → ¬ (x ·s y) ≡ nul
+integralSign pos pos ¬x≡nul ¬y≡nul = pos≢nul
+integralSign pos nul ¬x≡nul ¬y≡nul = Empty.rec (¬y≡nul refl)
+integralSign pos neg ¬x≡nul ¬y≡nul = neg≢nul
+integralSign nul pos ¬x≡nul ¬y≡nul = Empty.rec (¬x≡nul refl)
+integralSign nul nul ¬x≡nul ¬y≡nul = Empty.rec (¬x≡nul refl)
+integralSign nul neg ¬x≡nul ¬y≡nul = Empty.rec (¬x≡nul refl)
+integralSign neg pos ¬x≡nul ¬y≡nul = neg≢nul
+integralSign neg nul ¬x≡nul ¬y≡nul = Empty.rec (¬y≡nul refl)
+integralSign neg neg ¬x≡nul ¬y≡nul = pos≢nul

@@ -258,6 +258,10 @@ module Algebra (decide : LEM)
       (a .fst .upper-round q q∈upper)
 
 
+  ·𝕂₊-lZero : (a : 𝕂₊) → 𝟘₊ ·𝕂₊ a ≡ 𝟘₊
+  ·𝕂₊-lZero a = ·𝕂₊-Comm 𝟘₊ a ∙ ·𝕂₊-rZero a
+
+
   private
     upper-round2 : (a : 𝕂)(p q : K) → p ∈ a .upper → q ∈ a .upper → ∥ Σ[ r ∈ K ] (r < p) × (r < q) × (r ∈ a .upper) ∥
     upper-round2 a p q p∈upper q∈upper = Prop.map2
