@@ -1,11 +1,22 @@
 {-
 
-Impredicative Powerset
+Classical Impredicative Powerset
 
 This file introduces a "powerset", thanks to Excluded Middle,
 behaving very similar to that in classical set theory.
-I think most of the following results only relies on the concept of impredicativity,
-so probably axiom like Propositional Resizing is enough to make sense of it.
+However, I think except for a few `Boolean facts`,
+most of the following results only relies on the concept of impredicativity,
+and one way to formulate that is the existence of subobject classifier
+(LEM or even Propostional Resizing are enough to guarantee its existence).
+
+This one is classical and impredicative.
+One can find a constructive and predicative version in the standard library of Cubical Agda,
+see "https://github.com/agda/cubical/blob/master/Cubical/Foundations/Powerset.agda".
+
+TODO:
+Reorganize this file in better ways,
+since there are too many results crowded together.
+Maybe better separate it into several files.
 
 -}
 {-# OPTIONS --safe #-}
@@ -75,27 +86,38 @@ module Powerset (decide : LEM) where
   -}
 
   -- Membership
-  _∈_ : X → ℙ X → Type ℓ-zero
+  _∈_ : X → ℙ X → Type
   x ∈ A = A x ≡ true
-
-  -- Non-membership
-  _∉_ : X → ℙ X → Type ℓ-zero
-  x ∉ A = A x ≡ false
 
   isProp∈ : {x : X}(A : ℙ X) → isProp (x ∈ A)
   isProp∈ _ = isSetProp _ _
 
+
+  -- Non-membership
+  _∉_ : X → ℙ X → Type
+  x ∉ A = A x ≡ false
+
   isProp∉ : {x : X}(A : ℙ X) → isProp (x ∉ A)
   isProp∉ _ = isSetProp _ _
 
-  dichotomy∈ : (x : X)(A : ℙ X) → (x ∈ A) ⊎ (x ∉ A)
-  dichotomy∈ x A = dichotomyBool (A x)
+
+  -- Data type to make pattern matching more clearer, :P
+  data Dichotomy∈ {X : Type ℓ}(x : X)(A : ℙ X) : Type ℓ where
+    yeah : x ∈ A → Dichotomy∈ x A
+    nope : x ∉ A → Dichotomy∈ x A
+
+  dichotomy∈ : (x : X)(A : ℙ X) → Dichotomy∈ x A
+  dichotomy∈ x A with dichotomyBool (A x)
+  ... | inl x∈A = yeah x∈A
+  ... | inr x∉A = nope x∉A
+
 
   explode∈ : {Y : Type ℓ'} → {x : X}{A : ℙ X} → x ∈ A → x ∉ A → Y
   explode∈ x∈A x∉A = Empty.rec (true≢false (sym x∈A ∙ x∉A))
 
   ∈∉→≢ : {x y : X}{A : ℙ X} → x ∈ A → y ∉ A → ¬ x ≡ y
   ∈∉→≢ {A = A} x∈A y∉A x≡y = explode∈ {A = A} (subst (_∈ A) x≡y x∈A) y∉A
+
 
   -- Negation of membership
 
@@ -110,13 +132,13 @@ module Powerset (decide : LEM) where
 
     ¬∈→∉ : ¬ x ∈ A → x ∉ A
     ¬∈→∉ ¬x∈A with dichotomy∈ x A
-    ... | inl x∈A = Empty.rec (¬x∈A x∈A)
-    ... | inr x∉A = x∉A
+    ... | yeah x∈A = Empty.rec (¬x∈A x∈A)
+    ... | nope x∉A = x∉A
 
     ¬∉→∈ : ¬ x ∉ A → x ∈ A
     ¬∉→∈ ¬x∉A with dichotomy∈ x A
-    ... | inl x∈A = x∈A
-    ... | inr x∉A = Empty.rec (¬x∉A x∉A)
+    ... | yeah x∈A = x∈A
+    ... | nope x∉A = Empty.rec (¬x∉A x∉A)
 
     ¬¬∈→∈ : ¬ ¬ x ∈ A → x ∈ A
     ¬¬∈→∈ p = ¬∉→∈ (¬map ∉→¬∈ p)
@@ -124,12 +146,14 @@ module Powerset (decide : LEM) where
     ¬¬∉→∉ : ¬ ¬ x ∉ A → x ∉ A
     ¬¬∉→∉ p = ¬∈→∉ (¬map ∈→¬∉ p)
 
+
   -- Inclusion relation
   _⊆_ : {X : Type ℓ} → ℙ X → ℙ X → Type ℓ
   A ⊆ B = ∀ {x} → x ∈ A → x ∈ B
 
   isProp⊆ : {A B : ℙ X} → isProp (A ⊆ B)
   isProp⊆ {B = B} = isPropImplicitΠ (λ x → isPropΠ (λ _ → isProp∈ B))
+
 
   ⊆-trans :{A B C : ℙ X} → A ⊆ B → B ⊆ C → A ⊆ C
   ⊆-trans A⊆B B⊆C x∈A = B⊆C (A⊆B x∈A)
@@ -145,10 +169,42 @@ module Powerset (decide : LEM) where
 
   bi⊆→≡ : {A B : ℙ X} → A ⊆ B → B ⊆ A → A ≡ B
   bi⊆→≡ {A = A} {B = B} A⊆B B⊆A i x with dichotomy∈ x A
-  ... | inl p = (p ∙ sym (A⊆B p)) i
-  ... | inr p with dichotomy∈ x B
-  ...   | inl q = Empty.rec {A = A ≡ B} (true≢false (sym (B⊆A q) ∙ p)) i x
-  ...   | inr q = (p ∙ sym q) i
+  ... | yeah p = (p ∙ sym (A⊆B p)) i
+  ... | nope p with dichotomy∈ x B
+  ...   | yeah q = Empty.rec {A = A ≡ B} (true≢false (sym (B⊆A q) ∙ p)) i x
+  ...   | nope q = (p ∙ sym q) i
+
+
+  ∀∈+¬∈→⊆ : {A B : ℙ X} → ((x : X) → ∥ (x ∈ B) ⊎ (¬ x ∈ A) ∥) → A ⊆ B
+  ∀∈+¬∈→⊆ {B = B} ∀∈+¬∈ {x = x} x∈A = Prop.rec (isProp∈ B)
+    (λ { (inl x∈B) → x∈B ; (inr ¬x∈A) → Empty.rec (¬x∈A x∈A) }) (∀∈+¬∈ x)
+
+
+  -- There always merely exists element outside a non-subset against another subset
+
+  module _ {A B : ℙ X}(¬A⊆B : ¬ A ⊆ B) where
+
+    private
+      P = ∥ Σ[ x ∈ X ] (¬ x ∈ B) × (x ∈ A) ∥
+      isPropP : isProp ∥ Σ[ x ∈ X ] (¬ x ∈ B) × (x ∈ A) ∥
+      isPropP = squash
+
+    open ClassicalLogic decide
+
+    ⊈→∃ : ∥ Σ[ x ∈ X ] (¬ x ∈ B) × (x ∈ A) ∥
+    ⊈→∃ with decide isPropP
+    ... | yes p = p
+    ... | no ¬p = Empty.rec (¬A⊆B (∀∈+¬∈→⊆
+      (¬∃¬×→∀+¬ (λ _ → isProp∈ B) (λ _ → isProp∈ A) ¬p)))
+
+
+  -- Inhabitedness, namely, not being empty
+
+  isInhabited : {X : Type ℓ} → ℙ X → Type ℓ
+  isInhabited {X = X} A = ∥ Σ[ x ∈ X ] x ∈ A ∥
+
+  isPropIsInhabited : (A : ℙ X) → isProp (isInhabited A)
+  isPropIsInhabited _ = squash
 
 
   {-
@@ -168,6 +224,7 @@ module Powerset (decide : LEM) where
   -- The total subset
   total : ℙ X
   total x = true
+
 
   x∉∅ : {x : X} → x ∉ ∅
   x∉∅ = refl
@@ -196,6 +253,7 @@ module Powerset (decide : LEM) where
   A≡total : {A : ℙ X} → ((x : X) → x ∈ A) → A ≡ total
   A≡total {A = A} p = bi⊆→≡ (A⊆total {A = A}) (total⊆A p)
 
+
   -- Complementary subset
 
   ∁_ : ℙ X → ℙ X
@@ -209,6 +267,7 @@ module Powerset (decide : LEM) where
 
   ∈∁→∉ : {x : X}{A : ℙ X} → x ∈ (∁ A) → x ∉ A
   ∈∁→∉ x∈∁A = sym (notnot _) ∙ cong not x∈∁A
+
 
   -- Binary union
 
@@ -254,6 +313,7 @@ module Powerset (decide : LEM) where
   ∈A+∈B→∈A∪B : {x : X}(A B : ℙ X) → ∥ (x ∈ A) ⊎ (x ∈ B) ∥ → x ∈ (A ∪ B)
   ∈A+∈B→∈A∪B {x = x} A B = Prop.rec (isProp∈ (A ∪ B)) (λ ∈A+∈B → or≡true (A x) (B x) ∈A+∈B)
 
+
   -- Binary intersection
 
   _∩_ : ℙ X → ℙ X → ℙ X
@@ -298,6 +358,7 @@ module Powerset (decide : LEM) where
   A⊆B+B∩C≡∅→A∩C≡∅ : {A B C : ℙ X} → A ⊆ B → B ∩ C ≡ ∅ → A ∩ C ≡ ∅
   A⊆B+B∩C≡∅→A∩C≡∅ {A = A} {B = B} {C = C} A⊆B B∩V≡∅ = A⊆∅→A≡∅ (subst ((A ∩ C) ⊆_) B∩V≡∅ (⊆→∩⊆ A B C A⊆B))
 
+
   -- Absorption laws
 
   ∪-∩-Absorp : (A B : ℙ X) → A ∪ (A ∩ B) ≡ A
@@ -305,6 +366,7 @@ module Powerset (decide : LEM) where
 
   ∩-∪-Absorp : (A B : ℙ X) → A ∩ (A ∪ B) ≡ A
   ∩-∪-Absorp A B i x = and-or-absorp (A x) (B x) i
+
 
   -- Distribution laws
 
@@ -320,6 +382,7 @@ module Powerset (decide : LEM) where
   ∩-∪-lDist : (A B C : ℙ X) → (A ∪ B) ∩ C ≡ (A ∩ C) ∪ (B ∩ C)
   ∩-∪-lDist A B C = ∩-Comm _ _ ∙ ∩-∪-rDist _ _ _ ∙ (λ i → ∩-Comm C A i ∪ ∩-Comm C B i)
 
+
   -- Complementation laws
 
   ∪-Compt : (A : ℙ X) → A ∪ (∁ A) ≡ total
@@ -327,6 +390,7 @@ module Powerset (decide : LEM) where
 
   ∩-Compt : (A : ℙ X) → A ∩ (∁ A) ≡ ∅
   ∩-Compt A i x = and-compt (A x) i
+
 
   -- de Morgan laws
 
@@ -336,12 +400,13 @@ module Powerset (decide : LEM) where
   ∩-∪-deMorgan : (A B : ℙ X) → (∁ A) ∩ (∁ B) ≡ ∁ (A ∪ B)
   ∩-∪-deMorgan A B i x = and-or-deMorgan (A x) (B x) i
 
+
   -- Facts between non-intersecting subsets and complementary subsets
 
   →∩∅ : {A B : ℙ X} → ((x : X) → x ∈ A → x ∉ B) → A ∩ B ≡ ∅
   →∩∅ {A = A} {B = B} p i x with dichotomy∈ x A
-  ... | inl x∈A = x∈A i and p x x∈A i
-  ... | inr x∉A = and-absorpˡ (A x) (B x) x∉A i
+  ... | yeah x∈A = x∈A i and p x x∈A i
+  ... | nope x∉A = and-absorpˡ (A x) (B x) x∉A i
 
   A∩B=∅→A⊆∁B : {A B : ℙ X} → A ∩ B ≡ ∅ → A ⊆ (∁ B)
   A∩B=∅→A⊆∁B {A = A} {B = B} A∩B≡∅ {x = x} x∈A =
@@ -391,6 +456,7 @@ module Powerset (decide : LEM) where
     ... | yes p = Empty.rec (¬p p)
     ... | no ¬p = refl
 
+
   module _
     (P : X → hProp ℓ)(Q : X → hProp ℓ') where
 
@@ -399,6 +465,7 @@ module Powerset (decide : LEM) where
 
     Imply→⊆ : ((x : X) → P x .fst → Q x .fst) → specify P ⊆ specify Q
     Imply→⊆ P→Q x∈P = Inhab→∈ Q (P→Q _ (∈→Inhab P x∈P))
+
 
     ∈-∪→Inhab⊎ : (x : X) → x ∈ specify P ∪ specify Q → P x .fst ⊎ Q x .fst
     ∈-∪→Inhab⊎ x x∈∪ with ∈A∪B→∈A+∈B (specify P) (specify Q) x∈∪
@@ -456,8 +523,10 @@ module Powerset (decide : LEM) where
 
   -}
 
+  -- Union of arbitrary collection of subsets
   union : ℙ (ℙ X) → ℙ X
   union {X = X} S = specify λ x → ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥ , squash
+
 
   module _
     {S : ℙ (ℙ X)}{x : X} where
@@ -473,6 +542,7 @@ module Powerset (decide : LEM) where
       where
       helper : ¬ ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥
       helper = Prop.rec isProp⊥ (λ (A , x∈A , A∈S) → explode∈ {A = A} x∈A (p _ A∈S))
+
 
   union∅ : union {X = X} ∅ ≡ ∅
   union∅ = A≡∅ (λ U → ∉union (helper U))
@@ -504,11 +574,13 @@ module Powerset (decide : LEM) where
         { (inl x∈S) → Prop.map (λ (A , x∈A , x∈S) → A , x∈A , ∪-left∈  S T x∈S) (∈union→∃ x∈S)
         ; (inr x∈T) → Prop.map (λ (A , x∈A , x∈T) → A , x∈A , ∪-right∈ S T x∈T) (∈union→∃ x∈T) })
 
+
   union∪-left⊆ : {S T : ℙ (ℙ X)} → union S ⊆ union (S ∪ T)
   union∪-left⊆ {S = S} {T = T} = subst (union S ⊆_) (sym union∪) (∪-left⊆ (union S) (union T))
 
   union∪-right⊆ : {S T : ℙ (ℙ X)} → union T ⊆ union (S ∪ T)
   union∪-right⊆ {S = S} {T = T} = subst (union T ⊆_) (sym union∪) (∪-right⊆ (union S) (union T))
+
 
   union[A] : {A : ℙ X} → union [ A ] ≡ A
   union[A] {A = A} = bi⊆→≡ ∪[A]⊆A A⊆∪[A]

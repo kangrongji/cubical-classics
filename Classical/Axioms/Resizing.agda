@@ -3,7 +3,7 @@
 Voevodsky's Axiom of Propositional Resizing
 
 Notice that Resizing is a corollary of Excluded Middle,
-which is prove in `Classical.Foundations.Impredicativity`.
+of which proof can be found in `Classical.Axiom.ExcludedMiddle`.
 
 -}
 {-# OPTIONS --safe #-}
@@ -40,7 +40,7 @@ Resizing : Typeω
 Resizing = {ℓ ℓ' : Level} → isEquiv (liftProp {ℓ = ℓ} ℓ')
 
 
--- A simplified version that only lifting from level ℓ-zero is required
+-- A simplified version that only lifting from level zero is required
 
 Resizing₀ : Typeω
 Resizing₀ = {ℓ : Level} → isEquiv (liftProp {ℓ = ℓ-zero} ℓ)
@@ -83,7 +83,6 @@ Resizing→Drop resizing P .lower = invIsEq resizing P
 Resizing→Drop resizing P .dropEquiv =
   compEquiv (pathToEquiv (λ i → secIsEq resizing P (~ i) .fst)) (invEquiv LiftEquiv)
 
-
 module _
   {drop : Drop}{ℓ : Level} where
 
@@ -117,7 +116,12 @@ Drop→Resizing drop = Resizing₀→Resizing (Drop→Resizing₀ drop)
 
 -}
 
--- A formulation of subobject classifier
+-- A (pre-)formulation of subobject classifier
+
+-- Warning: This is not a complete formulation.
+-- The object Ω should be a `Heyting algebra` and all equivalences should respect this.
+-- (hProp automatically admit that by considering usual logical operations on propositions)
+-- Moreover, the equivalences should commute with universe level lifting.
 
 isSubobjectClassifier : Type ℓ → Typeω
 isSubobjectClassifier Ω = {ℓ : Level}{X : Type ℓ} → (X → Ω) ≃ (X → hProp ℓ)

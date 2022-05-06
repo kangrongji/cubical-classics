@@ -23,7 +23,6 @@ open import Cubical.Relation.Nullary
 open import Cubical.Relation.Nullary.DecidablePropositions
   hiding (isPropIsDecProp)
 
-
 private
   variable
     ℓ ℓ' : Level
