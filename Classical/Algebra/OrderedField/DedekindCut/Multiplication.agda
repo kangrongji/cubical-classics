@@ -9,6 +9,7 @@ module Classical.Algebra.OrderedField.DedekindCut.Multiplication where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Empty as Empty
+open import Cubical.Data.Sum
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
@@ -327,6 +328,29 @@ module Multiplication (decide : LEM)
       (_>𝕂 𝟘) (λ a → isProp<𝕂 {a = 𝟘} {b = a}) 1>𝕂0
       (λ a → a>0+-a>0→⊥ {a = a}) +𝕂-Pres>0
       ·𝕂'-Pres>0 trichotomy>𝕂0
+
+
+  -- The ordering given by general theory of oredered ring is same as the one used here before
+
+  open OrderedRingStr 𝕂OrderedRing using ()
+    renaming (_<_ to _<𝕂'_ ; _>_ to _>𝕂'_ ; _≤_ to _≤𝕂'_ ; _≥_ to _≥𝕂'_)
+
+  <𝕂→<𝕂' : (a b : 𝕂) → a <𝕂 b → a <𝕂' b
+  <𝕂→<𝕂' a b a<b = subst ((b +𝕂 (-𝕂 a)) >𝕂_) (+𝕂-rInverse a) (+𝕂-rPres< a b (-𝕂 a) a<b)
+
+  <𝕂'→<𝕂 : (a b : 𝕂) → a <𝕂' b → a <𝕂 b
+  <𝕂'→<𝕂 a b 0<b-a = transport (λ i → +𝕂-lUnit a i <𝕂 b-a+b≡b i) (+𝕂-rPres< 𝟘 (b +𝕂 (-𝕂 a)) a 0<b-a)
+    where b-a+b≡b : (b +𝕂 (-𝕂 a)) +𝕂 a ≡ b
+          b-a+b≡b = sym (+𝕂-Assoc _ _ _) ∙ (λ i → b +𝕂 +𝕂-lInverse a i) ∙ +𝕂-rUnit b
+
+  ≤𝕂→≤𝕂' : (a b : 𝕂) → a ≤𝕂 b → a ≤𝕂' b
+  ≤𝕂→≤𝕂' a b a≤b with split≤𝕂 a b a≤b
+  ... | lt a<b = inl (<𝕂→<𝕂' a b a<b)
+  ... | eq a≡b = inr a≡b
+
+  ≤𝕂'→≤𝕂 : (a b : 𝕂) → a ≤𝕂' b → a ≤𝕂 b
+  ≤𝕂'→≤𝕂 a b (inl a<b') = <𝕂→≤𝕂 {a = a} {b = b} (<𝕂'→<𝕂 a b a<b')
+  ≤𝕂'→≤𝕂 a b (inr a≡b ) = ≤𝕂-refl a≡b
 
 
   {-

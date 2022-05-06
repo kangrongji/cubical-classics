@@ -198,6 +198,15 @@ module Powerset (decide : LEM) where
       (¬∃¬×→∀+¬ (λ _ → isProp∈ B) (λ _ → isProp∈ A) ¬p)))
 
 
+  -- Inhabitedness, namely, not being empty
+
+  isInhabited : {X : Type ℓ} → ℙ X → Type ℓ
+  isInhabited {X = X} A = ∥ Σ[ x ∈ X ] x ∈ A ∥
+
+  isPropIsInhabited : (A : ℙ X) → isProp (isInhabited A)
+  isPropIsInhabited _ = squash
+
+
   {-
 
     Boolean Algebraic Operations

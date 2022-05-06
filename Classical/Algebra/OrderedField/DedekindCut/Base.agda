@@ -43,14 +43,14 @@ module Basics (decide : LEM)
   (𝒦 : OrderedField ℓ ℓ')
   where
 
-  open Powerset decide
-
   private
     K = 𝒦 .fst .fst .fst
 
+  open Powerset   decide
   open OrderedFieldStr 𝒦
 
   open Helpers (𝒦 .fst .fst)
+
 
   {-
 

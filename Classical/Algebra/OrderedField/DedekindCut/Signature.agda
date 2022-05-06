@@ -12,15 +12,21 @@ open import Cubical.Data.Empty as Empty
 open import Cubical.Relation.Nullary
 
 
+-- Being positive, zero or negative
+
 data Sign : Type where
   pos : Sign
   nul : Sign
   neg : Sign
 
+-- Reverse the signature
+
 -s_ : Sign → Sign
 -s pos = neg
 -s nul = nul
 -s neg = pos
+
+-- Signature of multiplication
 
 _·s_ : Sign → Sign → Sign
 pos ·s x = x
@@ -31,6 +37,7 @@ _≥0s : Sign → Type
 pos ≥0s = Unit
 nul ≥0s = Unit
 neg ≥0s = ⊥
+
 
 ·s-Comm : (x y : Sign) → x ·s y ≡ y ·s x
 ·s-Comm pos pos = refl

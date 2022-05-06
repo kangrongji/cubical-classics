@@ -140,14 +140,3 @@ module OrderedFieldStr (𝒦 : OrderedField ℓ ℓ') where
           1·q⁻¹>1·p⁻¹ = transport (λ i → ·-rInv p≢0 i · q⁻¹ > ·-rInv q≢0 i · p⁻¹) p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹
           q⁻¹>p⁻¹ : q⁻¹ > p⁻¹
           q⁻¹>p⁻¹ = transport (λ i → ·Lid q⁻¹ i > ·Lid p⁻¹ i) 1·q⁻¹>1·p⁻¹
-
-
-  {-
-
-    Inclusion from Rational Number
-
-  -}
-
-  --ℚ→K : ℚ → K
-  --ℚ→K = {!!}
-
