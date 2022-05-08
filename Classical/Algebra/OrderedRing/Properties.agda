@@ -3,7 +3,7 @@
   Properties of ordered ring
 
 -}
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --experimental-lossy-unification #-}
 module Classical.Algebra.OrderedRing.Properties where
 
 open import Cubical.Foundations.Prelude
@@ -80,6 +80,9 @@ private
 
     helper17 : (n q : 𝓡 .fst) → (1r + n) · q ≡ (n · q) + q
     helper17 = solve 𝓡
+
+    helper18 : (x : 𝓡 .fst) → - (1r + x) ≡ - 1r - x
+    helper18 = solve 𝓡
 
 
 module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
@@ -393,6 +396,9 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
   ℕ→R-PosSuc : (n : ℕ) → ℕ→R-Pos (suc n) ≡ 1r + ℕ→R-Pos n
   ℕ→R-PosSuc zero = sym (+Rid 1r)
   ℕ→R-PosSuc (suc n) = refl
+
+  ℕ→R-NegSuc : (n : ℕ) → ℕ→R-Neg (suc n) ≡ - 1r + ℕ→R-Neg n
+  ℕ→R-NegSuc n = (λ i → - ℕ→R-PosSuc n i) ∙ helper18 _
 
 
   ℕ→R-PosSuc>0 : (n : ℕ) → ℕ→R-Pos (suc n) > 0r
