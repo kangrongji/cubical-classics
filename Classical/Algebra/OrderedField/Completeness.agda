@@ -8,11 +8,17 @@ module Classical.Algebra.OrderedField.Completeness where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
+open import Cubical.Foundations.Equiv
+
+open import Cubical.Functions.Embedding
+open import Cubical.Functions.Surjection
+
 open import Cubical.Data.Nat using (ℕ ; zero ; suc)
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
 open import Cubical.Algebra.CommRingSolver.Reflection hiding (K')
@@ -185,16 +191,14 @@ module CompleteOrderedField (decide : LEM) where
 
     open OrderedFieldStr 𝒦
     open OrderedFieldStr 𝒦' using ()
-      renaming ( 0r to 0r' ; 1r to 1r'
-               ; -_ to -'_ ; _+_ to _+'_
-               ; 1>0 to 1>'0
-               ; inv₊ to inv'₊ ; ·-lInv₊ to ·'-lInv₊
-               ; _<_ to _<'_ ; _≤_ to _≤'_
+      renaming ( _<_ to _<'_ ; _≤_ to _≤'_
                ; _>_ to _>'_ ; _≥_ to _≥'_
-               ; _⋆_ to _⋆'_
-               ; p>0→p⁻¹>0 to p>'0→p⁻¹>'0
                ; isProp< to isProp<'
-               ; Trichotomy to Trichotomy')
+               ; Trichotomy to Trichotomy'
+               ; trichotomy to trichotomy'
+               ; <-asym to <'-asym
+               ; <-trans to <'-trans
+               ; is-set to is-set')
     open OrderedRingHom    f
     open OrderedRingHomStr f
     open OrderedFieldHomStr {𝒦' = 𝒦} {𝒦 = 𝒦'} f
@@ -202,6 +206,8 @@ module CompleteOrderedField (decide : LEM) where
     private
       K  = 𝒦  .fst .fst .fst
       K' = 𝒦' .fst .fst .fst
+      isSetK  = is-set
+      isSetK' = is-set'
       f-map = ring-hom .fst
 
 
@@ -218,15 +224,51 @@ module CompleteOrderedField (decide : LEM) where
       bounded : ℙ K
       bounded = specify P
 
+      bounded-inhab : isInhabited bounded
+      bounded-inhab = Prop.map
+        (λ (r , fr<y) → r , Inhab→∈ P fr<y)
+        (isUnbounded→isLowerUnbounded
+        (isArchimedean→isUnbounded
+        (isComplete→isArchimedean _ getSup')) y)
+
+      bounded-is-bounded : isUpperBounded 𝒦 bounded
+      bounded-is-bounded = Prop.map
+        (λ (r , y<fr) → r , λ s s∈b →
+          inl (homRefl< s r (<'-trans (∈→Inhab P s∈b) y<fr)))
+        (isArchimedean→isUnbounded
+        (isComplete→isArchimedean _ getSup') y)
+
       boundary : Supremum _ bounded
-      boundary = getSup {!!} {!!}
+      boundary = getSup bounded-inhab bounded-is-bounded
 
       x = boundary .sup
 
       fiber-path : f-map x ≡ y
-      fiber-path = {!!}
+      fiber-path = case-split (trichotomy' (f-map x) y)
         where
         case-split : Trichotomy' (f-map x) y → f-map x ≡ y
         case-split (eq fx≡y) = fx≡y
-        case-split (lt fx<y) = {!!}
-        case-split (gt fx>y) = {!!}
+        case-split (lt fx<y) = Empty.rec
+          (Prop.rec isProp⊥
+          (λ (r , fx<fr , fr<y) →
+            <≤-asym (homRefl< x r fx<fr) (boundary .bound r (Inhab→∈ P fr<y)))
+          (findBetween fx<y))
+        case-split (gt fx>y) = Empty.rec
+          (Prop.rec isProp⊥
+          (λ (r , y<fr , fr<fx) → Prop.rec isProp⊥
+            (λ (s , r<s , s∈b) →
+              <'-asym (<'-trans y<fr (homPres< r s r<s)) (∈→Inhab P s∈b))
+            (<sup→∃∈ _ r boundary (homRefl< r x fr<fx)))
+          (findBetween fx>y))
+
+
+    isEmbedding-f : isEmbedding f-map
+    isEmbedding-f = injEmbedding isSetK isSetK' (λ p → homRefl≡ _ _ p)
+
+    isSurjection-f : isSurjection f-map
+    isSurjection-f y = ∣ _ , fiber-path y ∣
+
+    -- Homomorphism between complete ordered fields is always isomorphism.
+
+    isEquiv-f : isEquiv f-map
+    isEquiv-f = isEmbedding×isSurjection→isEquiv (isEmbedding-f , isSurjection-f)

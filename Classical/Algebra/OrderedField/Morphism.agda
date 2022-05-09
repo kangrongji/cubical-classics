@@ -125,16 +125,31 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
     helper = archimedes x (f-map 1r') (homPres>0 _ 1>'0)
 
 
+  -- Unbounded in the other direction but is equivalent by using additive inverse
+
+  isLowerUnbounded : Type _
+  isLowerUnbounded = (x : K) → ∥ Σ[ r ∈ K' ] f-map r < x ∥
+
+  isUnbounded→isLowerUnbounded : isUnbounded → isLowerUnbounded
+  isUnbounded→isLowerUnbounded exceed x = Prop.map
+    (λ (r , fr>-x) → -' r ,
+      transport (λ i → pres- r (~ i) < -Idempotent x i) (-Reverse< fr>-x))
+    (exceed (- x))
+
+  isLowerUnbounded→isUnbounded : isLowerUnbounded → isUnbounded
+  isLowerUnbounded→isUnbounded -exceed x = Prop.map
+    (λ (r , fr<-x) → -' r ,
+      transport (λ i → pres- r (~ i) > -Idempotent x i) (-Reverse< fr<-x))
+    (-exceed (- x))
+
+
   private
 
     module _
       (exceed : isUnbounded) where
 
       -exceed : (x : K) → ∥ Σ[ r ∈ K' ] f-map r < x ∥
-      -exceed x = Prop.map
-        (λ (r , fr>-x) → -' r ,
-          transport (λ i → pres- r (~ i) < -Idempotent x i) (-Reverse< fr>-x))
-        (exceed (- x))
+      -exceed = isUnbounded→isLowerUnbounded exceed
 
       shrink : (x : K) → x > 0r → ∥ Σ[ r ∈ K' ] (0r < f-map r) × (f-map r < x) ∥
       shrink x x>0 = Prop.map
