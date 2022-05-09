@@ -357,6 +357,11 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
 
   -}
 
+  <≤-asym : x < y → y ≤ x → ⊥
+  <≤-asym x<y (inl x>y) = <-asym  x<y x>y
+  <≤-asym x<y (inr x≡y) = <-arefl x<y (sym x≡y)
+
+
   <≤-trans : x < y → y ≤ z → x < z
   <≤-trans x<y (inl y<z) = <-trans x<y y<z
   <≤-trans {x = x} x<y (inr y≡z) = subst (x <_) y≡z x<y

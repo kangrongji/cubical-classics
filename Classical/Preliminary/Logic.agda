@@ -30,6 +30,7 @@ private
 →¬¬ : X → ¬ ¬ X
 →¬¬ x ¬x = ¬x x
 
+
 ∥Π∥→Π∥∥ : {Y : X → Type ℓ'}
   → ∥ ((x : X) → Y x) ∥ → (x : X) → ∥ Y x ∥
 ∥Π∥→Π∥∥ = Prop.rec (isPropΠ (λ _ → squash)) (λ sec → λ x → ∣ sec x ∣)
@@ -39,9 +40,35 @@ private
 ∥Π∥→Π∥∥2 = Prop.rec (isPropΠ2 (λ _ _ → squash)) (λ sec → λ x y → ∣ sec x y ∣)
 
 
+¬Σ→∀¬ : {P : X → Type ℓ'} → ¬ (Σ[ x ∈ X ] P x) → (x : X) → ¬ P x
+¬Σ→∀¬ f x p = f (x , p)
+
+¬∃→∀¬ : {P : X → Type ℓ'} → ¬ ∥ Σ[ x ∈ X ] P x ∥ → (x : X) → ¬ P x
+¬∃→∀¬ f = ¬Σ→∀¬ ((¬map ∣_∣) f)
+
+
 module ClassicalLogic (decide : LEM) where
 
   open DoubleNegationElim decide
+
+  module _
+    {P : X → Type ℓ' }
+    where
+
+    ¬∀¬→∃ : ¬ ((x : X) → ¬ P x) → ∥ Σ[ x ∈ X ] P x ∥
+    ¬∀¬→∃ f = ¬¬elim squash (¬map ¬∃→∀¬ f)
+
+
+  module _
+    {P : X → Type ℓ' }(isPropP : (x : X) → isProp (P x))
+    where
+
+    ¬∀→∃¬ : ¬ ((x : X) → P x) → ∥ Σ[ x ∈ X ] ¬ P x ∥
+    ¬∀→∃¬ f = ¬∀¬→∃ (¬map helper f)
+      where
+      helper : ((x : X) → ¬ ¬ P x) → (x : X) → P x
+      helper f x = ¬¬elim (isPropP _) (f x)
+
 
   module _
     {P : X → Type ℓ' }(isPropP : (x : X) → isProp (P x))
@@ -60,8 +87,19 @@ module ClassicalLogic (decide : LEM) where
     ... | _ | no ¬q = inr ¬q
     ... | yes ¬p | yes q = Empty.rec (¬∃¬× (x , ¬p , q))
 
+
+    ¬Σ×→∀→¬ : ¬ (Σ[ x ∈ X ] P x × Q x) → (x : X) → P x → (¬ Q x)
+    ¬Σ×→∀→¬ ¬∃× x p with ¬Σ×→∀⊎¬ ¬∃× x
+    ... | inl ¬p = Empty.rec (¬p p)
+    ... | inr ¬q = ¬q
+
+
     ¬∃×→∀+¬ : ¬ ∥ Σ[ x ∈ X ] P x × Q x ∥ → (x : X) → ∥ (¬ P x) ⊎ (¬ Q x) ∥
     ¬∃×→∀+¬ f x = ∣ ¬Σ×→∀⊎¬ (f ∘ ∣_∣) x ∣
 
     ¬∃¬×→∀+¬ : ¬ ∥ Σ[ x ∈ X ] (¬ P x) × Q x ∥ → (x : X) → ∥ (P x) ⊎ (¬ Q x) ∥
     ¬∃¬×→∀+¬ f x = ∣ ¬Σ¬×→∀⊎¬ (f ∘ ∣_∣) x ∣
+
+
+    ¬∃×→∀→¬ : ¬ ∥ Σ[ x ∈ X ] P x × Q x ∥ → (x : X) → P x → (¬ Q x)
+    ¬∃×→∀→¬ f x p = ¬Σ×→∀→¬ (f ∘ ∣_∣) x p
