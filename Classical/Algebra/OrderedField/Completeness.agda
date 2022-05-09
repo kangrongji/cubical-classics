@@ -15,17 +15,21 @@ open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
-open import Cubical.Algebra.CommRingSolver.Reflection
+open import Cubical.Algebra.CommRingSolver.Reflection hiding (K')
 
 open import Classical.Preliminary.Logic
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
+open import Classical.Algebra.OrderedRing.Morphism
 open import Classical.Algebra.OrderedRing.Archimedes
 open import Classical.Algebra.OrderedField
+open import Classical.Algebra.OrderedField.Morphism
 
 private
   variable
-    ℓ ℓ' : Level
+    ℓ ℓ' ℓ'' ℓ''' : Level
+    𝒦  : OrderedField ℓ   ℓ'
+    𝒦' : OrderedField ℓ'' ℓ'''
 
 private
   module Helpers {ℓ : Level}(𝓡 : CommRing ℓ) where
@@ -37,8 +41,9 @@ private
 
 module CompleteOrderedField (decide : LEM) where
 
+  open Powerset decide
 
-  module _ (𝒦 : OrderedField ℓ ℓ') where
+  module Completeness (𝒦 : OrderedField ℓ ℓ') where
 
     private
       K = 𝒦 .fst .fst .fst
@@ -46,7 +51,6 @@ module CompleteOrderedField (decide : LEM) where
       variable
         p q : K
 
-    open Powerset   decide
     open OrderedFieldStr 𝒦
 
 
@@ -156,6 +160,9 @@ module CompleteOrderedField (decide : LEM) where
     isComplete→isArchimedean getSup = isArchimedean∥∥→isArchimedean (𝒦 .fst) (isComplete→isArchimedean∥∥ getSup)
 
 
+  open Completeness
+
+
   CompleteOrderedField : (ℓ ℓ' : Level) → Type (ℓ-suc (ℓ-max ℓ ℓ'))
   CompleteOrderedField ℓ ℓ' = Σ[ 𝒦 ∈ OrderedField ℓ ℓ' ] isComplete 𝒦
 
@@ -163,3 +170,63 @@ module CompleteOrderedField (decide : LEM) where
   module CompleteOrderedFieldStr (𝒦 : CompleteOrderedField ℓ ℓ') where
 
     -- TODO: Basic corollaries of completeness.
+
+
+  {-
+
+    Homomorphism between complete ordered fields
+
+  -}
+
+  module CompleteOrderedFieldHom (f : OrderedFieldHom 𝒦 𝒦')
+    (getSup  : isComplete 𝒦 )
+    (getSup' : isComplete 𝒦')
+    where
+
+    open OrderedFieldStr 𝒦
+    open OrderedFieldStr 𝒦' using ()
+      renaming ( 0r to 0r' ; 1r to 1r'
+               ; -_ to -'_ ; _+_ to _+'_
+               ; 1>0 to 1>'0
+               ; inv₊ to inv'₊ ; ·-lInv₊ to ·'-lInv₊
+               ; _<_ to _<'_ ; _≤_ to _≤'_
+               ; _>_ to _>'_ ; _≥_ to _≥'_
+               ; _⋆_ to _⋆'_
+               ; p>0→p⁻¹>0 to p>'0→p⁻¹>'0
+               ; isProp< to isProp<'
+               ; Trichotomy to Trichotomy')
+    open OrderedRingHom    f
+    open OrderedRingHomStr f
+    open OrderedFieldHomStr {𝒦' = 𝒦} {𝒦 = 𝒦'} f
+
+    private
+      K  = 𝒦  .fst .fst .fst
+      K' = 𝒦' .fst .fst .fst
+      f-map = ring-hom .fst
+
+
+    findBetween : isDense
+    findBetween = isArchimedean→isDense (isComplete→isArchimedean _ getSup')
+
+    open Supremum
+
+    module _ (y : K') where
+
+      P : K → hProp _
+      P x = (f-map x <' y) , isProp<'
+
+      bounded : ℙ K
+      bounded = specify P
+
+      boundary : Supremum _ bounded
+      boundary = getSup {!!} {!!}
+
+      x = boundary .sup
+
+      fiber-path : f-map x ≡ y
+      fiber-path = {!!}
+        where
+        case-split : Trichotomy' (f-map x) y → f-map x ≡ y
+        case-split (eq fx≡y) = fx≡y
+        case-split (lt fx<y) = {!!}
+        case-split (gt fx>y) = {!!}
