@@ -50,8 +50,20 @@ module FieldStr (𝒦 : Field ℓ) where
   ·-lInv x≢0 = ·Comm _ _ ∙ ·-rInv x≢0
 
 
-  inv-uniq : {x≢0 : ¬ x ≡ 0r}{y≢0 : ¬ y ≡ 0r} → x ≡ y → inv x≢0 ≡ inv y≢0
-  inv-uniq {x≢0 = x≢0} {y≢0 = y≢0} x≡y i = inv (x≢0≡y≢0 i)
+  inv-≢0 : (x≢0 : ¬ x ≡ 0r) → ¬ inv x≢0 ≡ 0r
+  inv-≢0 {x = x} x≢0 x⁻¹≡0 = x≢0 (sym (·Rid _) ∙ (λ i → x · 1≡0 i) ∙ 0RightAnnihilates _)
+    where
+    1≡0 : 1r ≡ 0r
+    1≡0 = sym (·-rInv _) ∙ (λ i → x · x⁻¹≡0 i) ∙ 0RightAnnihilates _
+
+  invIdem : (x≢0 : ¬ x ≡ 0r) → inv (inv-≢0 x≢0) ≡ x
+  invIdem {x = x} x≢0 = sym (·Lid _)
+    ∙ (λ i → ·-rInv x≢0 (~ i) · inv (inv-≢0 x≢0))
+    ∙ sym (·Assoc _ _ _) ∙ (λ i →  x · ·-rInv (inv-≢0 x≢0) i) ∙ ·Rid _
+
+
+  invUniq : {x≢0 : ¬ x ≡ 0r}{y≢0 : ¬ y ≡ 0r} → x ≡ y → inv x≢0 ≡ inv y≢0
+  invUniq {x≢0 = x≢0} {y≢0 = y≢0} x≡y i = inv (x≢0≡y≢0 i)
     where
     x≢0≡y≢0 : PathP (λ i → ¬ (x≡y i) ≡ 0r) x≢0 y≢0
     x≢0≡y≢0 = isProp→PathP (λ i → isPropΠ (λ _ → isProp⊥)) x≢0 y≢0

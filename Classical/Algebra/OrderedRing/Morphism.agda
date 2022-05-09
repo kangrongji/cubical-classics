@@ -57,6 +57,8 @@ private
     helper6 = solve 𝓡
 
 
+-- The homomorphism between ordered rings is just ring homomorphism that preserves positive element
+
 open OrderStrOnCommRing
 
 record OrderedRingHom (𝓡 : OrderedRing ℓ ℓ')(𝓡' : OrderedRing ℓ'' ℓ''') : Type (ℓ-max (ℓ-max ℓ ℓ') (ℓ-max ℓ'' ℓ''')) where
@@ -65,6 +67,12 @@ record OrderedRingHom (𝓡 : OrderedRing ℓ ℓ')(𝓡' : OrderedRing ℓ'' �
     pres->0  : (x : 𝓡 .fst .fst) → 𝓡 .snd ._>0 x → 𝓡' .snd ._>0 (ring-hom .fst x)
 
 
+{-
+
+  Properties of ordered ring homomorphism
+
+-}
+
 module OrderedRingHomStr (f : OrderedRingHom 𝓡 𝓡') where
 
   private
@@ -72,12 +80,22 @@ module OrderedRingHomStr (f : OrderedRingHom 𝓡 𝓡') where
     R' = 𝓡' .fst .fst
 
   open OrderedRingStr 𝓡
-  open OrderedRingStr 𝓡' using () renaming (_<_ to _<'_ ; _≤_ to _≤'_ ; trichotomy to trichotomy' ; <-arefl to <'-arefl ; <-asym to <'-asym)
+  open OrderedRingStr 𝓡' using ()
+    renaming ( _<_ to _<'_ ; _≤_ to _≤'_
+             ; _>_ to _>'_ ; _≥_ to _≥'_
+             ; trichotomy to trichotomy'
+             ; <-arefl to <'-arefl
+             ; <-asym to <'-asym
+             ; _⋆_ to _⋆'_
+             ; 0⋆q≡0 to 0⋆'q≡0 ; 1⋆q≡q to 1⋆'q≡q
+             ; sucn⋆q≡n⋆q+q to sucn⋆'q≡n⋆'q+q)
+
   open OrderedRingHom f
 
   open CommRingStr (𝓡  .fst .snd)
-  open CommRingStr (𝓡' .fst .snd) renaming (_+_ to _+'_ ; _-_ to _-'_ ; -_ to -'_)
-  open IsRingHom (ring-hom .snd)
+  open CommRingStr (𝓡' .fst .snd) using ()
+    renaming (0r to 0r' ; _+_ to _+'_ ; _-_ to _-'_ ; -_ to -'_)
+  open IsRingHom   (ring-hom .snd)
 
 
   private
@@ -90,6 +108,19 @@ module OrderedRingHomStr (f : OrderedRingHom 𝓡 𝓡') where
   homPres≤ : (x y : R) → x ≤ y → ring-hom .fst x ≤' ring-hom .fst y
   homPres≤ x y (inl x<y) = inl (homPres< _ _ x<y)
   homPres≤ x y (inr x≡y) = inr (cong (ring-hom .fst) x≡y)
+
+
+  homPres<0 : (x : R) → x < 0r → ring-hom .fst x <' 0r'
+  homPres<0 x x<0 = subst (ring-hom .fst x <'_) pres0 (homPres< _ _ x<0)
+
+  homPres>0 : (x : R) → x > 0r → ring-hom .fst x >' 0r'
+  homPres>0 x x>0 = subst (ring-hom .fst x >'_) pres0 (homPres< _ _ x>0)
+
+  homRefl>0 : (x : R) → ring-hom .fst x >' 0r' → x > 0r
+  homRefl>0 x x>0 with trichotomy x 0r
+  ... | lt x<0 = Empty.rec (<'-asym  (homPres<0 _ x<0) x>0)
+  ... | eq x≡0 = Empty.rec (<'-arefl x>0 (sym pres0 ∙ cong (ring-hom .fst) (sym x≡0)))
+  ... | gt x>0 = x>0
 
 
   homRefl≡ : (x y : R) → ring-hom .fst x ≡ ring-hom .fst y → x ≡ y
@@ -108,6 +139,21 @@ module OrderedRingHomStr (f : OrderedRingHom 𝓡 𝓡') where
   homRefl≤ x y (inl fx<fy) = inl (homRefl< _ _ fx<fy)
   homRefl≤ x y (inr fx≡fy) = inr (homRefl≡ _ _ fx≡fy)
 
+
+  homPres⋆ : (n : ℕ)(ε : R) → ring-hom .fst (n ⋆ ε) ≡ n ⋆' ring-hom .fst ε
+  homPres⋆ 0 ε = (λ i → ring-hom .fst (0⋆q≡0 ε i)) ∙ pres0 ∙ sym (0⋆'q≡0 _)
+  homPres⋆ 1 ε = (λ i → ring-hom .fst (1⋆q≡q ε i)) ∙ sym (1⋆'q≡q _)
+  homPres⋆ (suc (suc n)) ε = (λ i → ring-hom .fst (sucn⋆q≡n⋆q+q (suc n) ε i))
+    ∙ pres+ _ _
+    ∙ (λ i → homPres⋆ (suc n) ε i +' ring-hom .fst ε)
+    ∙ sym (sucn⋆'q≡n⋆'q+q (suc n) _)
+
+
+{-
+
+  The Canonical Map from ℤ
+
+-}
 
 module InclusionFromℤ (𝓡 : OrderedRing ℓ ℓ') where
 

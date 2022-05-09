@@ -84,6 +84,9 @@ private
     helper18 : (x : 𝓡 .fst) → - (1r + x) ≡ - 1r - x
     helper18 = solve 𝓡
 
+    helper19 : (x y : 𝓡 .fst) → (x - y) + y ≡ x
+    helper19 = solve 𝓡
+
 
 module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
 
@@ -339,6 +342,15 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
   +-rNeg→≤ {y = y} (inr x≡0) = inr ((λ i → y + x≡0 i) ∙ +Rid y)
 
 
+  ≥→Diff≥0 : x ≥ y → x - y ≥ 0r
+  ≥→Diff≥0 (inl x>y) = inl (>→Diff>0 x>y)
+  ≥→Diff≥0 {y = y} (inr x≡y) = inr (sym (+Rinv y) ∙ (λ i → x≡y i - y))
+
+  Diff≥0→≥ : x - y ≥ 0r → x ≥ y
+  Diff≥0→≥ (inl x-y>0) = inl (Diff>0→> x-y>0)
+  Diff≥0→≥ {x = x} {y = y} (inr x-y≡0) = inr (sym (+Lid y) ∙ (λ i → x-y≡0 i + y) ∙ helper19 x y)
+
+
   {-
 
     Strict & Non-strict Together
@@ -348,6 +360,10 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
   <≤-trans : x < y → y ≤ z → x < z
   <≤-trans x<y (inl y<z) = <-trans x<y y<z
   <≤-trans {x = x} x<y (inr y≡z) = subst (x <_) y≡z x<y
+
+  ≤<-trans : x ≤ y → y < z → x < z
+  ≤<-trans (inl x<y) y<z = <-trans x<y y<z
+  ≤<-trans {z = z} (inr x≡y) y<z = subst (_< z) (sym x≡y) y<z
 
 
   ·-PosPres>≥ : x > 0r → z > 0r → x < y → z ≤ w → x · z < y · w

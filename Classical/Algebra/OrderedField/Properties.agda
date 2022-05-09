@@ -111,32 +111,51 @@ module OrderedFieldStr (𝒦 : OrderedField ℓ ℓ') where
 
   {-
 
+    Inverse of positive element
+
+  -}
+
+  inv₊ : q > 0r → K
+  inv₊ q>0 = inv (>-arefl q>0)
+
+  ·-rInv₊ : (q>0 : q > 0r) → q · inv₊ q>0 ≡ 1r
+  ·-rInv₊ q>0 = 𝒦 .snd _ (>-arefl q>0) .snd
+
+  ·-lInv₊ : (q>0 : q > 0r) → inv₊ q>0 · q ≡ 1r
+  ·-lInv₊ q>0 = ·Comm _ _ ∙ ·-rInv₊ q>0
+
+
+  {-
+
     Order of multiplicative inverse
 
   -}
 
-  p>0→p⁻¹>0 : (p>0 : p > 0r) → inv (>-arefl {x = p} p>0) > 0r
-  p>0→p⁻¹>0 {p = p} p>0 = ·-rPosCancel>0 {x = p} {y = inv (>-arefl {x = p} p>0)} p>0 p·p⁻¹>0
-    where p·p⁻¹>0 : p · inv (>-arefl {x = p} p>0) > 0r
-          p·p⁻¹>0 = subst (_> 0r) (sym (·-rInv (>-arefl {x = p} p>0))) 1>0
+  p>0→p⁻¹>0 : (p>0 : p > 0r) → inv₊ p>0 > 0r
+  p>0→p⁻¹>0 {p = p} p>0 = ·-rPosCancel>0 {x = p} {y = inv₊ p>0} p>0 p·p⁻¹>0
+    where p·p⁻¹>0 : p · inv₊ p>0 > 0r
+          p·p⁻¹>0 = subst (_> 0r) (sym (·-rInv₊ p>0)) 1>0
 
-  p>q>0→p·q⁻¹>1 : (q>0 : q > 0r) → p > q → p · inv (>-arefl {x = q} q>0) > 1r
+  p>q>0→p·q⁻¹>1 : (q>0 : q > 0r) → p > q → p · inv₊ q>0 > 1r
   p>q>0→p·q⁻¹>1 {q = q} {p = p} q>0 p>q =
     subst (p · inv (>-arefl {x = q} q>0) >_) (·-rInv (>-arefl {x = q} q>0))
       (·-rPosPres< {x = inv (>-arefl {x = q} q>0)} {y = q} {z = p} (p>0→p⁻¹>0 {p = q} q>0) p>q)
 
-  inv-Reverse< : (p>0 : p > 0r)(q>0 : q > 0r) → p > q → inv (>-arefl {x = p} p>0) < inv (>-arefl {x = q} q>0)
+  inv-Reverse< : (p>0 : p > 0r)(q>0 : q > 0r) → p > q → inv₊ p>0 < inv₊ q>0
   inv-Reverse< {p = p} {q = q} p>0 q>0 p>q = q⁻¹>p⁻¹
-    where p≢0 = >-arefl {x = p} p>0
-          q≢0 = >-arefl {x = q} q>0
-          p⁻¹ = inv p≢0
-          q⁻¹ = inv q≢0
+    where p⁻¹ = inv₊ p>0
+          q⁻¹ = inv₊ q>0
           p⁻¹·q⁻¹>0 : p⁻¹ · q⁻¹ > 0r
           p⁻¹·q⁻¹>0 = ·-Pres>0 {x = p⁻¹} {y = q⁻¹} (p>0→p⁻¹>0 {p = p} p>0) (p>0→p⁻¹>0 {p = q} q>0)
           p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹ : (p · p⁻¹) · q⁻¹ > (q · q⁻¹) · p⁻¹
           p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹ = transport (λ i → helper2 p p⁻¹ q⁻¹ i > helper3 q p⁻¹ q⁻¹ i)
             (·-rPosPres< {x = p⁻¹ · q⁻¹} {y = q} {z = p} p⁻¹·q⁻¹>0 p>q)
           1·q⁻¹>1·p⁻¹ : 1r · q⁻¹ > 1r · p⁻¹
-          1·q⁻¹>1·p⁻¹ = transport (λ i → ·-rInv p≢0 i · q⁻¹ > ·-rInv q≢0 i · p⁻¹) p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹
+          1·q⁻¹>1·p⁻¹ = transport (λ i → ·-rInv₊ p>0 i · q⁻¹ > ·-rInv₊ q>0 i · p⁻¹) p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹
           q⁻¹>p⁻¹ : q⁻¹ > p⁻¹
           q⁻¹>p⁻¹ = transport (λ i → ·Lid q⁻¹ i > ·Lid p⁻¹ i) 1·q⁻¹>1·p⁻¹
+
+  inv₊Idem : (q>0 : q > 0r) → inv₊ (p>0→p⁻¹>0 q>0) ≡ q
+  inv₊Idem {q = q} q>0 = sym (·Lid _)
+    ∙ (λ i → ·-rInv₊ q>0 (~ i) · inv₊ (p>0→p⁻¹>0 q>0))
+    ∙ sym (·Assoc _ _ _) ∙ (λ i →  q · ·-rInv₊ (p>0→p⁻¹>0 q>0) i) ∙ ·Rid _
