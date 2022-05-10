@@ -196,9 +196,9 @@ module CompleteOrderedField (decide : LEM) where
                ; isProp< to isProp<'
                ; Trichotomy to Trichotomy'
                ; trichotomy to trichotomy'
-               ; <-asym to <'-asym
+               ; <-asym  to <'-asym
                ; <-trans to <'-trans
-               ; is-set to is-set')
+               ; is-set  to is-set')
     open OrderedRingHom    f
     open OrderedRingHomStr f
     open OrderedFieldHomStr {𝒦' = 𝒦} {𝒦 = 𝒦'} f
@@ -268,7 +268,7 @@ module CompleteOrderedField (decide : LEM) where
     isSurjection-f : isSurjection f-map
     isSurjection-f y = ∣ _ , fiber-path y ∣
 
-    -- Homomorphism between complete ordered fields is always isomorphism.
+    -- Homomorphism between complete ordered fields is always an isomorphism.
 
     isEquiv-f : isEquiv f-map
     isEquiv-f = isEmbedding×isSurjection→isEquiv (isEmbedding-f , isSurjection-f)

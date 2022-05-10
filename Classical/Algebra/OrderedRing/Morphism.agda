@@ -85,7 +85,7 @@ module OrderedRingHomStr (f : OrderedRingHom 𝓡 𝓡') where
              ; _>_ to _>'_ ; _≥_ to _≥'_
              ; trichotomy to trichotomy'
              ; <-arefl to <'-arefl
-             ; <-asym to <'-asym
+             ; <-asym  to <'-asym
              ; _⋆_ to _⋆'_
              ; 0⋆q≡0 to 0⋆'q≡0 ; 1⋆q≡q to 1⋆'q≡q
              ; sucn⋆q≡n⋆q+q to sucn⋆'q≡n⋆'q+q)
