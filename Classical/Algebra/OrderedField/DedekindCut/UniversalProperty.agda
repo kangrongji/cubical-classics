@@ -3,7 +3,7 @@
 The Universal Property of Dedekind Cuts
 
 -}
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --experimental-lossy-unification #-}
 module Classical.Algebra.OrderedField.DedekindCut.UniversalProperty where
 
 open import Cubical.Foundations.Prelude
@@ -17,6 +17,7 @@ open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.Ring
 open import Cubical.Algebra.CommRing
+open import Cubical.Algebra.CommRingSolver.Reflection hiding (K')
 
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
@@ -37,6 +38,16 @@ open import Classical.Algebra.OrderedField.DedekindCut.Multiplication
 private
   variable
     ℓ ℓ' ℓ'' ℓ''' : Level
+
+private
+  module Helpers {ℓ : Level}(𝓡 : CommRing ℓ) where
+    open CommRingStr (𝓡 .snd)
+
+    helper1 : (x y : 𝓡 .fst) → (x · (- y)) ≡ - (x · y)
+    helper1 = solve 𝓡
+
+    helper2 : (x y : 𝓡 .fst) → ((- x) · y) ≡ - (x · y)
+    helper2 = solve 𝓡
 
 
 module UniversalProperty (decide : LEM)
@@ -61,6 +72,11 @@ module UniversalProperty (decide : LEM)
       renaming ( _+_ to _+'_ ; -_ to -'_ ; _-_ to _-'_
                ; 0r to 0r' ; 1r to 1r'
                ; _·_ to _·'_
+               ; +Lid to +Lid' ; +Rid to +Rid'
+               ; +Linv to +Linv'
+               ; +Assoc to +Assoc'
+               ; 0LeftAnnihilates  to 0LeftAnnihilates'
+               ; 0RightAnnihilates to 0RightAnnihilates'
                ; _<_ to _<'_ ; _≤_ to _≤'_
                ; _>_ to _>'_ ; _≥_ to _≥'_
                ; isProp< to isProp<'
@@ -68,9 +84,10 @@ module UniversalProperty (decide : LEM)
                ; Trichotomy to Trichotomy'
                ; trichotomy to trichotomy'
                ; <-asym   to <'-asym
-               ; <-trans  to <'-trans
+               ; ≤-refl   to ≤-refl'
                ; <≤-total to <≤-total'
                ; <≤-trans to <≤-trans'
+               ; ≤<-trans to ≤<-trans'
                ; <≤-asym  to <≤-asym'
                ; ¬<→≥ to ¬<→≥'
                ; +-Pres< to +-Pres<'
@@ -90,6 +107,7 @@ module UniversalProperty (decide : LEM)
       f-map = ring-hom .fst
 
     getSup = 𝒦' .snd
+    findBetween = isArchimedean→isDense (isComplete→isArchimedean _ (𝒦' .snd))
 
     open Supremum
 
@@ -157,6 +175,48 @@ module UniversalProperty (decide : LEM)
       map-helper< = ∈→Inhab map-prop map∈sub
 
 
+    module _ (q : K) where
+
+      comp-helper : (x : K') → x ∈ map-sub (K→𝕂 q) → x ≤' f-map q
+      comp-helper x x∈sub with <≤-total' (f-map q) x
+      ... | inr x≤fq = x≤fq
+      ... | inl x>fq = Empty.rec (Prop.rec isProp⊥
+        (λ (r , fq<fr , fr<x) →
+          <'-asym fr<x (∈→Inhab (map-prop (K→𝕂 q)) x∈sub r (Inhab→∈ (q <P_) (homRefl< _ _ fq<fr))))
+        (findBetween x>fq))
+
+      comp-helper' : (x : K') → x ≤' f-map q → x ∈ map-sub (K→𝕂 q)
+      comp-helper' x x≤fq =
+        Inhab→∈ (map-prop (K→𝕂 q)) (λ r r∈q → ≤<-trans' x≤fq (homPres< q r (∈→Inhab (q <P_) r∈q)))
+
+      comp-prop : K' → hProp _
+      comp-prop x = (x ≤' f-map q) , isProp≤'
+
+      comp-sub : ℙ K'
+      comp-sub = specify comp-prop
+
+      comp-path : comp-sub ≡ map-sub (K→𝕂 q)
+      comp-path = bi⊆→≡ ⊆helper ⊇helper
+        where
+        ⊆helper : comp-sub ⊆ map-sub (K→𝕂 q)
+        ⊆helper x∈comp = comp-helper' _ (∈→Inhab comp-prop x∈comp)
+
+        ⊇helper : map-sub (K→𝕂 q) ⊆ comp-sub
+        ⊇helper x∈sub = Inhab→∈ comp-prop (comp-helper _ x∈sub)
+
+      compSup : Supremum (𝒦' .fst) comp-sub
+      compSup .sup = f-map q
+      compSup .bound r r∈comp = ∈→Inhab comp-prop r∈comp
+      compSup .least b b≥r∈comp = b≥r∈comp _ fq∈comp
+        where
+        fq∈comp : f-map q ∈ comp-sub
+        fq∈comp = Inhab→∈ comp-prop (≤-refl' refl)
+
+      map-comp : map-helper (K→𝕂 q) ≡ f-map q
+      map-comp i =
+        isProp→PathP (λ i → isPropSupremum (𝒦' .fst) (comp-path i)) compSup (map-sup (K→𝕂 q)) (~ i) .sup
+
+
     module _ (a : 𝕂)(b : 𝕂) where
 
       map-sub-⊆ : a ≥𝕂 b → map-sub b ⊆ map-sub a
@@ -209,8 +269,8 @@ module UniversalProperty (decide : LEM)
               in  <'-asym fp+q<fa+b (map-helper< (a +𝕂 b) _ p+q∈a+b))
             (>map-helper a s fa<s) (>map-helper b t fb<t)
 
-      map-helper+ : map-helper (a +𝕂 b) ≡ map-helper a +' map-helper b
-      map-helper+ = case-split (trichotomy' _ _)
+      map-pres+ : map-helper (a +𝕂 b) ≡ map-helper a +' map-helper b
+      map-pres+ = case-split (trichotomy' _ _)
         where
         case-split : Trichotomy' _ _ → _
         case-split (lt fa+b<fa+fb) = Empty.rec (<≤-asym' fa+b<fa+fb fa+fb≤fa+b)
@@ -219,20 +279,25 @@ module UniversalProperty (decide : LEM)
 
 
     map-pres0 : map-helper 𝟘 ≡ 0r'
-    map-pres0 = {!!}
+    map-pres0 = map-comp 0r ∙ pres0
 
     map-pres1 : map-helper 𝟙 ≡ 1r'
-    map-pres1 = {!!}
+    map-pres1 = map-comp 1r ∙ pres1
 
     map-pres- : (a : 𝕂) → map-helper (-𝕂 a) ≡ -' map-helper a
-    map-pres- = {!!}
+    map-pres- a = sym (+Lid' _)
+      ∙ (λ i → +Linv' (map-helper a) (~ i) +' map-helper (-𝕂 a))
+      ∙ sym (+Assoc' _ _ _) ∙ (λ i → (-' map-helper a) +' fa+f-a≡0 i) ∙ +Rid' _
+      where
+      fa+f-a≡0 : map-helper a +' map-helper (-𝕂 a) ≡ 0r'
+      fa+f-a≡0 = sym (map-pres+ a (-𝕂 a)) ∙ (λ i → map-helper (+𝕂-rInverse a i)) ∙ map-pres0
 
 
     map-helper-pres≥0 : (a : 𝕂) → a ≥𝕂 𝟘 → map-helper a ≥' 0r'
-    map-helper-pres≥0 a a≥0 = {!!}
+    map-helper-pres≥0 a a≥0 = subst (map-helper a ≥'_) map-pres0 (map-helper-pres≥ a 𝟘 a≥0)
 
     map-helper-pres>0 : (a : 𝕂) → a >𝕂 𝟘 → map-helper a >' 0r'
-    map-helper-pres>0 a a≥0 = {!!}
+    map-helper-pres>0 a a>0 = subst (map-helper a >'_) map-pres0 (map-helper-pres> a 𝟘 a>0)
 
 
     open OrderStrOnCommRing
@@ -280,35 +345,56 @@ module UniversalProperty (decide : LEM)
               in  <'-asym fp·q<fa·b (map-helper<  ((a₊ ·𝕂₊ b₊) .fst) _ p·q∈a·b))
             (>map-helper a s fa<s) (>map-helper b t fb<t)
 
-      map-helper·PosPos' : map-helper ((a₊ ·𝕂₊ b₊) .fst) ≡ map-helper a ·' map-helper b
-      map-helper·PosPos' = case-split (trichotomy' _ _)
+      map-pres·PosPos' : map-helper ((a₊ ·𝕂₊ b₊) .fst) ≡ map-helper a ·' map-helper b
+      map-pres·PosPos' = case-split (trichotomy' _ _)
         where
         case-split : Trichotomy' _ _ → _
         case-split (lt fa·b<fa·fb) = Empty.rec (<≤-asym' fa·b<fa·fb fa·fb≤fa·b)
         case-split (eq fa·b≡fa·fb) = fa·b≡fa·fb
         case-split (gt fa·b>fa·fb) = Empty.rec (¬fa·fb<fa·b fa·b>fa·fb)
 
-      map-helper·PosPos : map-helper (a ·𝕂 b) ≡ map-helper a ·' map-helper b
-      map-helper·PosPos = (λ i → map-helper (·𝕂≡·𝕂₊ a₊ b₊ i)) ∙ map-helper·PosPos'
+      map-pres·PosPos : map-helper (a ·𝕂 b) ≡ map-helper a ·' map-helper b
+      map-pres·PosPos = (λ i → map-helper (·𝕂≡·𝕂₊ a₊ b₊ i)) ∙ map-pres·PosPos'
 
 
-    module _ (a b : 𝕂) where
+    open Helpers 𝕂CommRing renaming (helper1 to helper𝕂1 ; helper2 to helper𝕂2)
+    open Helpers (𝒦' .fst .fst .fst)
 
-      map-helper·Pos : a >𝕂 𝟘 → map-helper (a ·𝕂 b) ≡ map-helper a ·' map-helper b
-      map-helper·Pos a>0 = case-split (trichotomy𝕂 b 𝟘)
-        where
-        case-split : Trichotomy𝕂 b 𝟘 → _
-        case-split (gt b>0) = map-helper·PosPos a b a>0 b>0
-        case-split (eq b≡0) = {!!}
-        case-split (lt b<0) = {!!}
+    map-pres·Pos : (a b : 𝕂) → a >𝕂 𝟘 → map-helper (a ·𝕂 b) ≡ map-helper a ·' map-helper b
+    map-pres·Pos a b a>0 = case-split (trichotomy𝕂 b 𝟘)
+      where
+      case-split : Trichotomy𝕂 b 𝟘 → _
+      case-split (gt b>0) = map-pres·PosPos a b a>0 b>0
+      case-split (eq b≡0) = (λ i → map-helper (a ·𝕂 b≡0 i))
+        ∙ (λ i → map-helper (·𝕂-rZero a i))
+        ∙ map-pres0 ∙ sym (0RightAnnihilates' _)
+        ∙ (λ i → map-helper a ·' map-pres0 (~ i))
+        ∙ (λ i → map-helper a ·' map-helper (b≡0 (~ i)))
+      case-split (lt b<0) = (λ i → map-helper (a ·𝕂 -𝕂-Involutive b (~ i)))
+        ∙ (λ i → map-helper (helper𝕂1 a (-𝕂 b) i))
+        ∙ map-pres- (a ·𝕂 (-𝕂 b))
+        ∙ (λ i → -' map-pres·PosPos a (-𝕂 b) a>0 (-reverse<0 b b<0) i)
+        ∙ sym (helper1 _ _)
+        ∙ (λ i → map-helper a ·' map-pres- (-𝕂 b) (~ i))
+        ∙ (λ i → map-helper a ·' map-helper (-𝕂-Involutive b i))
 
-      map-helper· : map-helper (a ·𝕂 b) ≡ map-helper a ·' map-helper b
-      map-helper· = case-split (trichotomy𝕂 a 𝟘)
-        where
-        case-split : Trichotomy𝕂 a 𝟘 → _
-        case-split (gt a>0) = map-helper·Pos a>0
-        case-split (eq a≡0) = {!!}
-        case-split (lt a<0) = {!!}
+    map-pres· : (a b : 𝕂) → map-helper (a ·𝕂 b) ≡ map-helper a ·' map-helper b
+    map-pres· a b = case-split (trichotomy𝕂 a 𝟘)
+      where
+      case-split : Trichotomy𝕂 a 𝟘 → _
+      case-split (gt a>0) = map-pres·Pos a b a>0
+      case-split (eq a≡0) = (λ i → map-helper (a≡0 i ·𝕂 b))
+        ∙ (λ i → map-helper (·𝕂-lZero b i))
+        ∙ map-pres0 ∙ sym (0LeftAnnihilates' _)
+        ∙ (λ i → map-pres0 (~ i) ·' map-helper b)
+        ∙ (λ i → map-helper (a≡0 (~ i)) ·' map-helper b)
+      case-split (lt a<0) = (λ i → map-helper (-𝕂-Involutive a (~ i) ·𝕂 b))
+        ∙ (λ i → map-helper (helper𝕂2 (-𝕂 a) b i))
+        ∙ map-pres- ((-𝕂 a) ·𝕂 b)
+        ∙ (λ i → -' map-pres·Pos (-𝕂 a) b (-reverse<0 a a<0) i)
+        ∙ sym (helper2 _ _)
+        ∙ (λ i → map-pres- (-𝕂 a) (~ i) ·' map-helper b)
+        ∙ (λ i → map-helper (-𝕂-Involutive a i) ·' map-helper b)
 
 
     {-
@@ -318,7 +404,7 @@ module UniversalProperty (decide : LEM)
     -}
 
     extendedRingHom : CommRingHom 𝕂CommRing (𝒦' .fst .fst .fst)
-    extendedRingHom = map-helper , makeIsRingHom map-pres1 map-helper+ map-helper·
+    extendedRingHom = map-helper , makeIsRingHom map-pres1 map-pres+ map-pres·
 
     open OrderedRingHom
 
