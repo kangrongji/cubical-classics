@@ -60,6 +60,12 @@ module CompleteOrderedField (decide : LEM) where
     open OrderedFieldStr 𝒦
 
 
+    {-
+
+      Supremum and Dedekind Completeness
+
+    -}
+
     record Supremum (A : ℙ K) : Type (ℓ-max ℓ ℓ') where
       field
         sup : K
@@ -88,6 +94,26 @@ module CompleteOrderedField (decide : LEM) where
       case-split _ (gt q>x) _ = inl q>x
       case-split x (lt q<x) x∈A = Empty.rec (¬∃×→∀→¬ (λ _ → isProp<) (λ _ → isProp∈ A) ¬p x q<x x∈A)
 
+    >sup→¬∈ : {A : ℙ K}(q : K)(boundary : Supremum A) → q > boundary .sup → ¬ q ∈ A
+    >sup→¬∈ {A = A} q boundary q>sup q∈A with decide (isProp∈ A)
+    ... | yes q∈A = <≤-asym q>sup (boundary .bound q q∈A)
+    ... | no ¬q∈A = ¬q∈A q∈A
+
+    ⊆→sup≤ : {A B : ℙ K} → A ⊆ B → (SupA : Supremum A)(SupB : Supremum B) → SupA .sup ≤ SupB .sup
+    ⊆→sup≤ {A = A} {B = B} A⊆B SupA SupB = SupA .least _ (λ r r∈A → SupB .bound r (A⊆B r∈A))
+
+
+    {-
+
+      Some characterizations of supremum
+
+    -}
+
+    makeSupremum : (A : ℙ K) → (x : K) → x ∈ A → ((r : K) → r ∈ A → r ≤ x) → Supremum A
+    makeSupremum A x x∈A x≥r∈A .sup = x
+    makeSupremum A x x∈A x≥r∈A .bound = x≥r∈A
+    makeSupremum A x x∈A x≥r∈A .least b b≥r∈A = b≥r∈A _ x∈A
+
 
     -- Boundedness of subsets
 
@@ -99,6 +125,129 @@ module CompleteOrderedField (decide : LEM) where
 
     isComplete : Type (ℓ-max ℓ ℓ')
     isComplete = {A : ℙ K} → isInhabited A → isUpperBounded A → Supremum A
+
+
+    {-
+
+      Infimum
+
+    -}
+
+    record Infimum (A : ℙ K) : Type (ℓ-max ℓ ℓ') where
+      field
+        inf : K
+        bound : (r : K) → r ∈ A → inf ≤ r
+        most  : (b : K) → ((r : K) → r ∈ A → b ≤ r) → b ≤ inf
+
+    open Infimum
+
+    isPropInfimum : (A : ℙ K) → isProp (Infimum A)
+    isPropInfimum A s t i .inf = ≤-asym (t .most _ (s .bound)) (s .most _ (t .bound)) i
+    isPropInfimum A s t i .bound =
+      isProp→PathP (λ i → isPropΠ2 (λ r _ → isProp≤ {x = isPropInfimum A s t i .inf} {y = r})) (s .bound) (t .bound) i
+    isPropInfimum A s t i .most  =
+      isProp→PathP (λ i → isPropΠ2 (λ b _ → isProp≤ {x = b} {y = isPropInfimum A s t i .inf})) (s .most)  (t .most)  i
+
+
+    >inf→∃∈ : {A : ℙ K}(q : K)(boundary : Infimum A) → q > boundary .inf → ∥ Σ[ x ∈ K ] (x < q) × (x ∈ A) ∥
+    >inf→∃∈ {A = A} q boundary q>inf with decide (squash {A = Σ[ x ∈ K ] (x < q) × (x ∈ A)})
+    ... | yes p = p
+    ... | no ¬p = Empty.rec (<≤-asym q>inf (boundary .most _ (λ r r∈A → case-split r (trichotomy q r) r∈A)))
+      where
+      case-split : (x : K) → Trichotomy q x → x ∈ A → q ≤ x
+      case-split _ (eq q≡x) _ = inr q≡x
+      case-split _ (lt q<x) _ = inl q<x
+      case-split x (gt q>x) x∈A = Empty.rec (¬∃×→∀→¬ (λ _ → isProp<) (λ _ → isProp∈ A) ¬p x q>x x∈A)
+
+    <inf→¬∈ : {A : ℙ K}(q : K)(boundary : Infimum A) → q < boundary .inf → ¬ q ∈ A
+    <inf→¬∈ {A = A} q boundary q<inf q∈A with decide (isProp∈ A)
+    ... | yes q∈A = <≤-asym q<inf (boundary .bound q q∈A)
+    ... | no ¬q∈A = ¬q∈A q∈A
+
+
+    isLowerBounded : ℙ K → Type (ℓ-max ℓ ℓ')
+    isLowerBounded A = ∥ Σ[ b ∈ K ] ((r : K) → r ∈ A → b ≤ r) ∥
+
+    isLowerComplete : Type (ℓ-max ℓ ℓ')
+    isLowerComplete = {A : ℙ K} → isInhabited A → isLowerBounded A → Infimum A
+
+
+    -- Equivalence of upper/lower completeness
+
+    module _ (A : ℙ K) where
+
+      -prop : K → hProp _
+      -prop x = - x ∈ A , isProp∈ A
+
+      -ℙ : ℙ K
+      -ℙ = specify -prop
+
+
+    x∈A→-x∈-A : (A : ℙ K){x : K} → x ∈ A → - x ∈ -ℙ A
+    x∈A→-x∈-A A {x = x} x∈A = Inhab→∈ (-prop A) (subst (_∈ A) (sym (-Idempotent x)) x∈A)
+
+    -ℙ-Idem : (A : ℙ K) → -ℙ (-ℙ A) ≡ A
+    -ℙ-Idem A = bi⊆→≡ ⊆-helper ⊇helper
+      where
+      ⊆-helper : {x : K} → x ∈ -ℙ (-ℙ A) → x ∈ A
+      ⊆-helper {x = x} x∈ =
+        subst (_∈ A) (-Idempotent x) (∈→Inhab (-prop A) (∈→Inhab (-prop (-ℙ A)) x∈))
+
+      ⊇helper : {x : K} → x ∈ A → x ∈ -ℙ (-ℙ A)
+      ⊇helper {x = x} x∈ =
+        Inhab→∈ (-prop (-ℙ A)) (Inhab→∈ (-prop A) (subst (_∈ A) (sym (-Idempotent x)) x∈))
+
+
+    isInhabited- : (A : ℙ K) → isInhabited A → isInhabited (-ℙ A)
+    isInhabited- A = Prop.map (λ (x , x∈A) → - x , x∈A→-x∈-A A x∈A)
+
+
+    isUpperBounded→isLowerBounded : (A : ℙ K) → isUpperBounded A → isLowerBounded (-ℙ A)
+    isUpperBounded→isLowerBounded A =
+      Prop.map (λ (b , b≥r∈A) → - b , (λ r r∈-A → -lReverse≤ (b≥r∈A _ (∈→Inhab (-prop A) r∈-A))))
+
+    isLowerBounded→isUpperBounded : (A : ℙ K) → isLowerBounded A → isUpperBounded (-ℙ A)
+    isLowerBounded→isUpperBounded A =
+      Prop.map (λ (b , b≤r∈A) → - b , (λ r r∈-A → -rReverse≤ (b≤r∈A _ (∈→Inhab (-prop A) r∈-A))))
+
+
+    Sup→Inf- : (A : ℙ K) → Supremum A → Infimum (-ℙ A)
+    Sup→Inf- A Sup .inf = - Sup .sup
+    Sup→Inf- A Sup .bound r r∈-A = -lReverse≤ (Sup .bound _ (∈→Inhab (-prop A) r∈-A))
+    Sup→Inf- A Sup .most  b b≤r∈-A = -rReverse≤ (Sup .least _ -b≥r∈-A)
+      where
+      -b≥r∈-A : (r : K) → r ∈ A → - b ≥ r
+      -b≥r∈-A r r∈A = -rReverse≤ (b≤r∈-A _ (x∈A→-x∈-A A r∈A))
+
+    Inf→Sup- : (A : ℙ K) → Infimum A → Supremum (-ℙ A)
+    Inf→Sup- A Inf .sup = - Inf .inf
+    Inf→Sup- A Inf .bound r r∈-A = -rReverse≤ (Inf .bound _ (∈→Inhab (-prop A) r∈-A))
+    Inf→Sup- A Inf .least b b≥r∈-A = -lReverse≤ (Inf .most  _ -b≤r∈-A)
+      where
+      -b≤r∈-A : (r : K) → r ∈ A → - b ≤ r
+      -b≤r∈-A r r∈A = -lReverse≤ (b≥r∈-A _ (x∈A→-x∈-A A r∈A))
+
+    Sup→Inf : (A : ℙ K) → Supremum (-ℙ A) → Infimum A
+    Sup→Inf A Sup = subst Infimum (-ℙ-Idem A) (Sup→Inf- _ Sup)
+
+    Inf→Sup : (A : ℙ K) → Infimum (-ℙ A) → Supremum A
+    Inf→Sup A Sup = subst Supremum (-ℙ-Idem A) (Inf→Sup- _ Sup)
+
+
+    isComplete→isLowerComplete : isComplete → isLowerComplete
+    isComplete→isLowerComplete getSup inhab bound =
+      Sup→Inf _ (getSup (isInhabited- _ inhab) (isLowerBounded→isUpperBounded _ bound))
+
+    isLowerComplete→isComplete : isLowerComplete → isComplete
+    isLowerComplete→isComplete getInf inhab bound =
+      Inf→Sup _ (getInf (isInhabited- _ inhab) (isUpperBounded→isLowerBounded _ bound))
+
+
+    {-
+
+      Completeness implies Archimedean-ness
+
+    -}
 
 
     private

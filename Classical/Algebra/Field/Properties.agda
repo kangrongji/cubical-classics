@@ -33,7 +33,7 @@ module FieldStr (𝒦 : Field ℓ) where
     variable
       x y : K
 
-  open RingTheory  (CommRing→Ring (𝒦 .fst))
+  open RingTheory  (CommRing→Ring (𝒦 .fst)) public
   open CommRingStr (𝒦 .fst .snd) public
   open Units       (𝒦 .fst)      public
 

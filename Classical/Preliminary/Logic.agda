@@ -47,12 +47,16 @@ private
 ¬∃→∀¬ f = ¬Σ→∀¬ ((¬map ∣_∣) f)
 
 
+takeOut∥Σ∥ : {P : X → Type ℓ'} → ∥ Σ[ x ∈ X ] ∥ P x ∥ ∥ → ∥ Σ[ x ∈ X ] P x ∥
+takeOut∥Σ∥ = Prop.rec squash (λ (x , ∥p∥) → Prop.map (λ p → x , p) ∥p∥)
+
+
 module ClassicalLogic (decide : LEM) where
 
   open DoubleNegationElim decide
 
   module _
-    {P : X → Type ℓ' }
+    {P : X → Type ℓ'}
     where
 
     ¬∀¬→∃ : ¬ ((x : X) → ¬ P x) → ∥ Σ[ x ∈ X ] P x ∥
@@ -60,7 +64,7 @@ module ClassicalLogic (decide : LEM) where
 
 
   module _
-    {P : X → Type ℓ' }(isPropP : (x : X) → isProp (P x))
+    {P : X → Type ℓ'}(isPropP : (x : X) → isProp (P x))
     where
 
     ¬∀→∃¬ : ¬ ((x : X) → P x) → ∥ Σ[ x ∈ X ] ¬ P x ∥
@@ -68,6 +72,21 @@ module ClassicalLogic (decide : LEM) where
       where
       helper : ((x : X) → ¬ ¬ P x) → (x : X) → P x
       helper f x = ¬¬elim (isPropP _) (f x)
+
+
+  module _
+    {Y : X → Type ℓ'}
+    {P : (x : X) → Y x → Type ℓ''}
+    (isPropP : (x : X) → (y : Y x) → isProp (P x y))
+    where
+
+    ¬∀→∃¬2 : ¬ ((x : X) → (y : Y x) → P x y) → ∥ Σ[ x ∈ X ] Σ[ y ∈ Y x ] ¬ P x y ∥
+    ¬∀→∃¬2 f = takeOut∥Σ∥ helper
+      where
+      helper : ∥ Σ[ x ∈ X ] ∥ Σ[ y ∈ Y x ] ¬ P x y ∥ ∥
+      helper = Prop.map
+        (λ (x , ¬p) → x , ¬∀→∃¬ (isPropP _) ¬p)
+        (¬∀→∃¬ (λ _ → isPropΠ (λ _ → isPropP _ _)) f)
 
 
   module _

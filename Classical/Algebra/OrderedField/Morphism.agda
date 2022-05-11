@@ -91,7 +91,6 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
   open OrderedRingHom    f
   open OrderedRingHomStr f
   open IsRingHom (ring-hom .snd)
-  open RingTheory (CommRing→Ring (𝒦 .fst .fst))
 
   private
     K  = 𝒦  .fst .fst .fst

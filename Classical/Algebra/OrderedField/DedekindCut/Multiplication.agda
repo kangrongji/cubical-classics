@@ -286,6 +286,14 @@ module Multiplication (decide : LEM)
     case-split (lt b+c<0) = ·𝕂-lDistb-Neg a b c b+c<0
 
 
+  -- The previously defined _·𝕂₊_ is equal to _·𝕂_ when both variables are non-negative.
+
+  ·𝕂≡·𝕂₊ : (a b : 𝕂₊) → a .fst ·𝕂 b .fst ≡ (a ·𝕂₊ b) .fst
+  ·𝕂≡·𝕂₊ (a , a≥0) (b , b≥0) = ·pos-helper a b a≥0 b≥0
+    ∙ (λ i → (path-𝕂₊ (abs𝕂 a) (a , a≥0) (abs≥0 a a≥0) i
+          ·𝕂₊ path-𝕂₊ (abs𝕂 b) (b , b≥0) (abs≥0 b b≥0) i) .fst)
+
+
   {-
 
     Commutative Ring Instance

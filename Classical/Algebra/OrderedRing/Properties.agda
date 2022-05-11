@@ -87,6 +87,9 @@ private
     helper19 : (x y : 𝓡 .fst) → (x - y) + y ≡ x
     helper19 = solve 𝓡
 
+    helper20 : (x y : 𝓡 .fst) → (x + y) - y ≡ x
+    helper20 = solve 𝓡
+
 
 module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
 
@@ -180,8 +183,15 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
   +-rPres< : x < y → x + z < y + z
   +-rPres< {z = z} x<y = subst (_>0) (helper12 _ _ z) x<y
 
+
   -Reverse< : x < y → - x > - y
   -Reverse< x<y = subst (_>0) (helper6 _ _) x<y
+
+  -lReverse< : - x < y → x > - y
+  -lReverse< {x = x} {y = y} -x<y = subst (_> - y) (-Idempotent x) (-Reverse< -x<y)
+
+  -rReverse< : x < - y → - x > y
+  -rReverse< {x = x} {y = y} x<-y = subst (_< - x) (-Idempotent y) (-Reverse< x<-y)
 
 
   +-rPos→> : x > 0r → y + x > y
@@ -273,6 +283,13 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
   ·-Pos·>1→> x>0 y>1 = subst (_>0) (helper15 _ _) (>0-· _ _ x>0 y>1)
 
 
+  +-MoveLToR< : x + y < z → x < z - y
+  +-MoveLToR< {x = x} {y = y} {z = z} x+y<z = subst (_< z - y) (helper20 x y) (+-rPres< x+y<z)
+
+  +-MoveRToL< : z < x + y → z - y < x
+  +-MoveRToL< {z = z} {x = x} {y = y} x+y>z = subst (_> z - y) (helper20 x y) (+-rPres< x+y>z)
+
+
   {-
 
     Non-strict Ordering
@@ -351,6 +368,30 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
   Diff≥0→≥ {x = x} {y = y} (inr x-y≡0) = inr (sym (+Lid y) ∙ (λ i → x-y≡0 i + y) ∙ helper19 x y)
 
 
+  -Reverse≤ : x ≤ y → - x ≥ - y
+  -Reverse≤ (inl x<y) = inl (-Reverse< x<y)
+  -Reverse≤ (inr x≡y) = inr (λ i → - x≡y (~ i))
+
+  -lReverse≤ : - x ≤ y → x ≥ - y
+  -lReverse≤ {x = x} {y = y} -x≥y = subst (_≥ - y) (-Idempotent x) (-Reverse≤ -x≥y)
+
+  -rReverse≤ : x ≤ - y → - x ≥ y
+  -rReverse≤ {x = x} {y = y} x≤-y = subst (_≤ - x) (-Idempotent y) (-Reverse≤ x≤-y)
+
+
+  ·-lPosPres≤ : x ≥ 0r → y ≤ z → x · y ≤ x · z
+  ·-lPosPres≤ (inl 0<x) (inl y<z) = inl (·-lPosPres< 0<x y<z)
+  ·-lPosPres≤ {y = y} {z = z} (inr 0≡x) _ =
+    inr ((λ i → 0≡x (~ i) · y) ∙ 0LeftAnnihilates _ ∙ sym (0LeftAnnihilates _) ∙ (λ i → 0≡x i · z))
+  ·-lPosPres≤ {x = x} _ (inr y≡z) = inr (λ i → x · y≡z i)
+
+  ·-rPosPres≤ : x ≥ 0r → y ≤ z → y · x ≤ z · x
+  ·-rPosPres≤ {x = x} {y = y} {z = z} x≥0 y≤z = transport (λ i → ·Comm x y i ≤ ·Comm x z i) (·-lPosPres≤ x≥0 y≤z)
+
+  ·-PosPres≥ : x ≥ 0r → z ≥ 0r → x ≤ y → z ≤ w → x · z ≤ y · w
+  ·-PosPres≥ x≥0 z≥0 x≤y z≤w = ≤-trans (·-rPosPres≤ z≥0 x≤y) (·-lPosPres≤ (≤-trans x≥0 x≤y) z≤w)
+
+
   {-
 
     Strict & Non-strict Together
@@ -371,10 +412,29 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
   ≤<-trans {z = z} (inr x≡y) y<z = subst (_< z) (sym x≡y) y<z
 
 
+  <≤-total : (x y : R) → (x < y) ⊎ (y ≤ x)
+  <≤-total x y with trichotomy x y
+  ... | lt x<y = inl x<y
+  ... | eq x≡y = inr (inr (sym x≡y))
+  ... | gt x>y = inr (inl x>y)
+
+  ¬<→≥ : ¬ x < y → x ≥ y
+  ¬<→≥ {x = x} {y = y} ¬x<y with <≤-total x y
+  ... | inl x<y = Empty.rec (¬x<y x<y)
+  ... | inr x≥y = x≥y
+
+
   ·-PosPres>≥ : x > 0r → z > 0r → x < y → z ≤ w → x · z < y · w
   ·-PosPres>≥ x>0 z>0 x<y (inl z<w) = ·-PosPres> x>0 z>0 x<y z<w
   ·-PosPres>≥ {x = x} {z = z} {y = y} x>0 z>0 x<y (inr z≡w) =
     subst (λ w → x · z < y · w) z≡w (·-rPosPres< z>0 x<y)
+
+  ·-PosPres≥0>0 : x ≥ 0r → z ≥ 0r → y > 0r → w > 0r → x < y → z < w → x · z < y · w
+  ·-PosPres≥0>0 (inl x>0) (inl z>0) _ _ x<y z<w = ·-PosPres> x>0 z>0 x<y z<w
+  ·-PosPres≥0>0 {z = z} {y = y} {w = w} (inr 0≡x) _ y>0 w>0 _ _ =
+    subst (y · w >_) (sym (0LeftAnnihilates _) ∙ (λ i → 0≡x i · z)) (·-Pres>0 y>0 w>0)
+  ·-PosPres≥0>0 {x = x} {y = y} {w = w} _ (inr 0≡z) y>0 w>0 _ _ =
+    subst (y · w >_) (sym (0RightAnnihilates _) ∙ (λ i → x · 0≡z i)) (·-Pres>0 y>0 w>0)
 
 
   {-
