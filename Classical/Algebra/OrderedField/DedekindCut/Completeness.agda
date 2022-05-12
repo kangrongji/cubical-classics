@@ -26,7 +26,7 @@ private
     ℓ ℓ' : Level
 
 
-module Completeness (decide : LEM)
+module CompletenessOfCuts (decide : LEM)
   (𝒦 : OrderedField ℓ ℓ')(archimedes : isArchimedean (𝒦 . fst))
   where
 
@@ -42,6 +42,7 @@ module Completeness (decide : LEM)
   open DedekindCut
 
   open CompleteOrderedField decide
+  open Completeness
   open Supremum
 
   open OrderedFieldStr 𝕂OrderedField using ()

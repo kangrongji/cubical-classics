@@ -9,6 +9,8 @@ module Classical.Algebra.OrderedRing.Morphism where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
+open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.Univalence
 
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
@@ -23,7 +25,7 @@ open import Cubical.Relation.Nullary
 
 open import Classical.Preliminary.CommRing.Instances.QuoInt
   renaming (ℤ to ℤRing)
-open import Classical.Preliminary.QuoInt
+open import Classical.Preliminary.QuoInt using (ℤOrder)
   renaming (_>0 to _>ℤ0)
 open import Classical.Algebra.OrderedRing
 
@@ -84,6 +86,7 @@ module OrderedRingHomStr (f : OrderedRingHom 𝓡 𝓡') where
     renaming ( _<_ to _<'_ ; _≤_ to _≤'_
              ; _>_ to _>'_ ; _≥_ to _≥'_
              ; trichotomy to trichotomy'
+             ; >0≡>0r to >0≡>0r'
              ; <-arefl to <'-arefl
              ; <-asym  to <'-asym
              ; _⋆_ to _⋆'_
@@ -121,6 +124,10 @@ module OrderedRingHomStr (f : OrderedRingHom 𝓡 𝓡') where
   ... | lt x<0 = Empty.rec (<'-asym  (homPres<0 _ x<0) x>0)
   ... | eq x≡0 = Empty.rec (<'-arefl x>0 (sym pres0 ∙ cong (ring-hom .fst) (sym x≡0)))
   ... | gt x>0 = x>0
+
+
+  homRefl>0' : (x : R) → 𝓡' .snd ._>0 (ring-hom .fst x) → 𝓡 .snd ._>0 x
+  homRefl>0' x = transport (λ i → >0≡>0r' (ring-hom .fst x) (~ i) →  >0≡>0r x (~ i)) (homRefl>0 x)
 
 
   homRefl≡ : (x y : R) → ring-hom .fst x ≡ ring-hom .fst y → x ≡ y

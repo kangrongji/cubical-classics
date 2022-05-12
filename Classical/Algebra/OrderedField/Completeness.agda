@@ -126,6 +126,9 @@ module CompleteOrderedField (decide : LEM) where
     isComplete : Type (ℓ-max ℓ ℓ')
     isComplete = {A : ℙ K} → isInhabited A → isUpperBounded A → Supremum A
 
+    isPropIsComplete : isProp isComplete
+    isPropIsComplete = isPropImplicitΠ (λ _ → isPropΠ2 (λ _ _ → isPropSupremum _))
+
 
     {-
 
@@ -421,3 +424,22 @@ module CompleteOrderedField (decide : LEM) where
 
     isEquiv-f : isEquiv f-map
     isEquiv-f = isEmbedding×isSurjection→isEquiv (isEmbedding-f , isSurjection-f)
+
+    isOrderedFieldEquivComplete : isOrderedFieldEquiv {𝒦 = 𝒦} {𝒦' = 𝒦'} f
+    isOrderedFieldEquivComplete = isEquiv-f
+
+
+  {-
+
+    SIP for Complete Ordered Field
+
+  -}
+
+  open Completeness
+  open CompleteOrderedFieldHom
+
+  uaCompleteOrderedField : (𝒦 𝒦' : CompleteOrderedField ℓ ℓ') → OrderedFieldHom (𝒦 .fst) (𝒦' .fst) → 𝒦 ≡ 𝒦'
+  uaCompleteOrderedField 𝒦 𝒦' f i .fst =
+    uaOrderedField {𝒦 = 𝒦 .fst} {𝒦' = 𝒦' .fst} {f = f} (isOrderedFieldEquivComplete f (𝒦 .snd) (𝒦' .snd)) i
+  uaCompleteOrderedField 𝒦 𝒦' f i .snd =
+    isProp→PathP (λ i → isPropIsComplete (uaCompleteOrderedField 𝒦 𝒦' f i .fst)) (𝒦 .snd) (𝒦' .snd) i

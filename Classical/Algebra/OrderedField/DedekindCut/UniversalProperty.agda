@@ -57,7 +57,7 @@ module UniversalProperty (decide : LEM)
   open Completeness
 
   module _
-    (𝒦' : CompleteOrderedField ℓ' ℓ'')(f : OrderedFieldHom 𝒦 (𝒦' .fst)) where
+    (𝒦' : CompleteOrderedField ℓ'' ℓ''')(f : OrderedFieldHom 𝒦 (𝒦' .fst)) where
 
     open Powerset decide
 
@@ -412,5 +412,5 @@ module UniversalProperty (decide : LEM)
     extendedOrderedRingHom .ring-hom = extendedRingHom
     extendedOrderedRingHom .pres->0  = map-pres>0
 
-    extend : OrderedFieldHom 𝕂OrderedField (𝒦' .fst)
-    extend = extendedOrderedRingHom
+    extendedOrderedFieldHom : OrderedFieldHom 𝕂OrderedField (𝒦' .fst)
+    extendedOrderedFieldHom = extendedOrderedRingHom

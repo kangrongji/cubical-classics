@@ -22,7 +22,9 @@ open import Cubical.Algebra.CommRingSolver.Reflection hiding (K')
 
 open import Classical.Algebra.OrderedRing
 open import Classical.Algebra.OrderedRing.Morphism
+open import Classical.Algebra.OrderedRing.Univalence
 open import Classical.Algebra.OrderedRing.Archimedes
+open import Classical.Algebra.Field
 open import Classical.Algebra.OrderedField
 
 private
@@ -394,3 +396,23 @@ module InclusionFromℚ (𝒦 : OrderedField ℓ ℓ') where
 
   ℚ→KOrderedFieldHom : OrderedFieldHom ℚOrderedField 𝒦
   ℚ→KOrderedFieldHom = ℚ→KOrderedRingHom
+
+
+{-
+
+  SIP for Ordered Field
+
+-}
+
+-- Equivalence of Ordered Rings
+
+isOrderedFieldEquiv : OrderedFieldHom 𝒦 𝒦' → Type _
+isOrderedFieldEquiv = isOrderedRingEquiv
+
+
+uaOrderedField : {𝒦 𝒦' : OrderedField ℓ ℓ'}
+  {f : OrderedFieldHom 𝒦 𝒦'} → isOrderedFieldEquiv {𝒦 = 𝒦} {𝒦' = 𝒦'} f → 𝒦 ≡ 𝒦'
+uaOrderedField {𝒦 = 𝒦} {𝒦' = 𝒦'} {f = f} is-equiv i .fst =
+  uaOrderedRing {𝓡 = 𝒦 .fst} {𝓡' = 𝒦' .fst} {f = f} is-equiv i
+uaOrderedField {𝒦 = 𝒦} {𝒦' = 𝒦'} is-equiv i .snd =
+  liftPathIsField (λ i → uaOrderedField is-equiv i .fst .fst) (𝒦 .snd) (𝒦' .snd) i

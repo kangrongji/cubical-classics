@@ -11,15 +11,16 @@ open import Classical.Axioms.ExcludedMiddle
 open import Classical.Preliminary.QuoQ
 open import Classical.Algebra.OrderedField
 open import Classical.Algebra.OrderedField.Completeness
-open import Classical.Algebra.OrderedField.Completion
+open import Classical.Analysis.Real.Axiomatic
 
 
 module Real (decide : LEM) where
 
   open CompleteOrderedField decide
-  open Completion decide
+  open AxiomsOfRealNumber   decide
+  open Reals
 
   abstract
 
     ℝ : CompleteOrderedField ℓ-zero ℓ-zero
-    ℝ = complete ℚOrderedField isArchimedeanℚ
+    ℝ = isContrReals .fst .cof
