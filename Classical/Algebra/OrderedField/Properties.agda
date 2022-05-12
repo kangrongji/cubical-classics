@@ -1,6 +1,6 @@
 {-
 
-
+Properties of Ordered Field
 
 -}
 {-# OPTIONS --safe --experimental-lossy-unification #-}
@@ -39,6 +39,12 @@ private
     helper3 : (q p⁻¹ q⁻¹ : 𝓡 .fst) → q · (p⁻¹ · q⁻¹) ≡ (q · q⁻¹) · p⁻¹
     helper3 = solve 𝓡
 
+    helper4 : (y z : 𝓡 .fst) → y + (z - y) ≡ z
+    helper4 = solve 𝓡
+
+    helper5 : (x y z : 𝓡 .fst) → x · (y · z) ≡ (y · x) · z
+    helper5 = solve 𝓡
+
 
 module OrderedFieldStr (𝒦 : OrderedField ℓ ℓ') where
 
@@ -49,7 +55,7 @@ module OrderedFieldStr (𝒦 : OrderedField ℓ ℓ') where
     K = 𝒦 .fst .fst .fst
 
     variable
-      p q : K
+      p q x y z : K
 
   open Helpers (𝒦 .fst .fst)
 
@@ -111,32 +117,104 @@ module OrderedFieldStr (𝒦 : OrderedField ℓ ℓ') where
 
   {-
 
+    Inverse of positive element
+
+  -}
+
+  inv₊ : q > 0r → K
+  inv₊ q>0 = inv (>-arefl q>0)
+
+  ·-rInv₊ : (q>0 : q > 0r) → q · inv₊ q>0 ≡ 1r
+  ·-rInv₊ q>0 = 𝒦 .snd _ (>-arefl q>0) .snd
+
+  ·-lInv₊ : (q>0 : q > 0r) → inv₊ q>0 · q ≡ 1r
+  ·-lInv₊ q>0 = ·Comm _ _ ∙ ·-rInv₊ q>0
+
+
+  {-
+
     Order of multiplicative inverse
 
   -}
 
-  p>0→p⁻¹>0 : (p>0 : p > 0r) → inv (>-arefl {x = p} p>0) > 0r
-  p>0→p⁻¹>0 {p = p} p>0 = ·-rPosCancel>0 {x = p} {y = inv (>-arefl {x = p} p>0)} p>0 p·p⁻¹>0
-    where p·p⁻¹>0 : p · inv (>-arefl {x = p} p>0) > 0r
-          p·p⁻¹>0 = subst (_> 0r) (sym (·-rInv (>-arefl {x = p} p>0))) 1>0
+  p>0→p⁻¹>0 : (p>0 : p > 0r) → inv₊ p>0 > 0r
+  p>0→p⁻¹>0 {p = p} p>0 = ·-rPosCancel>0 {x = p} {y = inv₊ p>0} p>0 p·p⁻¹>0
+    where p·p⁻¹>0 : p · inv₊ p>0 > 0r
+          p·p⁻¹>0 = subst (_> 0r) (sym (·-rInv₊ p>0)) 1>0
 
-  p>q>0→p·q⁻¹>1 : (q>0 : q > 0r) → p > q → p · inv (>-arefl {x = q} q>0) > 1r
+  p>q>0→p·q⁻¹>1 : (q>0 : q > 0r) → p > q → p · inv₊ q>0 > 1r
   p>q>0→p·q⁻¹>1 {q = q} {p = p} q>0 p>q =
     subst (p · inv (>-arefl {x = q} q>0) >_) (·-rInv (>-arefl {x = q} q>0))
       (·-rPosPres< {x = inv (>-arefl {x = q} q>0)} {y = q} {z = p} (p>0→p⁻¹>0 {p = q} q>0) p>q)
 
-  inv-Reverse< : (p>0 : p > 0r)(q>0 : q > 0r) → p > q → inv (>-arefl {x = p} p>0) < inv (>-arefl {x = q} q>0)
+  inv-Reverse< : (p>0 : p > 0r)(q>0 : q > 0r) → p > q → inv₊ p>0 < inv₊ q>0
   inv-Reverse< {p = p} {q = q} p>0 q>0 p>q = q⁻¹>p⁻¹
-    where p≢0 = >-arefl {x = p} p>0
-          q≢0 = >-arefl {x = q} q>0
-          p⁻¹ = inv p≢0
-          q⁻¹ = inv q≢0
+    where p⁻¹ = inv₊ p>0
+          q⁻¹ = inv₊ q>0
           p⁻¹·q⁻¹>0 : p⁻¹ · q⁻¹ > 0r
           p⁻¹·q⁻¹>0 = ·-Pres>0 {x = p⁻¹} {y = q⁻¹} (p>0→p⁻¹>0 {p = p} p>0) (p>0→p⁻¹>0 {p = q} q>0)
           p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹ : (p · p⁻¹) · q⁻¹ > (q · q⁻¹) · p⁻¹
           p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹ = transport (λ i → helper2 p p⁻¹ q⁻¹ i > helper3 q p⁻¹ q⁻¹ i)
             (·-rPosPres< {x = p⁻¹ · q⁻¹} {y = q} {z = p} p⁻¹·q⁻¹>0 p>q)
           1·q⁻¹>1·p⁻¹ : 1r · q⁻¹ > 1r · p⁻¹
-          1·q⁻¹>1·p⁻¹ = transport (λ i → ·-rInv p≢0 i · q⁻¹ > ·-rInv q≢0 i · p⁻¹) p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹
+          1·q⁻¹>1·p⁻¹ = transport (λ i → ·-rInv₊ p>0 i · q⁻¹ > ·-rInv₊ q>0 i · p⁻¹) p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹
           q⁻¹>p⁻¹ : q⁻¹ > p⁻¹
           q⁻¹>p⁻¹ = transport (λ i → ·Lid q⁻¹ i > ·Lid p⁻¹ i) 1·q⁻¹>1·p⁻¹
+
+  inv₊Idem : (q>0 : q > 0r) → inv₊ (p>0→p⁻¹>0 q>0) ≡ q
+  inv₊Idem {q = q} q>0 = sym (·Lid _)
+    ∙ (λ i → ·-rInv₊ q>0 (~ i) · inv₊ (p>0→p⁻¹>0 q>0))
+    ∙ sym (·Assoc _ _ _) ∙ (λ i →  q · ·-rInv₊ (p>0→p⁻¹>0 q>0) i) ∙ ·Rid _
+
+
+  private
+    ·inv-helper : (y>0 : y > 0r) → (x · y) · inv₊ y>0 ≡ x
+    ·inv-helper {x = x} y>0 = sym (·Assoc _ _ _) ∙ (λ i → x · ·-rInv₊ y>0 i) ∙ ·Rid _
+
+  ·-MoveLToR< : (y>0 : y > 0r) → x · y < z → x < z · inv₊ y>0
+  ·-MoveLToR< {y = y} {x = x} {z = z} y>0 xy<z =
+    subst (_< z · inv₊ y>0) (·inv-helper y>0) (·-rPosPres< (p>0→p⁻¹>0 y>0) xy<z)
+
+  ·-MoveRToL< : (y>0 : y > 0r) → z < x · y → z · inv₊ y>0 < x
+  ·-MoveRToL< {y = y} {z = z} {x = x} y>0 xy>z =
+    subst (_> z · inv₊ y>0) (·inv-helper y>0) (·-rPosPres< (p>0→p⁻¹>0 y>0) xy>z)
+
+
+  {-
+
+    Decomposition and ordering
+
+  -}
+
+  <-+-Decompose : (x y z : K) → x + y < z → Σ[ s ∈ K ] Σ[ t ∈ K ] (x < s) × (y < t) × (z ≡ s + t)
+  <-+-Decompose x y z x+y<z = mid , z - mid , mid>x , z-mid>y , sym (helper4 mid z)
+    where
+    mid = middle x (z - y)
+    x<z-y : x < z - y
+    x<z-y = +-MoveLToR< x+y<z
+    y+mid<z : y + mid < z
+    y+mid<z = subst (y + mid <_) (helper4 y z) (+-lPres< (middle<r x<z-y))
+    mid>x = middle>l x<z-y
+    z-mid>y : y < z - mid
+    z-mid>y = +-MoveLToR< y+mid<z
+
+
+  private
+    ·inv-helper' : (x>0 : x > 0r) → x · (y · inv₊ x>0) ≡ y
+    ·inv-helper' {x = x} y>0 = helper5 _ _ _ ∙ ·inv-helper y>0
+
+  <-·-Decompose : (x y z : K) → x > 0r → y > 0r → x · y < z
+    → Σ[ s ∈ K ] Σ[ t ∈ K ] (x < s) × (y < t) × (z ≡ s · t)
+  <-·-Decompose x y z x>0 y>0 xy<z =
+    mid , z · inv₊ mid>0 , mid>x , z·mid⁻¹>y , sym (·inv-helper' mid>0)
+    where
+    mid = middle x (z · inv₊ y>0)
+    x<zy⁻¹ : x < z · inv₊ y>0
+    x<zy⁻¹ = ·-MoveLToR< y>0 xy<z
+    mid>0 : mid > 0r
+    mid>0 = <-trans x>0 (middle>l x<zy⁻¹)
+    y·mid<z : y · mid < z
+    y·mid<z = subst (y · mid <_) (·inv-helper' y>0) (·-lPosPres< y>0 (middle<r x<zy⁻¹))
+    mid>x = middle>l x<zy⁻¹
+    z·mid⁻¹>y : y < z · inv₊ mid>0
+    z·mid⁻¹>y = ·-MoveLToR< mid>0 y·mid<z
