@@ -31,7 +31,7 @@ module AxiomsOfRealNumber (decide : LEM) where
   open InclusionFromℚ
   open Completion decide ℚOrderedField isArchimedeanℚ
 
-  -- The existence and uniqueness of Real Number.
+  -- The Existence and Uniqueness of Real Number
 
   isContrReals : isContr Reals
   isContrReals .fst .cof = complete
