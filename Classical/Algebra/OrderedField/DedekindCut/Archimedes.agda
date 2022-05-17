@@ -103,15 +103,6 @@ module Archimedes (decide : LEM)
       where
 
       private
-        min2 : (x y : K) → x > 0r → y > 0r → Σ[ z ∈ K ] (z > 0r) × (z < x) × (z < y)
-        min2 x y x>0 y>0 = case-split (trichotomy x y)
-          where
-          case-split : Trichotomy x y → Σ[ z ∈ K ] (z > 0r) × (z < x) × (z < y)
-          case-split (lt x<y) = middle 0r x , middle>l x>0 , middle<r x>0 , <-trans (middle<r x>0) x<y
-          case-split (gt x>y) = middle 0r y , middle>l y>0 , <-trans (middle<r y>0) x>y , middle<r y>0
-          case-split (eq x≡y) =
-            middle 0r x , middle>l x>0 , middle<r x>0 , subst (middle 0r x <_) x≡y (middle<r x>0)
-
         >-exchange : {a b c : K} → a - b > c → a - c > b
         >-exchange {a = a} {b = b} {c = c} a-b>c =
           transport (λ i → helper3 a b c i > helper4 b c i) (+-rPres< {z = b - c} a-b>c)
@@ -128,7 +119,7 @@ module Archimedes (decide : LEM)
               r-q>0 = >→Diff>0 (<≤-trans q<p p≤r)
               r+ε-t>0 : r+ε-t > 0r
               r+ε-t>0 = >→Diff>0 t<r+ε
-              (u , u>0 , u<r-q , u<r+ε-t) = min2 r-q r+ε-t r-q>0 r+ε-t>0
+              (u , u>0 , u<r-q , u<r+ε-t) = min2 r-q>0 r+ε-t>0
               r+ε-u = (r + ε) - u
               r-u = r - u
               r-u+ε = (r - u) + ε

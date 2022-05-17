@@ -108,10 +108,7 @@ module CompleteOrderedField (decide : LEM) where
         where
 
         insurmountable : (n : ℕ) → n ⋆ ε ≤ q
-        insurmountable n with trichotomy (n ⋆ ε) q
-        ... | lt n⋆ε<q = inl n⋆ε<q
-        ... | eq n⋆ε≡q = inr n⋆ε≡q
-        ... | gt n⋆ε>q = Empty.rec (insurmountable' n n⋆ε>q)
+        insurmountable n = ¬<→≥ (insurmountable' n)
 
         P : K → hProp _
         P q = ∥ Σ[ n ∈ ℕ ] n ⋆ ε > q ∥ , squash

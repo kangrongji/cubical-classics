@@ -99,7 +99,7 @@ archimedes q ε ε>0 = case-split (dec< q (zero ⋆ ε))
   case-split : Dec (zero ⋆ ε > q) → Σ[ n ∈ ℕ ] n ⋆ ε > q
   case-split (yes p) = zero , p
   case-split (no ¬p) = find (λ n → isProp< {x = q} {y = n ⋆ ε})
-    (λ n → dec< q (n ⋆ ε)) ¬p (∥archimedes∥ q ε ε>0)
+    (λ n → dec< q (n ⋆ ε)) (∥archimedes∥ q ε ε>0)
 
 
 -- Archimedean-ness of ℚ

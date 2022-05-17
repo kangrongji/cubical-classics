@@ -82,11 +82,17 @@ module _
     findMin : ∥ Σ[ n ∈ ℕ ] P n ∥ → InhabMin P
     findMin = Prop.rec isPropInhabMin (λ (n , p) → find-helper n p)
 
-    find : ∥ Σ[ n ∈ ℕ ] P n ∥ → Σ[ n ∈ ℕ ] P n
-    find p .fst = suc (findMin p .fst)
-    find p .snd = findMin p .snd .fst
-
     findInterval : ∥ Σ[ n ∈ ℕ ] P n ∥ → Σ[ n ∈ ℕ ] (¬ P n) × P (suc n)
     findInterval p .fst = findMin p .fst
     findInterval p .snd .fst = findMin p .snd .snd _ ≤-refl
     findInterval p .snd .snd = findMin p .snd .fst
+
+
+  module _
+    (decP : (n : ℕ) → Dec (P n))
+    where
+
+    find : ∥ Σ[ n ∈ ℕ ] P n ∥ → Σ[ n ∈ ℕ ] P n
+    find ∃p with decP 0
+    ... | yes p = 0 , p
+    ... | no ¬p = let (n , p , h) = findMin decP ¬p ∃p in suc n , p

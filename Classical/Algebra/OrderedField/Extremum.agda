@@ -64,10 +64,10 @@ module Extremum (decide : LEM)(𝒦 : OrderedField ℓ ℓ') where
       least : (b : K) → ((r : K) → r ∈ A → r ≤ b) → b ≥ sup
 
   record Infimum (A : ℙ K) : Type (ℓ-max ℓ ℓ') where
-      field
-        inf : K
-        bound : (r : K) → r ∈ A → inf ≤ r
-        most  : (b : K) → ((r : K) → r ∈ A → b ≤ r) → b ≤ inf
+    field
+      inf : K
+      bound : (r : K) → r ∈ A → inf ≤ r
+      most  : (b : K) → ((r : K) → r ∈ A → b ≤ r) → b ≤ inf
 
   open Supremum
   open Infimum
