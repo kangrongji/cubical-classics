@@ -3,7 +3,7 @@
 Multiplicative Structure on Dedekind Cuts
 
 -}
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --experimental-lossy-unification #-}
 module Classical.Algebra.OrderedField.DedekindCut.Multiplication where
 
 open import Cubical.Foundations.Prelude

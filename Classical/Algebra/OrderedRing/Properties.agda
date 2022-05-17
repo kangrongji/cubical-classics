@@ -91,17 +91,16 @@ private
     helper20 = solve 𝓡
 
 
-module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
+module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
 
   private
-    𝓡 = 𝓡ₒ .fst
-    R = 𝓡ₒ .fst .fst
+    R = 𝓡 .fst .fst
 
-  open RingTheory (CommRing→Ring 𝓡)
-  open CommRingStr   (𝓡ₒ .fst .snd)
-  open OrderStrOnCommRing (𝓡ₒ .snd)
+  open RingTheory (CommRing→Ring (𝓡 .fst))
+  open CommRingStr   (𝓡 .fst .snd)
+  open OrderStrOnCommRing (𝓡 .snd)
 
-  open Helpers 𝓡
+  open Helpers (𝓡 .fst)
 
 
   private
@@ -279,6 +278,13 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
   ·-lPosCancel<0 {x = x} {y = y} x>0 y·x<0 = ·-rPosCancel<0 x>0 (subst (_< 0r) (·Comm y x) y·x<0)
 
 
+  ·-rPosCancel< : x > 0r → x · y < x · z → y < z
+  ·-rPosCancel< {x = x} {y = y} {z = z} x>0 x·y<x·z with trichotomy y z
+  ... | lt y<z = y<z
+  ... | eq y≡z = Empty.rec (<-arefl x·y<x·z (λ i → x · y≡z i))
+  ... | gt y>z = Empty.rec (<-asym (·-lPosPres< x>0 y>z) x·y<x·z)
+
+
   ·-Pos·>1→> : x > 0r → y > 1r → x · y > x
   ·-Pos·>1→> x>0 y>1 = subst (_>0) (helper15 _ _) (>0-· _ _ x>0 y>1)
 
@@ -366,6 +372,16 @@ module OrderedRingStr (𝓡ₒ : OrderedRing ℓ ℓ') where
   Diff≥0→≥ : x - y ≥ 0r → x ≥ y
   Diff≥0→≥ (inl x-y>0) = inl (Diff>0→> x-y>0)
   Diff≥0→≥ {x = x} {y = y} (inr x-y≡0) = inr (sym (+Lid y) ∙ (λ i → x-y≡0 i + y) ∙ helper19 x y)
+
+
+  +-Pres≤ : x ≤ y → z ≤ w → x + z ≤ y + w
+  +-Pres≤ x≤y z≤w = Diff≥0→≥ (subst (_≥ 0r) (helper5 _ _ _ _) (+-Pres≥0 (≥→Diff≥0 x≤y) (≥→Diff≥0 z≤w)))
+
+  +-lPres≤ : x ≤ y → z + x ≤ z + y
+  +-lPres≤ {z = z} x≤y = Diff≥0→≥ (subst (_≥ 0r) (helper13 _ _ z) (≥→Diff≥0 x≤y))
+
+  +-rPres≤ : x ≤ y → x + z ≤ y + z
+  +-rPres≤ {z = z} x≤y = Diff≥0→≥ (subst (_≥ 0r) (helper12 _ _ z) (≥→Diff≥0 x≤y))
 
 
   -Reverse≤ : x ≤ y → - x ≥ - y

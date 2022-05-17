@@ -18,23 +18,53 @@ open import Classical.Algebra.OrderedRing.Morphism
 open import Classical.Algebra.OrderedField
 open import Classical.Algebra.OrderedField.Morphism
 open import Classical.Algebra.OrderedField.Completeness
-open import Classical.Analysis.Real.Axiomatic
+open import Classical.Algebra.OrderedField.Completion
 
+
+{-
+
+  The Axioms of Real Number
+
+-}
+
+module AxiomsOfRealNumber (decide : LEM) where
+
+  open CompleteOrderedField decide
+
+  -- Real Number is a complete ordered field as is usually defined in classical mathematics.
+
+  Reals : Type (ℓ-suc ℓ-zero)
+  Reals = CompleteOrderedField ℓ-zero ℓ-zero
+
+  open InclusionFromℚ
+  open Completion decide ℚOrderedField isArchimedeanℚ
+
+  -- The Existence and Uniqueness of Real Number
+
+  isContrReals : isContr Reals
+  isContrReals .fst = complete
+  isContrReals .snd 𝒦 i = uaCompleteOrderedField complete 𝒦 (extend 𝒦 (ℚ→KOrderedFieldHom (𝒦 .fst))) i
+
+
+{-
+
+  Basics of Real Number
+
+-}
 
 module Real (decide : LEM) where
 
   open CompleteOrderedField decide
-  open AxiomsOfRealNumber   decide
-  open Reals
-
   open InclusionFromℚ
   open OrderedRingHom
+
+  open AxiomsOfRealNumber   decide
 
 
   abstract
 
     ℝCompleteOrderedField : CompleteOrderedField ℓ-zero ℓ-zero
-    ℝCompleteOrderedField = isContrReals .fst .cof
+    ℝCompleteOrderedField = isContrReals .fst
 
     ℚ→ℝOrderedFieldHom : OrderedFieldHom ℚOrderedField (ℝCompleteOrderedField .fst)
     ℚ→ℝOrderedFieldHom = ℚ→KOrderedFieldHom (ℝCompleteOrderedField .fst)

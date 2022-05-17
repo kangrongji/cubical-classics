@@ -206,6 +206,9 @@ module Powerset (decide : LEM) where
   isPropIsInhabited : (A : ℙ X) → isProp (isInhabited A)
   isPropIsInhabited _ = squash
 
+  ¬isInhabited→¬x∈A : {A : ℙ X} → ¬ isInhabited A → (x : X) → x ∈ A → ⊥
+  ¬isInhabited→¬x∈A ¬∈ = ¬∃→∀¬ ¬∈
+
 
   {-
 
