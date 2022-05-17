@@ -113,6 +113,13 @@ module Continuity (decide : LEM) where
       δ , δ>0 , (λ y ∣x-y∣<δ → absKeepSign- fx<0 (ε-δ y ∣x-y∣<δ))
 
 
+  {-
+
+    Intermediate Value Theorem
+
+  -}
+
+
   -- The Unit Interval [0,1]
 
   module _ where
@@ -130,12 +137,6 @@ module Continuity (decide : LEM) where
       1∈𝐈 : 1 ∈ 𝐈
       1∈𝐈 = Inhab→∈ 𝐈-prop (inl 1>0 , inr refl)
 
-
-  {-
-
-    Intermediate Value Theorem
-
-  -}
 
   module _
     (f : ContinuousFunction 𝐈)
