@@ -88,20 +88,3 @@ module Real (decide : LEM) where
   instance
     fromNegℝ : HasFromNeg ℝ
     fromNegℝ = record { Constraint = λ _ → Unit ; fromNeg = λ n → ℕ→R-Neg n }
-
-{-
-  open OrderedRingStr (ℚOrderedField .fst)
-
-  instance
-    fromNatℝ : HasFromNat ℝ
-    fromNatℝ = record { Constraint = λ _ → Unit ; fromNat = λ n → ℚ→ℝ (ℕ→R-Pos n) }
-
-  instance
-    fromNegℝ : HasFromNeg ℝ
-    fromNegℝ = record { Constraint = λ _ → Unit ; fromNeg = λ n → ℚ→ℝ (ℕ→R-Neg n) }
--}
-
-  {-
-  -- For the convenience of use, importing ordered structure publicly here
-
-  open OrderedFieldStr (ℝCompleteOrderedField .fst) public -}

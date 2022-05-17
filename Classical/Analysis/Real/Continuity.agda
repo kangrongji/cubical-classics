@@ -3,7 +3,7 @@
 Continuous Real-Valued Functions
 
 This file contains:
-- Basics of continuous function;
+- Basics of continuous function, using ε-δ as definition;
 - The intermediate value theorem.
 
 -}
@@ -28,7 +28,6 @@ open import Classical.Algebra.OrderedField
 open import Classical.Algebra.OrderedField.Extremum
 open import Classical.Algebra.OrderedField.Completeness
 open import Classical.Analysis.Real.Base
-
 
 private
   module Helpers {ℓ : Level}(𝓡 : CommRing ℓ) where
@@ -66,6 +65,12 @@ module Continuity (decide : LEM) where
 
   open ContinuousFunction
 
+
+  {-
+
+    Properties of Continuous Function
+
+  -}
 
   module _ (𝔻 : ℙ ℝ)(f : ContinuousFunction 𝔻) where
 
@@ -126,7 +131,11 @@ module Continuity (decide : LEM) where
       1∈𝐈 = Inhab→∈ 𝐈-prop (inl 1>0 , inr refl)
 
 
-  -- Intermediate Value Theorem
+  {-
+
+    Intermediate Value Theorem
+
+  -}
 
   module _
     (f : ContinuousFunction 𝐈)
@@ -148,16 +157,25 @@ module Continuity (decide : LEM) where
       f<0-sub : ℙ ℝ
       f<0-sub = specify f<0-prop
 
+      0≤x∈sub : (x : ℝ) → x ∈ f<0-sub → x ≥ 0
+      0≤x∈sub x x∈sub = ∈→Inhab 𝐈-prop (∈→Inhab f<0-prop x∈sub .fst) .fst
+
+      1≥x∈sub : (x : ℝ) → x ∈ f<0-sub → x ≤ 1
+      1≥x∈sub x x∈sub = ∈→Inhab 𝐈-prop (∈→Inhab f<0-prop x∈sub .fst) .snd
+
       f<0-sup : Supremum f<0-sub
-      f<0-sup = getSup {!!} {!!}
+      f<0-sup = getSup ∣ 0 , 0∈sub ∣ ∣ 1 , 1≥x∈sub ∣
+        where
+        0∈sub : 0 ∈ f<0-sub
+        0∈sub = Inhab→∈ f<0-prop (0∈𝐈 , f0<0)
 
       x₀ = f<0-sup .sup
 
       0≤x₀ : 0 ≤ x₀
-      0≤x₀ = {!!}
+      0≤x₀ = supLowerBounded _ f<0-sup 0≤x∈sub
 
       x₀≤1 : x₀ ≤ 1
-      x₀≤1 = {!!}
+      x₀≤1 = supUpperBounded _ f<0-sup 1≥x∈sub
 
       instance
         x₀∈𝐈 : x₀ ∈ 𝐈
@@ -280,6 +298,7 @@ module Continuity (decide : LEM) where
     -- Given a continuous function defined on the unit interval,
     -- if its values at end-points have different signs,
     -- the function admits a zero point inside the interval.
+    -- Notice that the zero `really` exists, rather than merely existing.
 
     findZero : Σ[ x ∈ ℝ ] Σ[ x∈𝐈 ∈ x ∈ 𝐈 ] f .fun x ⦃ x∈𝐈 ⦄ ≡ 0
     findZero = x₀ , x₀∈𝐈 , fx₀≡0

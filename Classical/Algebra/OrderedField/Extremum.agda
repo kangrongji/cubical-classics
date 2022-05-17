@@ -133,6 +133,55 @@ module Extremum (decide : LEM)(𝒦 : OrderedField ℓ ℓ') where
   ... | no ¬q∈A = ¬q∈A q∈A
 
 
+  -- By definition, if a subset admits extremum, it must be inhabited and bounded.
+
+  Sup→Inhabited : {A : ℙ K} → Supremum A → isInhabited A
+  Sup→Inhabited {A = A} Sup with decide (isPropIsInhabited A)
+  ... | yes q∈A = q∈A
+  ... | no ¬q∈A = Empty.rec (<≤-asym q-1<q (Sup .least _ (allBound (Sup .sup - 1r))))
+    where
+    allBound : (x y : K) → y ∈ A → y ≤ x
+    allBound x y y∈A = Empty.rec (¬isInhabited→¬x∈A ¬q∈A y y∈A)
+
+  Sup→isUpperBounded : {A : ℙ K} → Supremum A → isUpperBounded A
+  Sup→isUpperBounded Sup = ∣ Sup .sup , Sup .bound ∣
+
+
+  -- Supremum of { x | x ≤ b } is just b itself.
+
+  module _ (b : K) where
+
+    prop-≤b : K → hProp _
+    prop-≤b x = (x ≤ b) , isProp≤
+
+    sub-≤b : ℙ K
+    sub-≤b = specify prop-≤b
+
+    b∈sub : b ∈ sub-≤b
+    b∈sub = Inhab→∈ prop-≤b (inr refl)
+
+    Sup≤b : Supremum sub-≤b
+    Sup≤b .sup = b
+    Sup≤b .bound r = ∈→Inhab prop-≤b
+    Sup≤b .least _ h = h _ b∈sub
+
+    Sup≤b≡b : (Sup : Supremum sub-≤b) → Sup .sup ≡ b
+    Sup≤b≡b Sup i = isPropSupremum sub-≤b Sup Sup≤b i .sup
+
+
+  -- If the subset is bounded by some element, its extremum is bounded by the same one.
+
+  supUpperBounded : {A : ℙ K}(b : K)(Sup : Supremum A) → ((x : K) → x ∈ A → x ≤ b) → Sup .sup ≤ b
+  supUpperBounded {A = A} b Sup b≥x∈A = ⊆→sup≤ A⊆[x≤b] Sup (Sup≤b b)
+    where
+    A⊆[x≤b] : A ⊆ sub-≤b b
+    A⊆[x≤b] x∈A = Inhab→∈ (prop-≤b b) (b≥x∈A _ x∈A)
+
+  supLowerBounded : {A : ℙ K}(b : K)(Sup : Supremum A) → ((x : K) → x ∈ A → b ≤ x) → Sup .sup ≥ b
+  supLowerBounded b Sup b≤x∈A =
+    Prop.rec isProp≤ (λ (x , x∈A) → ≤-trans (b≤x∈A x x∈A) (Sup .bound x x∈A)) (Sup→Inhabited Sup)
+
+
   {-
 
     Taking - x for all x ∈ some subset and reverse its extremum

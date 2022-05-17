@@ -3,7 +3,7 @@
 Dedekind Completion is Complete
 
 -}
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --experimental-lossy-unification #-}
 module Classical.Algebra.OrderedField.DedekindCut.Completeness where
 
 open import Cubical.Foundations.Prelude

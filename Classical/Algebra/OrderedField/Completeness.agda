@@ -1,6 +1,14 @@
 {-
 
-Dedekind Completeness of Ordered Field
+Dedekind/MacNeille Completeness of Ordered Field
+
+We say an ordered field is complete, as in usually understood,
+if any inhabited and bounded above subset admits least upper bound.
+
+Warning: Classically everything is well,
+but in constructive setting, this condition is called MacNeille completeness,
+and Dedekind completeness refers to another notion,
+c.f. `https://github.com/kangrongji/cubical-classics/issues/10`.
 
 -}
 {-# OPTIONS --safe #-}

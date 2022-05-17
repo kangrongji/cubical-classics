@@ -1,6 +1,12 @@
 {-
 
-Dedekind Completion of Archimedean Ordered Field
+Completion of Archimedean Ordered Field
+
+Warning: Though classically the procedure defined here is called Dedekind completion,
+constructively it is the MacNeille completion, which is different from the Dedekind one.
+
+TODO: Separating the completion procedure into construtive/classical parts,
+as indicated in `https://github.com/kangrongji/cubical-classics/issues/10`.
 
 -}
 {-# OPTIONS --safe --experimental-lossy-unification #-}

@@ -3,7 +3,7 @@
 Order Structure on Dedekind Cuts
 
 -}
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --experimental-lossy-unification #-}
 module Classical.Algebra.OrderedField.DedekindCut.Order where
 
 open import Cubical.Foundations.Prelude
