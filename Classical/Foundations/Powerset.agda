@@ -256,6 +256,9 @@ module Powerset (decide : LEM) where
   A≡total : {A : ℙ X} → ((x : X) → x ∈ A) → A ≡ total
   A≡total {A = A} p = bi⊆→≡ (A⊆total {A = A}) (total⊆A p)
 
+  ¬x∈∅ : (x : X) → x ∈ ∅ → ⊥
+  ¬x∈∅ x x∈∅ = false≢true x∈∅
+
 
   -- Complementary subset
 
@@ -545,6 +548,10 @@ module Powerset (decide : LEM) where
       where
       helper : ¬ ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥
       helper = Prop.rec isProp⊥ (λ (A , x∈A , A∈S) → explode∈ {A = A} x∈A (p _ A∈S))
+
+
+  ⊆union : {S : ℙ (ℙ X)}{A B : ℙ X} → A ⊆ B → B ∈ S → A ⊆ union S
+  ⊆union A⊆B B∈S x∈A = ∃→∈union ∣ _  , A⊆B x∈A , B∈S ∣
 
 
   union∅ : union {X = X} ∅ ≡ ∅
