@@ -29,6 +29,7 @@ open import Classical.Algebra.OrderedRing.Morphism
 open import Classical.Algebra.OrderedRing.Archimedes
 open import Classical.Algebra.OrderedField
 open import Classical.Algebra.OrderedField.Morphism
+open import Classical.Algebra.OrderedField.Extremum
 open import Classical.Algebra.OrderedField.Completeness
 open import Classical.Algebra.OrderedField.DedekindCut.Base
 open import Classical.Algebra.OrderedField.DedekindCut.Algebra
@@ -109,6 +110,7 @@ module UniversalProperty (decide : LEM)
     getSup = 𝒦' .snd
     findBetween = isArchimedean→isDense (isComplete→isArchimedean _ (𝒦' .snd))
 
+    open Extremum decide (𝒦' .fst)
     open Supremum
 
 
@@ -127,12 +129,12 @@ module UniversalProperty (decide : LEM)
             f-map q , Inhab→∈ map-prop (λ p p∈upper → homPres< _ _ (q<r∈upper _ p∈upper)))
           (a .lower-inhab)
 
-        map-sub-bound : isUpperBounded (𝒦' .fst) map-sub
+        map-sub-bound : isUpperBounded map-sub
         map-sub-bound = Prop.map
           (λ (q , q∈upper) → f-map q , (λ r r∈map → inl (∈→Inhab map-prop r∈map _ q∈upper)))
           (a .upper-inhab)
 
-      map-sup : Supremum (𝒦' .fst) map-sub
+      map-sup : Supremum map-sub
       map-sup = getSup map-sub-inhab map-sub-bound
 
       map-helper : K'
@@ -153,7 +155,7 @@ module UniversalProperty (decide : LEM)
             (¬map (Inhab→∈ map-prop) ¬∈sub))
 
       >map-helper : (x : K') → x >' map-helper → ∥ Σ[ q ∈ K ] q ∈ a .upper × (f-map q <' x) ∥
-      >map-helper x x>sup = >sup-helper x (>sup→¬∈ _ x map-sup x>sup)
+      >map-helper x x>sup = >sup-helper x (>sup→¬∈ x map-sup x>sup)
 
 
       private
@@ -163,7 +165,7 @@ module UniversalProperty (decide : LEM)
             (Prop.rec isProp⊥
               (λ (x , fq<x , x∈sub) →
                 <'-asym fq<x (∈→Inhab map-prop x∈sub q q∈a))
-            (<sup→∃∈ _ _ map-sup sup>fq)))
+            (<sup→∃∈ _ map-sup sup>fq)))
           (>sup-helper _ ¬∈sub)
 
       map∈sub : map-helper ∈ map-sub
@@ -204,7 +206,7 @@ module UniversalProperty (decide : LEM)
         ⊇helper : map-sub (K→𝕂 q) ⊆ comp-sub
         ⊇helper x∈sub = Inhab→∈ comp-prop (comp-helper _ x∈sub)
 
-      compSup : Supremum (𝒦' .fst) comp-sub
+      compSup : Supremum comp-sub
       compSup .sup = f-map q
       compSup .bound r r∈comp = ∈→Inhab comp-prop r∈comp
       compSup .least b b≥r∈comp = b≥r∈comp _ fq∈comp
@@ -214,7 +216,7 @@ module UniversalProperty (decide : LEM)
 
       map-comp : map-helper (K→𝕂 q) ≡ f-map q
       map-comp i =
-        isProp→PathP (λ i → isPropSupremum (𝒦' .fst) (comp-path i)) compSup (map-sup (K→𝕂 q)) (~ i) .sup
+        isProp→PathP (λ i → isPropSupremum (comp-path i)) compSup (map-sup (K→𝕂 q)) (~ i) .sup
 
 
     module _ (a : 𝕂)(b : 𝕂) where
@@ -224,7 +226,7 @@ module UniversalProperty (decide : LEM)
         Inhab→∈ (map-prop a) (λ r r∈a → ∈→Inhab (map-prop b) x∈subb _ (a≥b r∈a))
 
       map-helper-pres≥ : a ≥𝕂 b → map-helper a ≥' map-helper b
-      map-helper-pres≥ a≥b = ⊆→sup≤ _ (map-sub-⊆ a≥b) (map-sup b) (map-sup a)
+      map-helper-pres≥ a≥b = ⊆→sup≤ (map-sub-⊆ a≥b) (map-sup b) (map-sup a)
 
       map-helper-pres> : a >𝕂 b → map-helper a >' map-helper b
       map-helper-pres> a>b with <≤-total' (map-helper b) (map-helper a)

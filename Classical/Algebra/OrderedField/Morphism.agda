@@ -29,7 +29,7 @@ open import Classical.Algebra.OrderedField
 
 private
   variable
-    ℓ ℓ' ℓ'' ℓ''' : Level
+    ℓ ℓ' ℓ'' ℓ''' ℓ'''' : Level
     𝒦  : OrderedField ℓ   ℓ'
     𝒦' : OrderedField ℓ'' ℓ'''
 
@@ -74,6 +74,26 @@ OrderedFieldHom 𝒦 𝒦' = OrderedRingHom (𝒦 .fst) (𝒦' .fst)
 
 {-
 
+  SIP for Ordered Field
+
+-}
+
+-- Equivalence of Ordered Rings
+
+isOrderedFieldEquiv : OrderedFieldHom 𝒦 𝒦' → Type _
+isOrderedFieldEquiv = isOrderedRingEquiv
+
+
+uaOrderedField : {𝒦 𝒦' : OrderedField ℓ ℓ'}
+  {f : OrderedFieldHom 𝒦 𝒦'} → isOrderedFieldEquiv {𝒦 = 𝒦} {𝒦' = 𝒦'} f → 𝒦 ≡ 𝒦'
+uaOrderedField {𝒦 = 𝒦} {𝒦' = 𝒦'} {f = f} is-equiv i .fst =
+  uaOrderedRing {𝓡 = 𝒦 .fst} {𝓡' = 𝒦' .fst} {f = f} is-equiv i
+uaOrderedField {𝒦 = 𝒦} {𝒦' = 𝒦'} is-equiv i .snd =
+  liftPathIsField (λ i → uaOrderedField is-equiv i .fst .fst) (𝒦 .snd) (𝒦' .snd) i
+
+
+{-
+
   Properties of ordered field homomorphism
 
 -}
@@ -100,6 +120,13 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
     f-map = ring-hom .fst
 
 
+  {-
+
+    Homomorphism preserves multiplicative inverse
+
+  -}
+
+
   homPresInv : {x : K'} → (x>0 : x >' 0r') → f-map (inv'₊ x>0) ≡ inv₊ (homPres>0 _ x>0)
   homPresInv {x = x} x>0 = sym (·Rid _)
     ∙ (λ i → f-map (inv'₊ x>0) · ·-rInv₊ (homPres>0 _ x>0) (~ i))
@@ -111,6 +138,19 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
     fx⁻¹fx≡1 = sym (pres· _ _) ∙ (λ i → f-map (·'-lInv₊ x>0 i)) ∙ pres1
 
 
+  {-
+
+    Image of an ordered field homomorphism
+
+  -}
+
+  isUnboundedΣ : Type _
+  isUnboundedΣ = (x : K) → Σ[ r ∈ K' ] x < f-map r
+
+  isDenseΣ : Type _
+  isDenseΣ = {x y : K} → x < y → Σ[ r ∈ K' ] (x < f-map r) × (f-map r < y)
+
+
   isUnbounded : Type _
   isUnbounded = (x : K) → ∥ Σ[ r ∈ K' ] x < f-map r ∥
 
@@ -118,12 +158,16 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
   isDense = {x y : K} → x < y → ∥ Σ[ r ∈ K' ] (x < f-map r) × (f-map r < y) ∥
 
 
-  isArchimedean→isUnbounded : isArchimedean (𝒦 .fst) → isUnbounded
-  isArchimedean→isUnbounded archimedes x =
-    ∣ (helper .fst) ⋆' 1r' , subst (_> x) (sym (homPres⋆ _ _)) (helper .snd) ∣
+  isArchimedean→isUnboundedΣ : isArchimedean (𝒦 .fst) → isUnboundedΣ
+  isArchimedean→isUnboundedΣ archimedes x =
+    (helper .fst) ⋆' 1r' , subst (_> x) (sym (homPres⋆ _ _)) (helper .snd)
     where
     helper : _
     helper = archimedes x (f-map 1r') (homPres>0 _ 1>'0)
+
+
+  isArchimedean→isUnbounded : isArchimedean (𝒦 .fst) → isUnbounded
+  isArchimedean→isUnbounded archimedes x = ∣ isArchimedean→isUnboundedΣ archimedes x ∣
 
 
   -- Unbounded in the other direction but is equivalent by using additive inverse
@@ -144,28 +188,54 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
     (-exceed (- x))
 
 
+  isLowerUnboundedΣ : Type _
+  isLowerUnboundedΣ = (x : K) → Σ[ r ∈ K' ] f-map r < x
+
+  isUnboundedΣ→isLowerUnboundedΣ : isUnboundedΣ → isLowerUnboundedΣ
+  isUnboundedΣ→isLowerUnboundedΣ exceed x =
+    let (r , fr>-x) = exceed (- x) in
+    -' r , transport (λ i → pres- r (~ i) < -Idempotent x i) (-Reverse< fr>-x)
+
+
+  -- Another version but using smallness
+
+  isArbitrarilySmall : Type _
+  isArbitrarilySmall = (x : K) → x > 0r → ∥ Σ[ r ∈ K' ] (0r < f-map r) × (f-map r < x) ∥
+
+  isUnbounded→isArbitrarilySmall : isUnbounded → isArbitrarilySmall
+  isUnbounded→isArbitrarilySmall exceed x x>0 =
+    Prop.map
+    (λ (r , fr>x⁻¹) →
+      let x⁻¹>0 : inv₊ x>0 > 0r
+          x⁻¹>0 = p>0→p⁻¹>0 x>0
+          r>0 : r >' 0r'
+          r>0 = homRefl>0 _ (<-trans x⁻¹>0 fr>x⁻¹)
+          fr>0 : f-map r > 0r
+          fr>0 = homPres>0 _ r>0
+          fr⁻¹<x⁻¹⁻¹ = inv-Reverse< fr>0 x⁻¹>0 fr>x⁻¹
+      in  _ , homPres>0 _ (p>'0→p⁻¹>'0 r>0) ,
+          transport (λ i → homPresInv r>0 (~ i) < inv₊Idem x>0 i) fr⁻¹<x⁻¹⁻¹)
+    (exceed (inv₊ x>0))
+
+
+  isArbitrarilySmallΣ : Type _
+  isArbitrarilySmallΣ = (x : K) → x > 0r → Σ[ r ∈ K' ] (0r < f-map r) × (f-map r < x)
+
+  isUnboundedΣ→isArbitrarilySmallΣ : isUnboundedΣ → isArbitrarilySmallΣ
+  isUnboundedΣ→isArbitrarilySmallΣ exceed x x>0 =
+    let (r , fr>x⁻¹) = exceed (inv₊ x>0)
+        x⁻¹>0 : inv₊ x>0 > 0r
+        x⁻¹>0 = p>0→p⁻¹>0 x>0
+        r>0 : r >' 0r'
+        r>0 = homRefl>0 _ (<-trans x⁻¹>0 fr>x⁻¹)
+        fr>0 : f-map r > 0r
+        fr>0 = homPres>0 _ r>0
+        fr⁻¹<x⁻¹⁻¹ = inv-Reverse< fr>0 x⁻¹>0 fr>x⁻¹
+    in  _ , homPres>0 _ (p>'0→p⁻¹>'0 r>0) ,
+        transport (λ i → homPresInv r>0 (~ i) < inv₊Idem x>0 i) fr⁻¹<x⁻¹⁻¹
+
+
   private
-
-    module _
-      (exceed : isUnbounded) where
-
-      -exceed : (x : K) → ∥ Σ[ r ∈ K' ] f-map r < x ∥
-      -exceed = isUnbounded→isLowerUnbounded exceed
-
-      shrink : (x : K) → x > 0r → ∥ Σ[ r ∈ K' ] (0r < f-map r) × (f-map r < x) ∥
-      shrink x x>0 = Prop.map
-        (λ (r , fr>x⁻¹) →
-          let x⁻¹>0 : inv₊ x>0 > 0r
-              x⁻¹>0 = p>0→p⁻¹>0 x>0
-              r>0 : r >' 0r'
-              r>0 = homRefl>0 _ (<-trans x⁻¹>0 fr>x⁻¹)
-              fr>0 : f-map r > 0r
-              fr>0 = homPres>0 _ r>0
-              fr⁻¹<x⁻¹⁻¹ = inv-Reverse< fr>0 x⁻¹>0 fr>x⁻¹
-          in  _ , homPres>0 _ (p>'0→p⁻¹>'0 r>0) ,
-              transport (λ i → homPresInv r>0 (~ i) < inv₊Idem x>0 i) fr⁻¹<x⁻¹⁻¹)
-        (exceed (inv₊ x>0))
-
 
     module _
       (archimedes : isArchimedean (𝒦 .fst))
@@ -244,12 +314,16 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
         subst (_< b) (in-the-image (suc n₀)) b>sucn
 
 
+  isArchimedean→isDenseΣ : isArchimedean (𝒦 .fst) → isDenseΣ
+  isArchimedean→isDenseΣ archimedes {x = x} {y = y} x<y =
+    let (lower , lower<a) =
+          isUnboundedΣ→isLowerUnboundedΣ (isArchimedean→isUnboundedΣ archimedes) x
+        (ε , fε>0 , fε<δ) =
+          isUnboundedΣ→isArbitrarilySmallΣ (isArchimedean→isUnboundedΣ archimedes) (y - x) (>→Diff>0 x<y)
+    in among-them archimedes x y ε fε>0 fε<δ lower lower<a
+
   isArchimedean→isDense : isArchimedean (𝒦 .fst) → isDense
-  isArchimedean→isDense archimedes {x = x} {y = y} x<y = Prop.map2
-    (λ (lower , lower<a) (ε , fε>0 , fε<δ) →
-      among-them archimedes x y ε fε>0 fε<δ lower lower<a)
-    (-exceed (isArchimedean→isUnbounded archimedes) x)
-    (shrink  (isArchimedean→isUnbounded archimedes) (y - x) (>→Diff>0 x<y))
+  isArchimedean→isDense archimedes x<y = ∣ isArchimedean→isDenseΣ archimedes x<y ∣
 
 
 {-
@@ -396,23 +470,3 @@ module InclusionFromℚ (𝒦 : OrderedField ℓ ℓ') where
 
   ℚ→KOrderedFieldHom : OrderedFieldHom ℚOrderedField 𝒦
   ℚ→KOrderedFieldHom = ℚ→KOrderedRingHom
-
-
-{-
-
-  SIP for Ordered Field
-
--}
-
--- Equivalence of Ordered Rings
-
-isOrderedFieldEquiv : OrderedFieldHom 𝒦 𝒦' → Type _
-isOrderedFieldEquiv = isOrderedRingEquiv
-
-
-uaOrderedField : {𝒦 𝒦' : OrderedField ℓ ℓ'}
-  {f : OrderedFieldHom 𝒦 𝒦'} → isOrderedFieldEquiv {𝒦 = 𝒦} {𝒦' = 𝒦'} f → 𝒦 ≡ 𝒦'
-uaOrderedField {𝒦 = 𝒦} {𝒦' = 𝒦'} {f = f} is-equiv i .fst =
-  uaOrderedRing {𝓡 = 𝒦 .fst} {𝓡' = 𝒦' .fst} {f = f} is-equiv i
-uaOrderedField {𝒦 = 𝒦} {𝒦' = 𝒦'} is-equiv i .snd =
-  liftPathIsField (λ i → uaOrderedField is-equiv i .fst .fst) (𝒦 .snd) (𝒦' .snd) i

@@ -13,6 +13,7 @@ open import Cubical.Data.Sigma
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Nat using (ℕ ; zero ; suc)
 open import Cubical.Data.NatPlusOne
+open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
 open import Cubical.Algebra.CommRingSolver.Reflection
@@ -23,7 +24,7 @@ open import Classical.Algebra.OrderedField.Base
 
 private
   variable
-    ℓ ℓ' : Level
+    ℓ ℓ' ℓ'' : Level
 
 
 private
@@ -80,6 +81,9 @@ module OrderedFieldStr (𝒦 : OrderedField ℓ ℓ') where
 
   ·-/-lInv : (q : K)(n : ℕ₊₁) → (ℕ→R-Pos (ℕ₊₁→ℕ n)) · (q / n) ≡ q
   ·-/-lInv q n = ·Comm _ (q / n) ∙ ·-/-rInv q n
+
+  1/n>0 : (n : ℕ₊₁) →  1/ n > 0r
+  1/n>0 (1+ n) = ·-lPosCancel>0 (ℕ→R-PosSuc>0 n) (subst (_> 0r) (sym (1/n·n≡1 (1+ n))) 1>0)
 
 
   {-
@@ -218,3 +222,78 @@ module OrderedFieldStr (𝒦 : OrderedField ℓ ℓ') where
     mid>x = middle>l x<zy⁻¹
     z·mid⁻¹>y : y < z · inv₊ mid>0
     z·mid⁻¹>y = ·-MoveLToR< mid>0 y·mid<z
+
+
+  {-
+
+    Pick out a smaller-than-both positive element
+
+  -}
+
+  min2 : x > 0r → y > 0r → Σ[ z ∈ K ] (z > 0r) × (z < x) × (z < y)
+  min2 {x = x} {y = y} x>0 y>0 = case-split (trichotomy x y)
+    where
+    case-split : Trichotomy x y → Σ[ z ∈ K ] (z > 0r) × (z < x) × (z < y)
+    case-split (lt x<y) = middle 0r x , middle>l x>0 , middle<r x>0 , <-trans (middle<r x>0) x<y
+    case-split (gt x>y) = middle 0r y , middle>l y>0 , <-trans (middle<r y>0) x>y , middle<r y>0
+    case-split (eq x≡y) =
+      middle 0r x , middle>l x>0 , middle<r x>0 , subst (middle 0r x <_) x≡y (middle<r x>0)
+
+
+{-
+
+  Archimedean-ness of Ordered Field
+
+-}
+
+open import Classical.Preliminary.Nat
+open import Classical.Algebra.OrderedRing.Archimedes
+
+module _ (𝒦 : OrderedField ℓ ℓ')(archimedes : isArchimedean (𝒦 .fst)) where
+
+  open OrderedFieldStr 𝒦
+
+  private
+    K = 𝒦 .fst .fst .fst
+
+  -- An inverse version of Archimedean-ness,
+  -- which says you can make a non-zero element arbitrarily small by dividing a natural number.
+
+  isArchimedeanInv : Type (ℓ-max ℓ ℓ')
+  isArchimedeanInv = (x ε : K) → x > 0r → ε > 0r → Σ[ n ∈ ℕ₊₁ ] ε / n < x
+
+  isArchimedean→isArchimedeanInv : isArchimedeanInv
+  isArchimedean→isArchimedeanInv x ε x>0 ε>0 = let (n , nx>ε) = archimedes ε x x>0 in helper n nx>ε
+    where
+    helper : (n : ℕ) → n ⋆ x > ε → Σ[ n ∈ ℕ₊₁ ] ε / n < x
+    helper zero nx>ε = Empty.rec (<-asym ε>0 (subst (_> ε) (0⋆q≡0 _) nx>ε))
+    helper (suc n) nx>ε = 1+ n ,
+      subst (ε / (1+ n) <_) (sym (·Assoc _ _ _)
+      ∙ ·-/-lInv x (1+ n)) (·-rPosPres< (1/n>0 (1+ n)) nx>ε)
+
+
+  -- A useful lemma to lift mere existence to existence
+
+  module _
+    {P : (x : K) → Type ℓ''}
+    (isPropP : (x : K) → isProp (P x))
+    (decP : (x : K) → Dec (P x))
+    (<-close : (x y : K) → x > 0r → x < y → P y → P x)
+    (∃ε : ∥ Σ[ ε ∈ K ] (ε > 0r) × P ε ∥) where
+
+    private
+      P' : ℕ → Type ℓ''
+      P' n = P (1r / (1+ n))
+
+      1r/n>0 : (n : ℕ₊₁) → 1r / n > 0r
+      1r/n>0 n = ·-Pres>0 1>0 (1/n>0 n)
+
+      ∃P'n : ∥ Σ[ n ∈ ℕ ] P' n ∥
+      ∃P'n = Prop.map
+        (λ (ε , ε>0 , pε) →
+          let (1+ n , 1/n<ε) =
+                isArchimedean→isArchimedeanInv ε 1r ε>0 1>0
+          in  n , <-close _ _ (1r/n>0 _) 1/n<ε pε) ∃ε
+
+    findExplicit : Σ[ ε ∈ K ] (ε > 0r) × P ε
+    findExplicit = let (n , p) = find (λ _ → isPropP _) (λ _ → decP _) ∃P'n in 1r / (1+ n) , (1r/n>0 _) , p

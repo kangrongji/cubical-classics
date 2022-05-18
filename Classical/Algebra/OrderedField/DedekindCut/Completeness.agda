@@ -3,7 +3,7 @@
 Dedekind Completion is Complete
 
 -}
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --experimental-lossy-unification #-}
 module Classical.Algebra.OrderedField.DedekindCut.Completeness where
 
 open import Cubical.Foundations.Prelude
@@ -16,6 +16,7 @@ open import Classical.Foundations.Powerset
 
 open import Classical.Algebra.OrderedRing.Archimedes
 open import Classical.Algebra.OrderedField
+open import Classical.Algebra.OrderedField.Extremum
 open import Classical.Algebra.OrderedField.Completeness
 open import Classical.Algebra.OrderedField.DedekindCut.Base
 open import Classical.Algebra.OrderedField.DedekindCut.Order
@@ -43,6 +44,7 @@ module CompletenessOfCuts (decide : LEM)
 
   open CompleteOrderedField decide
   open Completeness
+  open Extremum decide 𝕂OrderedField
   open Supremum
 
   open OrderedFieldStr 𝕂OrderedField using ()
@@ -110,9 +112,9 @@ module CompletenessOfCuts (decide : LEM)
   -}
 
   isComplete𝕂 : isComplete 𝕂OrderedField
-  isComplete𝕂 {A = A} = Prop.rec2 (isPropSupremum 𝕂OrderedField A)
+  isComplete𝕂 {A = A} = Prop.rec2 (isPropSupremum A)
     (λ (a₀ , a₀∈A) (b , bound) →
-      Prop.rec (isPropSupremum 𝕂OrderedField A)
+      Prop.rec (isPropSupremum A)
       (λ (s , s∈x∈A) →
         record
         { sup = sup𝕂 A a₀ a₀∈A s s∈x∈A
