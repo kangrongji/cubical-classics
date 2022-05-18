@@ -414,6 +414,9 @@ module Powerset (decide : LEM) where
   ... | yeah x∈A = x∈A i and p x x∈A i
   ... | nope x∉A = and-absorpˡ (A x) (B x) x∉A i
 
+  →∩∅' : {A B : ℙ X} → ((x : X) → x ∈ A → x ∈ B → ⊥) → A ∩ B ≡ ∅
+  →∩∅' {B = B} p = →∩∅ (λ x x∈A → ¬∈→∉ {A = B} (p x x∈A))
+
   A∩B=∅→A⊆∁B : {A B : ℙ X} → A ∩ B ≡ ∅ → A ⊆ (∁ B)
   A∩B=∅→A⊆∁B {A = A} {B = B} A∩B≡∅ {x = x} x∈A =
     ∉→∈∁ {A = B} (and-forceˡ (A x) (B x) (λ i → A∩B≡∅ i x) x∈A)

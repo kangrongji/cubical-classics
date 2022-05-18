@@ -48,15 +48,15 @@ module Neighbourhood (decide : LEM) where
     N∈ℕbhx→N∈Open : {x : X}{N : Subset} → N ∈ ℕbh x → N ∈ Open
     N∈ℕbhx→N∈Open {x = x} = right∈-∩ (rep x) Open
 
-    getℕbh : {x : X}{N : Subset} → x ∈ N → N ∈ Open → N ∈ ℕbh x
-    getℕbh {x = x} {N = N} x∈N N∈Open = ∈→∈∩ (rep x) Open x∈N N∈Open
+    makeℕbh : {x : X}{N : Subset} → x ∈ N → N ∈ Open → N ∈ ℕbh x
+    makeℕbh {x = x} {N = N} x∈N N∈Open = ∈→∈∩ (rep x) Open x∈N N∈Open
 
     total∈ℕbh : {x : X} → total ∈ ℕbh x
-    total∈ℕbh {x = x} = getℕbh {x = x} (x∈total {x = x}) (𝒯 .has-total)
+    total∈ℕbh {x = x} = makeℕbh {x = x} (x∈total {x = x}) (𝒯 .has-total)
 
     ℕbh∩ : {x : X}{U V : Subset} → U ∈ ℕbh x → V ∈ ℕbh x → U ∩ V ∈ ℕbh x
     ℕbh∩ {U = U} {V = V} U∈ℕx V∈ℕx =
-      getℕbh (∩-∈rep U V (N∈ℕbhx→x∈N U∈ℕx) (N∈ℕbhx→x∈N V∈ℕx))
+      makeℕbh (∩-∈rep U V (N∈ℕbhx→x∈N U∈ℕx) (N∈ℕbhx→x∈N V∈ℕx))
         (𝒯 .∩-close (N∈ℕbhx→N∈Open U∈ℕx) (N∈ℕbhx→N∈Open V∈ℕx))
 
 
@@ -73,7 +73,7 @@ module Neighbourhood (decide : LEM) where
     x ∈∘ U = ∥ x Σ∈∘ U ∥
 
     ∈→∈∘ : {x : X}{U : Subset} → U ∈ Open → x ∈ U → x ∈∘ U
-    ∈→∈∘ {U = U} U∈Open x∈U = ∣ _ , getℕbh x∈U U∈Open , ⊆-refl {A = U} ∣
+    ∈→∈∘ {U = U} U∈Open x∈U = ∣ _ , makeℕbh x∈U U∈Open , ⊆-refl {A = U} ∣
 
 
     -- If every point of a subset U is its interior point,

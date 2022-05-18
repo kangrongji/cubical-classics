@@ -7,7 +7,6 @@ Topology on a Type and Topological Space
 module Classical.Topology.Base where
 
 open import Cubical.Foundations.Prelude
-
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
 

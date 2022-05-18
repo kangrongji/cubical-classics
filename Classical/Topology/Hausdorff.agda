@@ -44,7 +44,7 @@ module Hausdorff (decide : LEM) where
 
     isHausdorff : Type _
     isHausdorff =
-      {x y : X} → ¬ x ≡ y → ∥ Σ[ U ∈ Subset ] Σ[ V ∈ Subset ] (U ∈ ℕbh x) × (V ∈ ℕbh y) × (U ∩ V ≡ ∅) ∥
+      {x y : X} → ¬ x ≡ y → ∥ Σ[ U ∈ ℙ X ] Σ[ V ∈ ℙ X ] (U ∈ ℕbh x) × (V ∈ ℕbh y) × (U ∩ V ≡ ∅) ∥
 
 
     module _

@@ -211,7 +211,10 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
 
 
   +-Pres>0 : x > 0r → y > 0r → x + y > 0r
-  +-Pres>0 {x = x} {y = y} = transport (λ i → >0≡>0r x i → >0≡>0r y i → >0≡>0r (x + y) i) (>0-+ x y)
+  +-Pres>0 {x = x} {y = y} x>0 y>0 = subst (x + y >_) (+Rid _) (+-Pres< x>0 y>0)
+
+  +-Pres<0 : x < 0r → y < 0r → x + y < 0r
+  +-Pres<0 {x = x} {y = y} x<0 y<0 = subst (x + y <_) (+Rid _) (+-Pres< x<0 y<0)
 
   ·-Pres>0 : x > 0r → y > 0r → x · y > 0r
   ·-Pres>0 {x = x} {y = y} = transport (λ i → >0≡>0r x i → >0≡>0r y i → >0≡>0r (x · y) i) (>0-· x y)
