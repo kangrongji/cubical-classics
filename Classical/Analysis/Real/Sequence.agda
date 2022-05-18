@@ -151,38 +151,3 @@ module Cauchy (decide : LEM) where
 
   isCauchy : (ℕ → ℝ) → Type
   isCauchy seq = (ε : ℝ) → ε > 0 → ∥ Σ[ N ∈ ℕ ] ((m n : ℕ) → m >ℕ N → n >ℕ N → abs (seq m - seq n) < ε) ∥
-
-
-  -- Real Number is Cauchy Complete
-
-  converge : (seq : ℕ → ℝ) → isCauchy seq → Limit seq
-  converge = {!!}
-
-
-  {-
-
-    The Bolzano-Weierstrass Theorem
-
-  -}
-
-
-  -- The notion of sub-sequence
-
-  record Subsequence (seq : ℕ → ℝ) : Type where
-    field
-      incl : ℕ → ℕ
-      incrs : (n : ℕ) → incl (suc n) >ℕ incl n
-
-  open Subsequence
-
-  subseq : {seq : ℕ → ℝ} → Subsequence seq → ℕ → ℝ
-  subseq {seq = seq} sub n = seq (sub .incl n)
-
-
-  -- The Bolzano-Weierstrass Theorem
-
-  isBoundedSequence : (ℕ → ℝ) → Type
-  isBoundedSequence seq = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] ((n : ℕ) → (a ≤ seq n) × (seq n ≤ b)) ∥
-
-  bolwei : (seq : ℕ → ℝ) → isBoundedSequence seq → Σ[ sub ∈ Subsequence seq ] Limit (subseq sub)
-  bolwei = {!!}
