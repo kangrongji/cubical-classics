@@ -2,6 +2,12 @@
 
 Topology of Real Numbers
 
+This file contains:
+- The canonical metric of ℝ and its induced topology;
+- Basics of closed interval;
+- Closed interval is closed and compact;
+- The Heine-Borel theorem.
+
 -}
 {-# OPTIONS --safe #-}
 module Classical.Analysis.Real.Topology where
@@ -47,6 +53,12 @@ module TopologyOfReal (decide : LEM) where
       x y z : ℝ
 
 
+  {-
+
+    Canonical Metric and Topology of ℝ
+
+  -}
+
   -- ℝ is a metric space
 
   instance
@@ -68,7 +80,11 @@ module TopologyOfReal (decide : LEM) where
   isHausdorffℝ = isHausdorffMetric
 
 
-  -- Closed interval
+  {-
+
+    Closed Interval
+
+  -}
 
   module _ (a b : ℝ) ⦃ a≤b : a ≤ b ⦄ where
 
@@ -263,15 +279,15 @@ module TopologyOfReal (decide : LEM) where
 
         x₀∈cov×¬x₀<b : (x₀ ∈ cov-sub) × (¬ x₀ < b)
         x₀∈cov×¬x₀<b = Prop.rec isProp×'
-            (λ (U , r , r>0 , U∈𝒰 , ℬxr⊆U) → Prop.rec isProp×'
-            (λ (y , x₀-r<y , y∈sub) → Prop.rec isProp×'
-            (λ (𝒰₀ , 𝒰₀⊆𝒰 , fin𝒰₀ , cov) →
-              x₀∈cov×¬x₀<b'
-                U r ⦃ r>0 ⦄ U∈𝒰 ℬxr⊆U
-                y x₀-r<y y∈sub
-                𝒰₀ 𝒰₀⊆𝒰 fin𝒰₀ cov)
-            (∈→Inhab cov-prop y∈sub .snd))
-            (<sup→∃∈ (x₀ - r) cov-sup (+-rNeg→< (-Reverse>0 r>0)))) ∃ℬ
+          (λ (U , r , r>0 , U∈𝒰 , ℬxr⊆U) → Prop.rec isProp×'
+          (λ (y , x₀-r<y , y∈sub) → Prop.rec isProp×'
+          (λ (𝒰₀ , 𝒰₀⊆𝒰 , fin𝒰₀ , cov) →
+            x₀∈cov×¬x₀<b'
+              U r ⦃ r>0 ⦄ U∈𝒰 ℬxr⊆U
+              y x₀-r<y y∈sub
+              𝒰₀ 𝒰₀⊆𝒰 fin𝒰₀ cov)
+          (∈→Inhab cov-prop y∈sub .snd))
+          (<sup→∃∈ (x₀ - r) cov-sup (+-rNeg→< (-Reverse>0 r>0)))) ∃ℬ
 
         x₀≡b : x₀ ≡ b
         x₀≡b = ≤+¬<→≡ x₀≤b (x₀∈cov×¬x₀<b .snd)
@@ -286,3 +302,41 @@ module TopologyOfReal (decide : LEM) where
 
     isClosedInterval : isClosedSubSet [ a , b ]
     isClosedInterval = isCompactSubset→isClosedSubSet isHausdorffℝ isCompactInterval
+
+
+  {-
+
+    Bounded Subset
+
+  -}
+
+
+  -- Two usual formulation of boundedness, and they are equivalent.
+
+  isBounded : ℙ ℝ → Type
+  isBounded A = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] (a ≤ b) × ((x : ℝ) → x ∈ A → (a ≤ x) × (x ≤ b)) ∥
+
+  isBoundedByInterval : ℙ ℝ → Type
+  isBoundedByInterval A = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] Σ[ a≤b ∈ a ≤ b ] A ⊆ [ a , b ] ⦃ a≤b ⦄ ∥
+
+  isBounded→isBoundedByInterval : {A : ℙ ℝ} → isBounded A → isBoundedByInterval A
+  isBounded→isBoundedByInterval =
+    Prop.map (λ (a , b , a≤b , h) →
+      a , b , a≤b , λ {x} x∈A → Inhab→∈𝐈 ⦃ a≤b ⦄ (h x x∈A .fst) (h x x∈A .snd))
+
+  isBoundedByInterval→isBounded : {A : ℙ ℝ} → isBoundedByInterval A → isBounded A
+  isBoundedByInterval→isBounded =
+    Prop.map (λ (a , b , a≤b , A⊆𝐈) →
+      a , b , a≤b , λ x x∈A → ∈→Inhab𝐈-L ⦃ a≤b ⦄ (A⊆𝐈 x∈A) , ∈→Inhab𝐈-R ⦃ a≤b ⦄ (A⊆𝐈 x∈A))
+
+
+  {-
+
+    Heine-Borel Theorem
+
+  -}
+
+  -- A bounded and closed subset of ℝ is compact under the canonical topology.
+
+  isBoundedClosed→isCompact : {A : ℙ ℝ} → isBounded A → isClosedSubSet A → isCompactSubset A
+  isBoundedClosed→isCompact = {!!}
