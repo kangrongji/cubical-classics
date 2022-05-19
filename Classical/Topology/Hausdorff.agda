@@ -47,8 +47,7 @@ module Hausdorff (decide : LEM) where
       {x y : X} → ¬ x ≡ y → ∥ Σ[ U ∈ ℙ X ] Σ[ V ∈ ℙ X ] (U ∈ ℕbh x) × (V ∈ ℕbh y) × (U ∩ V ≡ ∅) ∥
 
 
-    module _
-      (separate : isHausdorff) where
+    module _ (separate : isHausdorff) where
 
       -- In a Hausdorff space X,
       -- point x ∈ X and subset K ⊆ X are separating by open sets

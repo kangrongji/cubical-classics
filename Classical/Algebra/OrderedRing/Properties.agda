@@ -310,6 +310,9 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   -MoveRToL< : z < x - y → z + y < x
   -MoveRToL< {z = z} {x = x} {y = y} x-y>z = subst (x >_) (λ i → z + -Idempotent y i) (+-MoveRToL< x-y>z)
 
+  -MoveRToL<' : z < x - y → y + z < x
+  -MoveRToL<' {z = z} {x = x} {y = y} x-y>z = subst (x >_) (+Comm _ _) (-MoveRToL< x-y>z)
+
 
   {-
 

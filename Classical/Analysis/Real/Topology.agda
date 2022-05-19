@@ -89,13 +89,16 @@ module TopologyOfReal (decide : LEM) where
   module _ {a b : ℝ} ⦃ a≤b : a ≤ b ⦄ where
 
     Inhab→∈𝐈 : a ≤ x → x ≤ b → x ∈ [ a , b ]
-    Inhab→∈𝐈 = {!!}
+    Inhab→∈𝐈 a≤x x≤b = Inhab→∈ (𝐈-prop a b) (a≤x , x≤b)
 
     ∈→Inhab𝐈-L : x ∈ [ a , b ] → a ≤ x
-    ∈→Inhab𝐈-L = {!!}
+    ∈→Inhab𝐈-L x∈𝐈 = ∈→Inhab (𝐈-prop a b) x∈𝐈 .fst
 
     ∈→Inhab𝐈-R : x ∈ [ a , b ] → x ≤ b
-    ∈→Inhab𝐈-R  = {!!}
+    ∈→Inhab𝐈-R x∈𝐈 = ∈→Inhab (𝐈-prop a b) x∈𝐈 .snd
+
+    x∈[a,b] : a ≡ b → x ∈ [ a , b ] → a ≡ x
+    x∈[a,b] {x = x} a≡b x∈𝐈 = ≤-asym (∈→Inhab𝐈-L x∈𝐈) (subst (x ≤_) (sym a≡b) (∈→Inhab𝐈-R x∈𝐈))
 
 
   instance
@@ -108,11 +111,10 @@ module TopologyOfReal (decide : LEM) where
 
   module _ (a b : ℝ) ⦃ a≤b : a ≤ b ⦄ where
 
-    isClosedInterval : isClosedSubSet [ a , b ]
-    isClosedInterval = {!!}
+    -- Closed interval is compact.
 
     isCompactInterval : isCompactSubset [ a , b ]
-    isCompactInterval = {!!}
+    isCompactInterval = cov[a,b]
       where
 
       module _ {𝒰 : ℙ Subset}(𝒰cov𝐈 : 𝒰 covers [ a , b ]) where
@@ -126,108 +128,161 @@ module TopologyOfReal (decide : LEM) where
         cov-prop x =
           (Σ[ x∈𝐈 ∈ x ∈ [ a , b ] ]
             ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers [ a , x ] ⦃ ∈→Inhab𝐈-L x∈𝐈 ⦄ ∥) ,
-          {!!}
+          isPropΣ (isProp∈ [ a , b ]) (λ _ → squash)
 
         cov-sub = specify cov-prop
 
+        a≤x∈sub : (x : ℝ) → x ∈ cov-sub → x ≥ a
+        a≤x∈sub x x∈sub = ∈→Inhab𝐈-L (∈→Inhab cov-prop x∈sub .fst)
+
+        b≥x∈sub : (x : ℝ) → x ∈ cov-sub → x ≤ b
+        b≥x∈sub x x∈sub =  ∈→Inhab𝐈-R (∈→Inhab cov-prop x∈sub .fst)
+
+        instance
+          a≤a : a ≤ a
+          a≤a = inr refl
+
         cov-sup : Supremum cov-sub
-        cov-sup = getSup {!!} {!!}
+        cov-sup = getSup ∣ a , Inhab→∈ cov-prop (a∈𝐈 a b , cov-a) ∣ ∣ b , b≥x∈sub ∣
+          where
+          cov-a : ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers [ a , a ] ⦃ ∈→Inhab𝐈-L (a∈𝐈 a b) ⦄ ∥
+          cov-a = Prop.map
+            (λ (U , a∈U , U∈𝒰) →
+              [[ U ]] , A∈S→[A]⊆S U∈𝒰 , isFinSubset[x] ,
+              (λ {x} x∈[a,a] →
+                let a≡x : a ≡ x
+                    a≡x = x∈[a,b] refl x∈[a,a]
+                in  subst (x ∈_) (sym union[A]) (subst (_∈ U) a≡x a∈U)) ,
+              A∈S→[A]⊆S (𝒰cov𝐈 .snd U∈𝒰))
+            (∈cover (a∈𝐈 a b) 𝒰cov𝐈)
 
         x₀ = cov-sup .sup
 
-        x₀≥a : x₀ ≥ a
-        x₀≥a = {!!}
+        instance
+          x₀≥a : x₀ ≥ a
+          x₀≥a = supLowerBounded _ cov-sup a≤x∈sub
 
         x₀≤b : x₀ ≤ b
-        x₀≤b = {!!}
+        x₀≤b = supUpperBounded _ cov-sup b≥x∈sub
+
+        x₀∈𝐈 : x₀ ∈ [ a , b ]
+        x₀∈𝐈 = Inhab→∈𝐈 x₀≥a x₀≤b
 
         module _
-          (U : ℙ ℝ)(r : ℝ) ⦃ r>0 : r > 0 ⦄
-          (U∈𝒰 : U ∈ 𝒰)(ℬx₀r⊆U : ℬ x₀ r ⊆ U) where
-
-          ε : ℝ
-          ε = 2
-
-          ε/2 = middle 0 ε
-
-          ε/2>0 : ε/2 > 0
-          ε/2>0 = {!!}
-
-          a≤x₀+ε/2 : a ≤ x₀ + ε/2
-          a≤x₀+ε/2 = {!!}
-
-          x₀+ε/2≤b : x₀ + ε/2 ≤ b
-          x₀+ε/2≤b = {!!}
-
-          x₀+ε/2∈𝐈 : (x₀ + ε/2) ∈ [ a , b ]
-          x₀+ε/2∈𝐈 = {!!}
+          (U : ℙ ℝ)(r : ℝ) ⦃ r>0 : r > 0 ⦄ (U∈𝒰 : U ∈ 𝒰)(ℬx₀r⊆U : ℬ x₀ r ⊆ U)
+          (y : ℝ)(x₀-r<y : x₀ - r < y)(y∈sub : y ∈ cov-sub) where
 
           instance
-            ε>0 : ε > 0
-            ε>0 = {!!}
-
-            a≤x₀-ε : a ≤ x₀ - ε
-            a≤x₀-ε = {!!}
-
-            _ : a ≤ x₀ + ε/2
-            _ = ∈→Inhab𝐈-L x₀+ε/2∈𝐈
-
-            x₀-ε∈𝐈 : (x₀ - ε) ∈ [ a , b ]
-            x₀-ε∈𝐈 = {!!}
-
-          ε/2<ε = middle<r ε>0
-
-          ∃𝒰₀ : ∥ Σ[ 𝒰₀ ∈ ℙ ℙ ℝ ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers [ a , x₀ - ε ] ∥
-          ∃𝒰₀ = {!!}
-
-          ∃V : ∥ Σ[ V ∈ ℙ ℝ ] V ∈ 𝒰 × ℬ x₀ ε ⦃ ε>0 ⦄ ⊆ V ∥
-          ∃V = {!!}
+            a≤y : a ≤ y
+            a≤y = a≤x∈sub y y∈sub
 
           module _
-            (𝒰₀ : ℙ ℙ ℝ)(𝒰₀⊆𝒰 : 𝒰₀ ⊆ 𝒰)(fin𝒰₀ : isFinSubset 𝒰₀)(cov : 𝒰₀ covers [ a , x₀ - ε ])
-            (V : ℙ ℝ)(V∈𝒰 : V ∈ 𝒰)(ℬx₀ε⊆V : ℬ x₀ ε ⊆ V) where
+            (𝒰₀ : ℙ ℙ ℝ)(𝒰₀⊆𝒰 : 𝒰₀ ⊆ 𝒰)(fin𝒰₀ : isFinSubset 𝒰₀)(cov : 𝒰₀ covers [ a , y ])
+            where
 
-            𝒰₀+V : ℙ ℙ ℝ
-            𝒰₀+V = 𝒰₀ ∪ [[ V ]]
+            𝒰₀+U : ℙ ℙ ℝ
+            𝒰₀+U = 𝒰₀ ∪ [[ U ]]
 
-            𝒰₀+V∈𝒰 : 𝒰₀+V ⊆ 𝒰
-            𝒰₀+V∈𝒰 = ⊆→⊆∪ {C = 𝒰} 𝒰₀⊆𝒰 (A∈S→[A]⊆S {S = 𝒰} V∈𝒰)
+            𝒰₀+U∈𝒰 : 𝒰₀+U ⊆ 𝒰
+            𝒰₀+U∈𝒰 = ⊆→⊆∪ {C = 𝒰} 𝒰₀⊆𝒰 (A∈S→[A]⊆S {S = 𝒰} U∈𝒰)
 
-            fin𝒰₀+V : isFinSubset 𝒰₀+V
-            fin𝒰₀+V = isfinsuc V fin𝒰₀
+            fin𝒰₀+U : isFinSubset 𝒰₀+U
+            fin𝒰₀+U = isfinsuc U fin𝒰₀
 
-            ∪-helper : {x : ℝ} → (x ∈ union 𝒰₀) ⊎ (x ∈ V) → x ∈ union 𝒰₀+V
+            ∪-helper : {x : ℝ} → (x ∈ union 𝒰₀) ⊎ (x ∈ U) → x ∈ union 𝒰₀+U
             ∪-helper (inl x∈∪𝒰₀) = union∪-left⊆ x∈∪𝒰₀
-            ∪-helper {x = x} (inr x∈[V]) = union∪-right⊆ (subst (x ∈_) (sym union[A]) x∈[V])
+            ∪-helper {x = x} (inr x∈[U]) = union∪-right⊆ (subst (x ∈_) (sym union[A]) x∈[U])
 
-            covMore : 𝒰₀+V covers [ a , x₀ + ε/2 ]
-            covMore .fst {x = x} x∈[a,x₀+ε/2] = case-split (<≤-total (x₀ - ε) x)
+            covSup : 𝒰₀+U covers [ a , x₀ ]
+            covSup .fst {x = x} x∈[a,x₀] = case-split (<≤-total y x)
               where
               case-split : _ → _
-              case-split (inl x>x₀-ε) = ∪-helper (inr (ℬx₀ε⊆V x∈ℬx₀ε))
+              case-split (inl x>y) = ∪-helper (inr (ℬx₀r⊆U x∈ℬx₀r))
                 where
-                x∈ℬx₀ε : x ∈ ℬ x₀ ε
-                x∈ℬx₀ε = Inhab→∈ℬ (absInOpenInterval ε>0 x>x₀-ε
-                  (≤<-trans (∈→Inhab𝐈-R x∈[a,x₀+ε/2]) (+-lPres< ε/2<ε)))
-              case-split (inr x≤x₀-ε) = ∪-helper (inl (cov .fst x∈[a,x₀-ε]))
+                x∈ℬx₀r : x ∈ ℬ x₀ r
+                x∈ℬx₀r = Inhab→∈ℬ (absInOpenInterval r>0 (<-trans x₀-r<y x>y)
+                  (≤<-trans (∈→Inhab𝐈-R x∈[a,x₀]) (+-rPos→> r>0)))
+              case-split (inr x≤y) = ∪-helper (inl (cov .fst x∈[a,y]))
                 where
-                x∈[a,x₀-ε] : x ∈ [ a , x₀ - ε ]
-                x∈[a,x₀-ε] = Inhab→∈𝐈 (∈→Inhab𝐈-L x∈[a,x₀+ε/2]) x≤x₀-ε
-            covMore .snd = ⊆-trans {A = 𝒰₀+V} 𝒰₀+V∈𝒰 (𝒰cov𝐈 .snd)
+                x∈[a,y] : x ∈ [ a , y ]
+                x∈[a,y] = Inhab→∈𝐈 (∈→Inhab𝐈-L x∈[a,x₀]) x≤y
+            covSup .snd = ⊆-trans {A = 𝒰₀+U} 𝒰₀+U∈𝒰 (𝒰cov𝐈 .snd)
 
-            no-way' : ⊥
-            no-way' = <≤-asym (+-rPos→> ε/2>0) (cov-sup .bound _ x₀+ε/2∈cov)
-              where
-              x₀+ε/2∈cov : (x₀ + ε/2) ∈ cov-sub
-              x₀+ε/2∈cov = Inhab→∈ cov-prop (x₀+ε/2∈𝐈 , ∣ 𝒰₀+V , 𝒰₀+V∈𝒰 , fin𝒰₀+V , covMore ∣)
+            x₀∈cov : x₀ ∈ cov-sub
+            x₀∈cov = Inhab→∈ cov-prop (x₀∈𝐈 , ∣ 𝒰₀+U , 𝒰₀+U∈𝒰 , fin𝒰₀+U , covSup ∣)
 
+            module _ (x₀<b : x₀ < b) where
 
-        module _ (x₀<b : x₀ < b) where
+              ε-triple = min2 {y = b - x₀} r>0 (>→Diff>0 x₀<b)
 
-          ∃ℬ : ∥ Σ[ U ∈ ℙ ℝ ] Σ[ r ∈ ℝ ] Σ[ r>0 ∈ r > 0 ] (U ∈ 𝒰) × (ℬ x₀ r ⦃ r>0 ⦄ ⊆ U) ∥
-          ∃ℬ = {!!}
+              ε = ε-triple .fst
+              ε>0 = ε-triple .snd .fst
+              ε<r = ε-triple .snd .snd .fst
+              ε<b-x₀ = ε-triple .snd .snd .snd
 
-          --∃𝒰₀ : ∥
+              instance
+                a≤x₀+ε : a ≤ x₀ + ε
+                a≤x₀+ε = inl (≤<-trans x₀≥a (+-rPos→> ε>0))
 
-          ¬x₀<b : ⊥
-          ¬x₀<b = {!!}
+              x₀+ε∈𝐈 : (x₀ + ε) ∈ [ a , b ]
+              x₀+ε∈𝐈 = Inhab→∈𝐈 a≤x₀+ε (inl (-MoveRToL<' ε<b-x₀))
+
+              covMore : 𝒰₀+U covers [ a , x₀ + ε ]
+              covMore .fst {x = x} x∈[a,x₀+ε] = case-split (<≤-total y x)
+                where
+                case-split : _ → _
+                case-split (inl x>y) = ∪-helper (inr (ℬx₀r⊆U x∈ℬx₀r))
+                  where
+                  x∈ℬx₀r : x ∈ ℬ x₀ r
+                  x∈ℬx₀r = Inhab→∈ℬ (absInOpenInterval r>0 (<-trans x₀-r<y x>y)
+                    (≤<-trans (∈→Inhab𝐈-R x∈[a,x₀+ε]) (+-lPres< ε<r)))
+                case-split (inr x≤y) = ∪-helper (inl (cov .fst x∈[a,y]))
+                  where
+                  x∈[a,y] : x ∈ [ a , y ]
+                  x∈[a,y] = Inhab→∈𝐈 (∈→Inhab𝐈-L x∈[a,x₀+ε]) x≤y
+              covMore .snd = ⊆-trans {A = 𝒰₀+U} 𝒰₀+U∈𝒰 (𝒰cov𝐈 .snd)
+
+              no-way : ⊥
+              no-way = <≤-asym (+-rPos→> ε>0) (cov-sup .bound _ x₀+ε∈cov)
+                where
+                x₀+ε∈cov : (x₀ + ε) ∈ cov-sub
+                x₀+ε∈cov = Inhab→∈ cov-prop (x₀+ε∈𝐈 , ∣ 𝒰₀+U , 𝒰₀+U∈𝒰 , fin𝒰₀+U , covMore ∣)
+
+            x₀∈cov×¬x₀<b' : (x₀ ∈ cov-sub) × (¬ x₀ < b)
+            x₀∈cov×¬x₀<b' = x₀∈cov , no-way
+
+        ∃ℬ : ∥ Σ[ U ∈ ℙ ℝ ] Σ[ r ∈ ℝ ] Σ[ r>0 ∈ r > 0 ] (U ∈ 𝒰) × (ℬ x₀ r ⦃ r>0 ⦄ ⊆ U) ∥
+        ∃ℬ = Prop.rec squash
+          (λ (U , x₀∈U , U∈𝒰) → Prop.map
+          (λ (r , r>0 , ℬxr⊆U) → U , r , r>0 , U∈𝒰 , (λ p → ℬxr⊆U p))
+          (∈→Inhab𝓂 (𝒰cov𝐈 .snd U∈𝒰) x₀ x₀∈U))
+          (∈cover x₀∈𝐈 𝒰cov𝐈)
+
+        isProp×' : isProp ((x₀ ∈ cov-sub) × (¬ x₀ < b))
+        isProp×' = isProp× (isProp∈ cov-sub) (isProp¬ _)
+
+        x₀∈cov×¬x₀<b : (x₀ ∈ cov-sub) × (¬ x₀ < b)
+        x₀∈cov×¬x₀<b = Prop.rec isProp×'
+            (λ (U , r , r>0 , U∈𝒰 , ℬxr⊆U) → Prop.rec isProp×'
+            (λ (y , x₀-r<y , y∈sub) → Prop.rec isProp×'
+            (λ (𝒰₀ , 𝒰₀⊆𝒰 , fin𝒰₀ , cov) →
+              x₀∈cov×¬x₀<b'
+                U r ⦃ r>0 ⦄ U∈𝒰 ℬxr⊆U
+                y x₀-r<y y∈sub
+                𝒰₀ 𝒰₀⊆𝒰 fin𝒰₀ cov)
+            (∈→Inhab cov-prop y∈sub .snd))
+            (<sup→∃∈ (x₀ - r) cov-sup (+-rNeg→< (-Reverse>0 r>0)))) ∃ℬ
+
+        x₀≡b : x₀ ≡ b
+        x₀≡b = ≤+¬<→≡ x₀≤b (x₀∈cov×¬x₀<b .snd)
+
+        cov[a,b]' : cov-prop b .fst
+        cov[a,b]' = ∈→Inhab cov-prop (subst (_∈ cov-sub) x₀≡b (x₀∈cov×¬x₀<b .fst))
+
+        cov[a,b] : ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers [ a , b ] ∥
+        cov[a,b] = cov[a,b]' .snd
+
+    -- Closed interval is closed.
+
+    isClosedInterval : isClosedSubSet [ a , b ]
+    isClosedInterval = isCompactSubset→isClosedSubSet isHausdorffℝ isCompactInterval

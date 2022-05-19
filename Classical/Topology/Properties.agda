@@ -58,6 +58,9 @@ module TopologyProperties (decide : LEM) where
     union∈Open : {𝒰 : ℙ Subset} → 𝒰 ⊆ Open → union 𝒰 ∈ Open
     union∈Open = 𝒯 .∪-close
 
+    ∈cover : {x : X}{A : ℙ X}{𝒰 : ℙ ℙ X} → x ∈ A → 𝒰 covers A → ∥ Σ[ U ∈ ℙ X ] x ∈ U × U ∈ 𝒰 ∥
+    ∈cover x∈A 𝒰covA = ∈union→∃ (𝒰covA .fst x∈A)
+
 
     -- Compact subset
 
