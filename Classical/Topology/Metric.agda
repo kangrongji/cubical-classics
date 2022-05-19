@@ -42,7 +42,9 @@ module MetricStr (decide : LEM) where
   open Real        decide
   open OrderedFieldStr (ℝCompleteOrderedField .fst)
   open TopologyStr decide
+  open TopologyProperties decide
   open Topology
+
 
   record Metric (X : Type ℓ) : Type (ℓ-suc ℓ) where
     field
@@ -136,8 +138,9 @@ module MetricStr (decide : LEM) where
 
     ­-}
 
-    𝓂-prop : ℙ X → hProp _
-    𝓂-prop A = ((x : X) → x ∈ A → ∥ Σ[ r ∈ ℝ ] Σ[ r>0 ∈ r > 0 ] ℬ x r ⦃ r>0 ⦄ ⊆ A ∥) , isPropΠ2 (λ _ _ → squash)
+    private
+      𝓂-prop : ℙ X → hProp _
+      𝓂-prop A = ((x : X) → x ∈ A → ∥ Σ[ r ∈ ℝ ] Σ[ r>0 ∈ r > 0 ] ℬ x r ⦃ r>0 ⦄ ⊆ A ∥) , isPropΠ2 (λ _ _ → squash)
 
     Metric→Topology : Topology X
     Metric→Topology .openset = specify 𝓂-prop
@@ -161,9 +164,20 @@ module MetricStr (decide : LEM) where
         (∈→Inhab 𝓂-prop (S⊆Open A∈S) x x∈A))
       (∈union→∃ x∈∪S))
 
-    instance
-      MetricTopology : Topology X
-      MetricTopology = Metric→Topology
+
+    private
+      instance
+        MetricTopology : Topology X
+        MetricTopology = Metric→Topology
+
+
+    module _ {U : ℙ X} where
+
+      ∈→Inhab𝓂 : isOpenSubSet U → (x : X) → x ∈ U → ∥ Σ[ r ∈ ℝ ] Σ[ r>0 ∈ r > 0 ] ℬ x r ⦃ r>0 ⦄ ⊆ U ∥
+      ∈→Inhab𝓂 = ∈→Inhab 𝓂-prop
+
+      Inhab→∈𝓂 : ((x : X) → x ∈ U → ∥ Σ[ r ∈ ℝ ] Σ[ r>0 ∈ r > 0 ] ℬ x r ⦃ r>0 ⦄ ⊆ U ∥) → isOpenSubSet U
+      Inhab→∈𝓂 = Inhab→∈ 𝓂-prop
 
 
     -- Open balls are really open

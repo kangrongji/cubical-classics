@@ -455,6 +455,15 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   ... | inr x≥y = x≥y
 
 
+  ≤+¬≡→< : x ≤ y → ¬ x ≡ y → x < y
+  ≤+¬≡→< (inl x<y) _ = x<y
+  ≤+¬≡→< (inr x≡y) ¬x≡y = Empty.rec (¬x≡y x≡y)
+
+  ≤+¬<→≡ : x ≤ y → ¬ x < y → x ≡ y
+  ≤+¬<→≡ (inl x<y) ¬x<y = Empty.rec (¬x<y x<y)
+  ≤+¬<→≡ (inr x≡y) _ = x≡y
+
+
   ·-PosPres>≥ : x > 0r → z > 0r → x < y → z ≤ w → x · z < y · w
   ·-PosPres>≥ x>0 z>0 x<y (inl z<w) = ·-PosPres> x>0 z>0 x<y z<w
   ·-PosPres>≥ {x = x} {z = z} {y = y} x>0 z>0 x<y (inr z≡w) =

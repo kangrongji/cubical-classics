@@ -44,6 +44,15 @@ private
     helper6 : (x y z : 𝓡 .fst) → (x - y) + (y - z) ≡ x - z
     helper6 = solve 𝓡
 
+    helper7 : (x d : 𝓡 .fst) → x ≡ (x + d) - d
+    helper7 = solve 𝓡
+
+    helper8 : (x y : 𝓡 .fst) → y - x ≡ - (x - y)
+    helper8 = solve 𝓡
+
+    helper9 : (x d : 𝓡 .fst) → (x + d) - x ≡ d
+    helper9 = solve 𝓡
+
 
 module AbsoluteValue (𝓡 : OrderedRing ℓ ℓ') where
 
@@ -156,6 +165,31 @@ module AbsoluteValue (𝓡 : OrderedRing ℓ ℓ') where
     x-y≤d = transport (λ i → helper2 x y d i ≤ helper3 x y d i) (+-rPres≤ (+-rPres≤ x-d≤y))
     x-y≡∣x-y∣ : x - y ≡ abs (x - y)
     x-y≡∣x-y∣ = sym (x≥0→abs≡x (≥→Diff≥0 y≤x))
+
+  absInBetween< : d > 0r → x - d < y → y < x → abs (x - y) < d
+  absInBetween< {d = d} {x = x} {y = y} d>0 x-d<y y<x = subst (_< d) x-y≡∣x-y∣ x-y<d
+    where
+    x-y<d : x - y < d
+    x-y<d = transport (λ i → helper2 x y d i < helper3 x y d i) (+-rPres< (+-rPres< x-d<y))
+    x-y≡∣x-y∣ : x - y ≡ abs (x - y)
+    x-y≡∣x-y∣ = sym (x>0→abs≡x (>→Diff>0 y<x))
+
+  absInBetween<' : d > 0r → x < y → y < x + d → abs (x - y) < d
+  absInBetween<' {d = d} {x = x} {y = y} d>0 x<y y<x+d = subst (_< d) x-y≡∣x-y∣ x-y<d
+    where
+    x-y<d : y - x < d
+    x-y<d = transport (λ i → y - x < helper9 x d i) (+-rPres< y<x+d)
+    x-y≡∣x-y∣ : y - x ≡ abs (x - y)
+    x-y≡∣x-y∣ = helper8 _ _ ∙ sym (x<0→abs≡-x (<→Diff<0 x<y))
+
+  absInOpenInterval : d > 0r → x - d < y → y < x + d → abs (x - y) < d
+  absInOpenInterval {d = d} {x = x} {y = y} d>0 x-d<y y<x+d = case-split (trichotomy x y)
+    where
+    case-split : Trichotomy x y → _
+    case-split (gt x>y) = absInBetween<  d>0 x-d<y x>y
+    case-split (lt x<y) = absInBetween<' d>0 x<y y<x+d
+    case-split (eq x≡y) = subst (_< d) (sym (x≡0→abs≡0 (x≡y→diff≡0 x≡y))) d>0
+
 
 
   private

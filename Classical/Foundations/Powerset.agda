@@ -57,7 +57,7 @@ module Powerset (decide : LEM) where
 
   -- The powerset construction, namely the type of all possible "subsets",
   -- well-behaved only when one has some kind of impredicativity.
-  ℙ : Type ℓ → Type ℓ
+  ℙ_ : Type ℓ → Type ℓ
   ℙ X = X → Prop
 
   isSetℙ : isSet (ℙ X)
@@ -318,6 +318,11 @@ module Powerset (decide : LEM) where
 
   ∈A+∈B→∈A∪B : {x : X}(A B : ℙ X) → ∥ (x ∈ A) ⊎ (x ∈ B) ∥ → x ∈ (A ∪ B)
   ∈A+∈B→∈A∪B {x = x} A B = Prop.rec (isProp∈ (A ∪ B)) (λ ∈A+∈B → or≡true (A x) (B x) ∈A+∈B)
+
+  ⊆→⊆∪ : {A B C : ℙ X} → A ⊆ C → B ⊆ C → A ∪ B ⊆ C
+  ⊆→⊆∪ {A = A} {B = B} A⊆C B⊆C x∈A∪B with ∈A∪B→∈A+∈B A B x∈A∪B
+  ... | inl x∈A = A⊆C x∈A
+  ... | inr x∈B = B⊆C x∈B
 
 
   -- Binary intersection
@@ -623,6 +628,9 @@ module Powerset (decide : LEM) where
   data isFinSubset {ℓ : Level}{X : Type ℓ} : ℙ X → Type ℓ where
     isfin∅   : isFinSubset ∅
     isfinsuc : (x : X){A : ℙ X} → isFinSubset A → isFinSubset (A ∪ [ x ])
+
+  isFinSubset[x] : {x : X} → isFinSubset [ x ]
+  isFinSubset[x] {x = x} = subst isFinSubset (∪-lUnit _) (isfinsuc x isfin∅)
 
   isFinSubset∪ : {A B : ℙ X} → isFinSubset A → isFinSubset B → isFinSubset (A ∪ B)
   isFinSubset∪ p isfin∅ = subst isFinSubset (sym (∪-rUnit _)) p
