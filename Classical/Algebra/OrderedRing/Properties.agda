@@ -345,8 +345,8 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   ≤-trans {x = x} x≤y (inr y≡z) = subst (x ≤_) y≡z x≤y
   ≤-trans {x = x} {y = y} {z = z} (inl x<y) (inl y<z) = inl (<-trans {x = x} {y = y} {z = z} x<y y<z)
 
-  ≤-total : (x ≤ y) ⊎ (y ≤ x)
-  ≤-total {x = x} {y = y} with trichotomy x y
+  ≤-total : (x y : R) → (x ≤ y) ⊎ (y ≤ x)
+  ≤-total x y with trichotomy x y
   ... | lt x<y = inl (inl x<y)
   ... | eq x≡y = inl (inr x≡y)
   ... | gt x>y = inr (inl x>y)
@@ -577,3 +577,19 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   n⋆q≥0 : (n : ℕ)(q : R) → q > 0r → n ⋆ q ≥ 0r
   n⋆q≥0 zero q _ = inr (sym (0⋆q≡0 q))
   n⋆q≥0 (suc n) q q>0 = inl (sucn⋆q>0 n q q>0)
+
+
+  {-
+
+    Difference and Equality
+
+  -}
+
+  diff≡0→x≡y : x - y ≡ 0r → x ≡ y
+  diff≡0→x≡y {y = y} x-y≡0 = sym (helper19 _ _) ∙ (λ i → x-y≡0 i + y) ∙ +Lid _
+
+  x≡y→diff≡0 : x ≡ y → x - y ≡ 0r
+  x≡y→diff≡0 {y = y} x≡y = (λ i → x≡y i - y) ∙ +Rinv _
+
+  x-y≡-[y-x] : x - y ≡ - (y - x)
+  x-y≡-[y-x] = helper2 _ _

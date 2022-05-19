@@ -8,6 +8,7 @@ module Classical.Algebra.OrderedRing.AbsoluteValue where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Data.Empty as Empty
+open import Cubical.Data.Sum
 
 open import Cubical.Algebra.Ring
 open import Cubical.Algebra.CommRing
@@ -34,6 +35,15 @@ private
     helper3 : (x y d : 𝓡 .fst) → (y + d) - y ≡ d
     helper3 = solve 𝓡
 
+    helper4 : (x y d : 𝓡 .fst) → (y + d) - y ≡ d
+    helper4 = solve 𝓡
+
+    helper5 : (x y : 𝓡 .fst) → - x - y ≡ - (x + y)
+    helper5 = solve 𝓡
+
+    helper6 : (x y z : 𝓡 .fst) → (x - y) + (y - z) ≡ x - z
+    helper6 = solve 𝓡
+
 
 module AbsoluteValue (𝓡 : OrderedRing ℓ ℓ') where
 
@@ -57,6 +67,18 @@ module AbsoluteValue (𝓡 : OrderedRing ℓ ℓ') where
   ... | lt x<0 = - x
   ... | eq x≡0 = 0r
   ... | gt x>0 = x
+
+  abs≥0 : abs x ≥ 0r
+  abs≥0 {x = x} with trichotomy x 0r
+  ... | lt x<0 = inl (-Reverse<0 x<0)
+  ... | eq x≡0 = inr refl
+  ... | gt x>0 = inl x>0
+
+  abs≡0→x≡0 : abs x ≡ 0r → x ≡ 0r
+  abs≡0→x≡0 {x = x} abs≡0 with trichotomy x 0r
+  ... | lt x<0 = sym (-Idempotent _) ∙ (λ i → - abs≡0 i) ∙ 0Selfinverse
+  ... | eq x≡0 = x≡0
+  ... | gt x>0 = abs≡0
 
 
   x>0→abs≡x : x > 0r → abs x ≡ x
@@ -134,3 +156,58 @@ module AbsoluteValue (𝓡 : OrderedRing ℓ ℓ') where
     x-y≤d = transport (λ i → helper2 x y d i ≤ helper3 x y d i) (+-rPres≤ (+-rPres≤ x-d≤y))
     x-y≡∣x-y∣ : x - y ≡ abs (x - y)
     x-y≡∣x-y∣ = sym (x≥0→abs≡x (≥→Diff≥0 y≤x))
+
+
+  private
+    absIneq+Pos : x ≥ 0r → abs x + abs y ≥ abs (x + y)
+    absIneq+Pos {x = x} {y = y} (inr 0≡x) =
+      transport (λ i → left (~ i) ≥ right (~ i)) (inr refl)
+      where
+      left : abs x + abs y ≡ abs y
+      left = (λ i → x≡0→abs≡0 (sym 0≡x) i + abs y) ∙ +Lid _
+      right : abs (x + y) ≡ abs y
+      right = cong abs ((λ i → 0≡x (~ i) + y) ∙ +Lid _)
+    absIneq+Pos {x = x} {y = y} (inl x>0) = case-split (trichotomy y 0r) (trichotomy (x + y) 0r)
+      where
+      case-split : Trichotomy y 0r → Trichotomy (x + y) 0r → _
+      case-split (eq y≡0) _ =
+        transport (λ i → left (~ i) ≥ right (~ i)) (inr refl)
+        where
+        left : abs x + abs y ≡ abs x
+        left = (λ i → abs x + x≡0→abs≡0 y≡0 i) ∙ +Rid _
+        right : abs (x + y) ≡ abs x
+        right = cong abs ((λ i → x + y≡0 i) ∙ +Rid _)
+      case-split (gt y>0) _ =
+        transport (λ i → x>0→abs≡x x>0 (~ i) + x>0→abs≡x y>0 (~ i) ≥ x>0→abs≡x ineq (~ i)) (inr refl)
+        where
+        ineq : x + y > 0r
+        ineq = +-Pres>0 x>0 y>0
+      case-split (lt y<0) (lt x+y<0) =
+        transport (λ i → x>0→abs≡x x>0 (~ i) + x<0→abs≡-x y<0 (~ i) ≥ x<0→abs≡-x x+y<0 (~ i)) ineq
+        where
+        ineq : x - y ≥ - (x + y)
+        ineq = subst (x - y ≥_) (helper5 _ _) (+-rPres≤ (≤-trans (inl (-Reverse>0 x>0)) (inl x>0)))
+      case-split (lt y<0) (eq x+y≡0) =
+        subst (abs x + abs y ≥_) (sym (x≡0→abs≡0 x+y≡0)) (+-Pres≥0 abs≥0 abs≥0)
+      case-split (lt y<0) (gt x+y>0) =
+        transport (λ i → x>0→abs≡x x>0 (~ i) + x<0→abs≡-x y<0 (~ i) ≥ x>0→abs≡x x+y>0 (~ i)) ineq
+        where
+        ineq : x - y ≥ x + y
+        ineq = +-lPres≤ (≤-trans (inl y<0) (inl (-Reverse<0 y<0)))
+
+
+  absIneq+ : abs x + abs y ≥ abs (x + y)
+  absIneq+ {x = x} {y = y} = case-split (<≤-total x 0r) (<≤-total y 0r)
+    where
+    case-split : _ → _ → _
+    case-split (inr x≥0) _ = absIneq+Pos x≥0
+    case-split _ (inr y≥0) = transport (λ i → +Comm (abs y) (abs x) i ≥ abs (+Comm y x i)) (absIneq+Pos y≥0)
+    case-split (inl x<0) (inl y<0) =
+      inr (x<0→abs≡-x ineq ∙ sym (helper5 _ _) ∙ (λ i → x<0→abs≡-x x<0 (~ i) + x<0→abs≡-x y<0 (~ i)))
+      where
+      ineq : x + y < 0r
+      ineq = +-Pres<0 x<0 y<0
+
+  Δ-Inequality : abs (x - y) + abs (y - z) ≥ abs (x - z)
+  Δ-Inequality {x = x} {y = y} {z = z} =
+    subst (λ t → abs (x - y) + abs (y - z) ≥ abs t) (helper6 _ _ _) absIneq+
