@@ -211,7 +211,10 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
 
 
   +-Pres>0 : x > 0r → y > 0r → x + y > 0r
-  +-Pres>0 {x = x} {y = y} = transport (λ i → >0≡>0r x i → >0≡>0r y i → >0≡>0r (x + y) i) (>0-+ x y)
+  +-Pres>0 {x = x} {y = y} x>0 y>0 = subst (x + y >_) (+Rid _) (+-Pres< x>0 y>0)
+
+  +-Pres<0 : x < 0r → y < 0r → x + y < 0r
+  +-Pres<0 {x = x} {y = y} x<0 y<0 = subst (x + y <_) (+Rid _) (+-Pres< x<0 y<0)
 
   ·-Pres>0 : x > 0r → y > 0r → x · y > 0r
   ·-Pres>0 {x = x} {y = y} = transport (λ i → >0≡>0r x i → >0≡>0r y i → >0≡>0r (x · y) i) (>0-· x y)
@@ -307,6 +310,9 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   -MoveRToL< : z < x - y → z + y < x
   -MoveRToL< {z = z} {x = x} {y = y} x-y>z = subst (x >_) (λ i → z + -Idempotent y i) (+-MoveRToL< x-y>z)
 
+  -MoveRToL<' : z < x - y → y + z < x
+  -MoveRToL<' {z = z} {x = x} {y = y} x-y>z = subst (x >_) (+Comm _ _) (-MoveRToL< x-y>z)
+
 
   {-
 
@@ -342,8 +348,8 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   ≤-trans {x = x} x≤y (inr y≡z) = subst (x ≤_) y≡z x≤y
   ≤-trans {x = x} {y = y} {z = z} (inl x<y) (inl y<z) = inl (<-trans {x = x} {y = y} {z = z} x<y y<z)
 
-  ≤-total : (x ≤ y) ⊎ (y ≤ x)
-  ≤-total {x = x} {y = y} with trichotomy x y
+  ≤-total : (x y : R) → (x ≤ y) ⊎ (y ≤ x)
+  ≤-total x y with trichotomy x y
   ... | lt x<y = inl (inl x<y)
   ... | eq x≡y = inl (inr x≡y)
   ... | gt x>y = inr (inl x>y)
@@ -450,6 +456,15 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   ¬<→≥ {x = x} {y = y} ¬x<y with <≤-total x y
   ... | inl x<y = Empty.rec (¬x<y x<y)
   ... | inr x≥y = x≥y
+
+
+  ≤+¬≡→< : x ≤ y → ¬ x ≡ y → x < y
+  ≤+¬≡→< (inl x<y) _ = x<y
+  ≤+¬≡→< (inr x≡y) ¬x≡y = Empty.rec (¬x≡y x≡y)
+
+  ≤+¬<→≡ : x ≤ y → ¬ x < y → x ≡ y
+  ≤+¬<→≡ (inl x<y) ¬x<y = Empty.rec (¬x<y x<y)
+  ≤+¬<→≡ (inr x≡y) _ = x≡y
 
 
   ·-PosPres>≥ : x > 0r → z > 0r → x < y → z ≤ w → x · z < y · w
@@ -574,3 +589,19 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   n⋆q≥0 : (n : ℕ)(q : R) → q > 0r → n ⋆ q ≥ 0r
   n⋆q≥0 zero q _ = inr (sym (0⋆q≡0 q))
   n⋆q≥0 (suc n) q q>0 = inl (sucn⋆q>0 n q q>0)
+
+
+  {-
+
+    Difference and Equality
+
+  -}
+
+  diff≡0→x≡y : x - y ≡ 0r → x ≡ y
+  diff≡0→x≡y {y = y} x-y≡0 = sym (helper19 _ _) ∙ (λ i → x-y≡0 i + y) ∙ +Lid _
+
+  x≡y→diff≡0 : x ≡ y → x - y ≡ 0r
+  x≡y→diff≡0 {y = y} x≡y = (λ i → x≡y i - y) ∙ +Rinv _
+
+  x-y≡-[y-x] : x - y ≡ - (y - x)
+  x-y≡-[y-x] = helper2 _ _

@@ -61,7 +61,7 @@ module Cauchy (decide : LEM) where
 
   -}
 
-  -- Monotone increasing and bounded sequence
+  -- Monotone increasing and upper-bounded sequence
 
   isIncreasing : (ℕ → ℝ) → Type
   isIncreasing seq = (n : ℕ) → seq (suc n) ≥ seq n

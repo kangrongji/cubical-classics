@@ -222,7 +222,7 @@ module Multiplication (decide : LEM)
       where c+b≥0 : (c +𝕂 b) ≥𝕂 𝟘
             c+b≥0 = subst (_≥𝕂 𝟘) (+𝕂-Comm b c) b+c≥0
     case-split (ge b≥0) (lt c<0) = ·𝕂-lDistb-PosPosNeg a b c a≥0 b≥0 c<0 b+c≥0
-    case-split (lt b<0) (lt c<0) = Empty.rec (<≤𝕂-asym (b +𝕂 c) 𝟘 (+-Pres<0 b c b<0 c<0) b+c≥0)
+    case-split (lt b<0) (lt c<0) = Empty.rec (<≤𝕂-asym (b +𝕂 c) 𝟘 (+𝕂-Pres<0 b c b<0 c<0) b+c≥0)
 
   private
     alg-helper' : (a b c d : 𝕂) → (a +𝕂 b) +𝕂 (c +𝕂 d) ≡ (a +𝕂 c) +𝕂 (b +𝕂 d)

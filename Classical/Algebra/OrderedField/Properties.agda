@@ -46,6 +46,9 @@ private
     helper5 : (x y z : 𝓡 .fst) → x · (y · z) ≡ (y · x) · z
     helper5 = solve 𝓡
 
+    helper6 : (x : 𝓡 .fst) → x + x ≡ (1r + 1r) · x
+    helper6 = solve 𝓡
+
 
 module OrderedFieldStr (𝒦 : OrderedField ℓ ℓ') where
 
@@ -100,6 +103,9 @@ module OrderedFieldStr (𝒦 : OrderedField ℓ ℓ') where
 
   2·middle : (p q : K) → 2r · middle p q ≡ p + q
   2·middle p q = ·-/-lInv (p + q) 2
+
+  x/2+x/2≡x : (x : K) → middle 0r x + middle 0r x ≡ x
+  x/2+x/2≡x x = helper6 _ ∙ 2·middle 0r x ∙ +Lid x
 
 
   middle-l : (p q : K) → 2r · (middle p q - p) ≡ q - p
