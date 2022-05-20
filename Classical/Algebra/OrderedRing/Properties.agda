@@ -616,3 +616,16 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
 
   x-y≡-[y-x] : x - y ≡ - (y - x)
   x-y≡-[y-x] = helper2 _ _
+
+
+  {-
+
+    No Infinitesimal
+
+  -}
+
+  infinitesimal : x ≥ 0r → ((ε : R) → (ε > 0r) → x < ε) → x ≡ 0r
+  infinitesimal {x = x} x≥0 ∀ε>x = ≤-asym (¬<→≥ ¬x>0) x≥0
+    where
+    ¬x>0 : ¬ x > 0r
+    ¬x>0 x>0 = <-asym (∀ε>x x x>0) (∀ε>x x x>0)

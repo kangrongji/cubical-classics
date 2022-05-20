@@ -247,3 +247,13 @@ module AbsoluteValue (𝓡 : OrderedRing ℓ ℓ') where
   Δ-Inequality : abs (x - y) + abs (y - z) ≥ abs (x - z)
   Δ-Inequality {x = x} {y = y} {z = z} =
     subst (λ t → abs (x - y) + abs (y - z) ≥ abs t) (helper6 _ _ _) absIneq+
+
+
+  {-
+
+    Infinitesimal Closedness
+
+  -}
+
+  infinitesimalDiff : ((ε : R) → (ε > 0r) → abs (x - y) < ε) → x ≡ y
+  infinitesimalDiff ∀ε>∣x-y∣ = diff≡0→x≡y (abs≡0→x≡0 (infinitesimal abs≥0 ∀ε>∣x-y∣))

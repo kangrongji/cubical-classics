@@ -18,13 +18,14 @@ module Classical.Analysis.Real.Sequence where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Nat
-  using    (ℕ ; suc)
+  using    (ℕ ; suc ; max)
   renaming (_+_ to _+ℕ_)
 open import Cubical.Data.Nat.Order
-  using    (<-weaken)
+  using    (<-weaken ; left-≤-max ; right-≤-max)
   renaming (_>_ to _>ℕ_ ; _<_ to _<ℕ_
           ; _≥_ to _≥ℕ_ ; _≤_ to _≤ℕ_
-          ; ≤-refl to ≤ℕ-refl)
+          ; ≤-refl to ≤ℕ-refl
+          ; ≤<-trans to ≤<ℕ-trans)
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
@@ -38,7 +39,9 @@ open import Classical.Algebra.OrderedRing.AbsoluteValue
 open import Classical.Algebra.OrderedField
 open import Classical.Algebra.OrderedField.Extremum
 open import Classical.Algebra.OrderedField.Completeness
+open import Classical.Topology.Metric
 open import Classical.Analysis.Real.Base
+open import Classical.Analysis.Real.Topology
 
 
 module Cauchy (decide : LEM) where
@@ -59,7 +62,7 @@ module Cauchy (decide : LEM) where
   isConvergentTo seq x = (ε : ℝ) → ε > 0 → ∥ Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n >ℕ n₀ → abs (x - seq n) < ε) ∥
 
   isPropIsConvergentTo : {seq : ℕ → ℝ}{x : ℝ} → isProp (isConvergentTo seq x)
-  isPropIsConvergentTo = {!!}
+  isPropIsConvergentTo = isPropΠ2 (λ _ _ → squash)
 
   record Limit (seq : ℕ → ℝ) : Type where
     field
@@ -71,14 +74,43 @@ module Cauchy (decide : LEM) where
   -- The uniqueness of limit
 
   isPropLimit : {seq : ℕ → ℝ} → isProp (Limit seq)
-  isPropLimit = {!!}
-{-  isPropLimit {seq = seq} p q i .lim = {!!}
-    where
-    ∣x-y∣<ε : (ε : ℝ) → ε > 0 → abs (p .lim - q .lim) < ε
-    ∣x-y∣<ε = {!!}
   isPropLimit {seq = seq} p q i .conv =
     isProp→PathP (λ i → isPropIsConvergentTo {x = isPropLimit p q i .lim}) (p .conv) (q .conv) i
--}
+  isPropLimit {seq = seq} p q i .lim = infinitesimalDiff ∣x-y∣<ε i
+    where
+
+    module _ (ε : ℝ)(ε>0 : ε > 0) where
+
+      ε/2 = middle 0 ε
+      ε/2>0 = middle>l ε>0
+
+      module _
+        (n₀ : ℕ)(abs<₀ : (n : ℕ) → n >ℕ n₀ → abs (p .lim - seq n) < ε/2)
+        (n₁ : ℕ)(abs<₁ : (n : ℕ) → n >ℕ n₁ → abs (q .lim - seq n) < ε/2) where
+
+        n : ℕ
+        n = suc (max n₀ n₁)
+
+        n>n₀ : n >ℕ n₀
+        n>n₀ = ≤<ℕ-trans left-≤-max ≤ℕ-refl
+
+        n>n₁ : n >ℕ n₁
+        n>n₁ = ≤<ℕ-trans right-≤-max ≤ℕ-refl
+
+        open TopologyOfReal decide
+        open MetricStr decide
+        open Metric   ℝMetric
+
+        abs< : abs (p .lim - q .lim) < ε
+        abs< = ≤<-trans (dist-Δ _ _ _) (transport
+          (λ i → abs (p .lim - seq n) + dist-symm (q .lim) (seq n) i < x/2+x/2≡x ε i)
+          (+-Pres< (abs<₀ _ n>n₀) (abs<₁ _ n>n₁)))
+
+      ∣x-y∣<ε : abs (p .lim - q .lim) < ε
+      ∣x-y∣<ε = Prop.rec2 isProp<
+        (λ (n₀ , abs<₀) (n₁ , abs<₁) → abs< n₀ abs<₀ n₁ abs<₁)
+        (p .conv ε/2 ε/2>0) (q .conv ε/2 ε/2>0)
+
 
   {-
 
@@ -179,7 +211,7 @@ module Cauchy (decide : LEM) where
   isClusteringAt seq x = (ε : ℝ) → ε > 0 → ∥ Σ[ n ∈ ℕ ] abs (x - seq n) < ε ∥
 
   isPropIsClusteringAt :  {seq : ℕ → ℝ}{x : ℝ} → isProp (isClusteringAt seq x)
-  isPropIsClusteringAt = {!!}
+  isPropIsClusteringAt = isPropΠ2 (λ _ _ → squash)
 
   record ClusterPoint (seq : ℕ → ℝ) : Type where
     field
@@ -268,26 +300,23 @@ module Cauchy (decide : LEM) where
 
   -}
 
+  -- We say a sequence is Cauchy,
+  -- if for any ε > 0, there merely exists N ∈ ℕ
+  -- such that whenever m n > N,
+  -- the distance between the m-th and n-th terms is smaller than ε.
+  -- In other words, the sequence is condensed when n approaching infinity.
+
   isCauchy : (ℕ → ℝ) → Type
   isCauchy seq = (ε : ℝ) → ε > 0 → ∥ Σ[ N ∈ ℕ ] ((m n : ℕ) → m >ℕ N → n >ℕ N → abs (seq m - seq n) < ε) ∥
 
 
+  -- Cauchy sequence is bounded
+
+  isCauchy→isBoundedSequence : {seq : ℕ → ℝ} → isCauchy seq → isBoundedSequence seq
+  isCauchy→isBoundedSequence = {!!}
+
+
   -- Real Number is Cauchy Complete
 
-  converge : (seq : ℕ → ℝ) → isCauchy seq → Limit seq
-  converge = {!!}
-
-
-{-
-  -- The notion of sub-sequence
-
-  record Subsequence (seq : ℕ → ℝ) : Type where
-    field
-      incl : ℕ → ℕ
-      incrs : (n : ℕ) → incl (suc n) >ℕ incl n
-
-  open Subsequence
-
-  subseq : {seq : ℕ → ℝ} → Subsequence seq → ℕ → ℝ
-  subseq {seq = seq} sub n = seq (sub .incl n)
--}
+  isCauchy→Limit : {seq : ℕ → ℝ} → isCauchy seq → Limit seq
+  isCauchy→Limit {seq = seq} cauchy = {!!}
