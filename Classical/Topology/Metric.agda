@@ -173,10 +173,10 @@ module MetricStr (decide : LEM) where
 
     module _ {U : ℙ X} where
 
-      ∈→Inhab𝓂 : isOpenSubSet U → (x : X) → x ∈ U → ∥ Σ[ r ∈ ℝ ] Σ[ r>0 ∈ r > 0 ] ℬ x r ⦃ r>0 ⦄ ⊆ U ∥
+      ∈→Inhab𝓂 : isOpenSub U → (x : X) → x ∈ U → ∥ Σ[ r ∈ ℝ ] Σ[ r>0 ∈ r > 0 ] ℬ x r ⦃ r>0 ⦄ ⊆ U ∥
       ∈→Inhab𝓂 = ∈→Inhab 𝓂-prop
 
-      Inhab→∈𝓂 : ((x : X) → x ∈ U → ∥ Σ[ r ∈ ℝ ] Σ[ r>0 ∈ r > 0 ] ℬ x r ⦃ r>0 ⦄ ⊆ U ∥) → isOpenSubSet U
+      Inhab→∈𝓂 : ((x : X) → x ∈ U → ∥ Σ[ r ∈ ℝ ] Σ[ r>0 ∈ r > 0 ] ℬ x r ⦃ r>0 ⦄ ⊆ U ∥) → isOpenSub U
       Inhab→∈𝓂 = Inhab→∈ 𝓂-prop
 
 

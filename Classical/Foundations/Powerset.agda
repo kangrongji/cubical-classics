@@ -369,6 +369,12 @@ module Powerset (decide : LEM) where
   A⊆B+B∩C≡∅→A∩C≡∅ : {A B C : ℙ X} → A ⊆ B → B ∩ C ≡ ∅ → A ∩ C ≡ ∅
   A⊆B+B∩C≡∅→A∩C≡∅ {A = A} {B = B} {C = C} A⊆B B∩V≡∅ = A⊆∅→A≡∅ (subst ((A ∩ C) ⊆_) B∩V≡∅ (⊆→∩⊆ A B C A⊆B))
 
+  A⊆B→A∩B≡A : {A B : ℙ X} → A ⊆ B → A ∩ B ≡ A
+  A⊆B→A∩B≡A {A = A} {B = B} A⊆B = bi⊆→≡ (left∈-∩ A B) A⊆A∩B
+    where
+    A⊆A∩B : A ⊆ A ∩ B
+    A⊆A∩B x∈A = ∈→∈∩ A B x∈A (A⊆B x∈A)
+
 
   -- Absorption laws
 
@@ -510,6 +516,23 @@ module Powerset (decide : LEM) where
   y∈[x]→∥x≡y∥ : {x y : X} → y ∈ [ x ] → ∥ x ≡ y ∥
   y∈[x]→∥x≡y∥ {x = x} = ∈→Inhab (λ y → ∥ x ≡ y ∥ , squash)
 
+  A⊆[x]→A≡∅/[x] : {A : ℙ X}{x : X} → A ⊆ [ x ] → (A ≡ ∅) ⊎ (A ≡ [ x ])
+  A⊆[x]→A≡∅/[x] {X = X} {A = A} {x = x} A⊆[x] = case-split (dichotomy∈ x A)
+    where
+    case-split : Dichotomy∈ x A → _
+    case-split (yeah x∈A) = inr (bi⊆→≡ A⊆[x] [x]⊆A)
+      where
+      [x]⊆A : [ x ] ⊆ A
+      [x]⊆A y∈[x] = Prop.rec (isProp∈ A)
+        (λ x≡y → subst (_∈ A) x≡y x∈A)
+        (y∈[x]→∥x≡y∥ y∈[x])
+    case-split (nope x∉A) = inl (A≡∅ (λ y → ¬∈→∉ {A = A} (∀¬x∈A y)))
+      where
+      ∀¬x∈A : (y : X) → ¬ y ∈ A
+      ∀¬x∈A y y∈A = Prop.rec isProp⊥
+        (λ x≡y → ∉→¬∈ {A = A} x∉A (subst (_∈ A) (sym x≡y) y∈A))
+        (y∈[x]→∥x≡y∥ (A⊆[x] y∈A))
+
   A∈S→[A]⊆S : {A : ℙ X}{S : ℙ (ℙ X)} → A ∈ S → [ A ] ⊆ S
   A∈S→[A]⊆S {S = S} A∈S B∈[A] =
     Prop.rec (isProp∈ S) (λ A≡B → subst (_∈ S) A≡B A∈S) (y∈[x]→∥x≡y∥ B∈[A])
@@ -625,17 +648,34 @@ module Powerset (decide : LEM) where
 
   -- Finite subset
 
-  data isFinSubset {ℓ : Level}{X : Type ℓ} : ℙ X → Type ℓ where
-    isfin∅   : isFinSubset ∅
-    isfinsuc : (x : X){A : ℙ X} → isFinSubset A → isFinSubset (A ∪ [ x ])
+  data isFinSub {ℓ : Level}{X : Type ℓ} : ℙ X → Type ℓ where
+    isfin∅   : isFinSub ∅
+    isfinsuc : {A : ℙ X} → isFinSub A → (x : X) → isFinSub (A ∪ [ x ])
+    fin-squash : {A : ℙ X} → (p q : isFinSub A) → p ≡ q
 
-  isFinSubset[x] : {x : X} → isFinSubset [ x ]
-  isFinSubset[x] {x = x} = subst isFinSubset (∪-lUnit _) (isfinsuc x isfin∅)
+  isFinSub[x] : {x : X} → isFinSub [ x ]
+  isFinSub[x] {x = x} = subst isFinSub (∪-lUnit _) (isfinsuc isfin∅ x)
 
-  isFinSubset∪ : {A B : ℙ X} → isFinSubset A → isFinSubset B → isFinSubset (A ∪ B)
-  isFinSubset∪ p isfin∅ = subst isFinSubset (sym (∪-rUnit _)) p
-  isFinSubset∪ p (isfinsuc y finB) =
-    subst isFinSubset (sym (∪-Assoc _ _ _)) (isfinsuc y (isFinSubset∪ p finB))
+  isFinSub∪ : {A B : ℙ X} → isFinSub A → isFinSub B → isFinSub (A ∪ B)
+  isFinSub∪ p isfin∅ = subst isFinSub (sym (∪-rUnit _)) p
+  isFinSub∪ p (isfinsuc finB y) =
+    subst isFinSub (sym (∪-Assoc _ _ _)) (isfinsuc (isFinSub∪ p finB) y)
+  isFinSub∪ p (fin-squash q s i) = fin-squash (isFinSub∪ p q) (isFinSub∪ p s) i
+
+  isFinSub⊆ : {A B : ℙ X} → A ⊆ B → isFinSub B → isFinSub A
+  isFinSub⊆ A⊆B isfin∅ = subst isFinSub (sym (A⊆∅→A≡∅ A⊆B)) isfin∅
+  isFinSub⊆ {A = A} A⊆B (isfinsuc {A = B} finB y) =
+    subst isFinSub (sym (∩-∪-rDist _ _ _) ∙ A⊆B→A∩B≡A A⊆B) (isFinSub∪ finA∩B finA∩[y])
+    where
+    finA∩B : isFinSub (A ∩ B)
+    finA∩B = isFinSub⊆ (right∈-∩ A B) finB
+    finA∩[y] : isFinSub (A ∩ [ y ])
+    finA∩[y] = case-split (A⊆[x]→A≡∅/[x] (right∈-∩ A [ y ]))
+      where
+      case-split : (A ∩ [ y ] ≡ ∅) ⊎ (A ∩ [ y ] ≡ [ y ]) → _
+      case-split (inl A∩[y]≡∅) = subst isFinSub (sym A∩[y]≡∅) isfin∅
+      case-split (inr A∩[y]≡[y]) = subst isFinSub (sym A∩[y]≡[y]) isFinSub[x]
+  isFinSub⊆ A⊆B (fin-squash p q i) = fin-squash (isFinSub⊆ A⊆B p) (isFinSub⊆ A⊆B q) i
 
 
   {-

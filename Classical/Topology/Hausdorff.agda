@@ -53,20 +53,20 @@ module Hausdorff (decide : LEM) where
       -- point x ∈ X and subset K ⊆ X are separating by open sets
       -- if x ∉ K and K is compact.
 
-      sepOpenCompact : {x : X}{K : Subset} → isCompactSubset K → x ∉ K → SepOpen x K
+      sepOpenCompact : {x : X}{K : ℙ X} → isCompactSub K → x ∉ K → SepOpen x K
       sepOpenCompact {x = x₀} {K = K} takefin x₀∉K = sepOpen
         where
-        P : Subset → hProp _
+        P : ℙ X → hProp _
         P U = ∥ Σ[ x ∈ X ] (x ∈ K) × (U ∈ ℕbh x) × (Sep x₀ U) ∥ , squash
 
-        𝒰 : ℙ Subset
+        𝒰 : ℙ ℙ X
         𝒰 = specify P
 
         𝒰⊆Open : 𝒰 ⊆ Open
         𝒰⊆Open p =
           Prop.rec (isProp∈ Open) (λ (_ , _ , q , _) → N∈ℕbhx→N∈Open q) (∈→Inhab P p)
 
-        𝕌 : Subset
+        𝕌 : ℙ X
         𝕌 = union 𝒰
 
         -- A shuffle of propositions
@@ -84,7 +84,7 @@ module Hausdorff (decide : LEM) where
         𝕌∈Open = union∈Open 𝒰⊆Open
 
         -- Another shuffle of propositions
-        ∃𝒰₀ : ∥ Σ[ 𝒰₀ ∈ ℙ Subset ] 𝒰₀ ⊆ Open × isFinSubset 𝒰₀ × 𝒰₀ covers K × ((U : Subset) → U ∈ 𝒰₀ → Sep x₀ U) ∥
+        ∃𝒰₀ : ∥ Σ[ 𝒰₀ ∈ ℙ ℙ X ] 𝒰₀ ⊆ Open × isFinSub 𝒰₀ × 𝒰₀ covers K × ((U : ℙ X) → U ∈ 𝒰₀ → Sep x₀ U) ∥
         ∃𝒰₀ =
           Prop.map
           (λ (𝒰₀ , 𝒰₀⊆𝒰 , fin𝒰₀ , 𝒰₀covK) →
@@ -100,6 +100,6 @@ module Hausdorff (decide : LEM) where
 
       -- Compact subset of Hausdorff space is closed.
 
-      isCompactSubset→isClosedSubSet : {K : Subset} → isCompactSubset K → isClosedSubSet K
-      isCompactSubset→isClosedSubSet takefin =
+      isCompactSub→isClosedSub : {K : ℙ X} → isCompactSub K → isClosedSub K
+      isCompactSub→isClosedSub takefin =
         SepCriterionOfClosedness (λ _ x∉K → SepOpen→Sep (sepOpenCompact takefin x∉K))

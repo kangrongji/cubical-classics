@@ -2,14 +2,17 @@
 
 This file contains:
 - The notion of closed subset;
-- Definition and basic properties of open covering;
-- Definition of compactness.
+- Basics of open covering;
+- Basics of compactness.
 
 -}
 {-# OPTIONS --safe #-}
 module Classical.Topology.Properties where
 
 open import Cubical.Foundations.Prelude
+open import Cubical.Foundations.HLevels
+open import Cubical.Data.Empty as Empty
+open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
 
@@ -32,41 +35,138 @@ module TopologyProperties (decide : LEM) where
 
   module _ {X : Type ℓ} ⦃ 𝒯 : Topology X ⦄ where
 
-    -- The ppen and closed subsets
+    {-
 
-    Subset : Type _
-    Subset = ℙ X
+      The Open and Closed Subset
 
-    Open : ℙ Subset
+    -}
+
+    Open : ℙ ℙ X
     Open = 𝒯 .openset
 
-    Closed : ℙ Subset
+    Closed : ℙ ℙ X
     Closed A = Open (∁ A)
 
-    isOpenSubSet : Subset → Type _
-    isOpenSubSet U = U ∈ Open
+    isOpenSub : ℙ X → Type _
+    isOpenSub U = U ∈ Open
 
-    isClosedSubSet : Subset → Type _
-    isClosedSubSet A = ∁ A ∈ Open
+    isClosedSub : ℙ X → Type _
+    isClosedSub A = ∁ A ∈ Open
+
+    isOpenSub∁ : {A : ℙ X} → isClosedSub A → isOpenSub (∁ A)
+    isOpenSub∁ p = p
+
+    isClosedSub∁ : {A : ℙ X} → isOpenSub A → isClosedSub (∁ A)
+    isClosedSub∁ = subst (_∈ Open) (sym (∁-Unip _))
 
 
-    -- Open coverings
+    {-
 
-    _covers_ : ℙ Subset → Subset → Type _
+      Open Covering
+
+    -}
+
+    _covers_ : ℙ ℙ X → ℙ X → Type _
     _covers_ 𝒰 A = A ⊆ union 𝒰 × 𝒰 ⊆ Open
 
-    union∈Open : {𝒰 : ℙ Subset} → 𝒰 ⊆ Open → union 𝒰 ∈ Open
+    union∈Open : {𝒰 : ℙ ℙ X} → 𝒰 ⊆ Open → union 𝒰 ∈ Open
     union∈Open = 𝒯 .∪-close
 
     ∈cover : {x : X}{A : ℙ X}{𝒰 : ℙ ℙ X} → x ∈ A → 𝒰 covers A → ∥ Σ[ U ∈ ℙ X ] x ∈ U × U ∈ 𝒰 ∥
     ∈cover x∈A 𝒰covA = ∈union→∃ (𝒰covA .fst x∈A)
 
 
-    -- Compact subset
+    {-
 
-    isCompactSubset : Subset → Type _
-    isCompactSubset K =
-      {𝒰 : ℙ Subset} → 𝒰 covers K → ∥ Σ[ 𝒰₀ ∈ ℙ Subset ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers K ∥
+      Compactness
+
+    -}
+
+    -- A subset K is compact,
+    -- if for any open covering 𝒰 of K,
+    -- there always merely exists a finite subcover of 𝒰.
+
+    isCompactSub : ℙ X → Type _
+    isCompactSub K =
+      {𝒰 : ℙ ℙ X} → 𝒰 covers K → ∥ Σ[ 𝒰₀ ∈ ℙ ℙ X ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers K ∥
 
     isCompact : Type _
-    isCompact = isCompactSubset total
+    isCompact = isCompactSub total
+
+    isPropIsCompactSub : {A : ℙ X} → isProp (isCompactSub A)
+    isPropIsCompactSub = isPropImplicitΠ (λ _ → isPropΠ (λ _ → squash))
+
+
+    -- A closed subset that is contained in certain compact subset is itself compact.
+
+    isClosedInCompact→isCompact :
+      {A K : ℙ X} → A ⊆ K → isClosedSub A → isCompactSub K → isCompactSub A
+    isClosedInCompact→isCompact {A = A} {K = K} A⊆K ∁A∈Open takefinK {𝒰 = 𝒰} 𝒰covA = ∃𝒰₀
+      where
+
+      𝒰+∁A : ℙ ℙ X
+      𝒰+∁A = 𝒰 ∪ [ ∁ A ]
+
+      ∪-helper : {x : X} → (x ∈ union 𝒰) ⊎ (x ∈ ∁ A) → x ∈ union 𝒰+∁A
+      ∪-helper (inl x∈∪𝒰) = union∪-left⊆ x∈∪𝒰
+      ∪-helper {x = x} (inr x∈[∁A]) = union∪-right⊆ (subst (x ∈_) (sym union[A]) x∈[∁A])
+
+      𝒰+∁A-covK : 𝒰+∁A covers K
+      𝒰+∁A-covK .fst {x = x} x∈K = case-split (dichotomy∈ x A)
+        where
+        case-split : Dichotomy∈ x A → _
+        case-split (yeah x∈A) = ∪-helper (inl (𝒰covA .fst x∈A))
+        case-split (nope x∉A) = ∪-helper (inr (∉→∈∁ {A = A} x∉A))
+      𝒰+∁A-covK .snd = ⊆→⊆∪ {C = Open} (𝒰covA .snd) (A∈S→[A]⊆S {S = Open} ∁A∈Open)
+
+      a∈U+U∈𝒰+∁A→U∈𝒰 : {x : X}{U : ℙ X} → x ∈ A → x ∈ U → U ∈ 𝒰+∁A → U ∈ 𝒰
+      a∈U+U∈𝒰+∁A→U∈𝒰 {x = x} {U = U} x∈A x∈U U∈𝒰+∁A = case-split (∈A∪B→∈A+∈B 𝒰 [ ∁ A ] U∈𝒰+∁A)
+        where
+        case-split : (U ∈ 𝒰) ⊎ (U ∈ [ ∁ A ]) → U ∈ 𝒰
+        case-split (inl U∈𝒰) = U∈𝒰
+        case-split (inr U∈[∁A]) = Empty.rec (∉→¬∈ {A = A} (∈∁→∉ {A = A} x∈∁A) x∈A)
+          where
+          x∈∁A : x ∈ ∁ A
+          x∈∁A = Prop.rec (isProp∈ (∁ A))
+            (λ ∁A≡U → subst (x ∈_) (sym ∁A≡U) x∈U)
+            (y∈[x]→∥x≡y∥ U∈[∁A])
+
+      module _ (𝒰' : ℙ ℙ X)(𝒰'⊆𝒰+∁A : 𝒰' ⊆ 𝒰+∁A)(fin𝒰' : isFinSub 𝒰')(𝒰'covK : 𝒰' covers K) where
+
+        cov-prop : ℙ X → hProp _
+        cov-prop U = ∥ Σ[ x ∈ X ] (x ∈ A) × (x ∈ U) × (U ∈ 𝒰') ∥ , squash
+
+        𝒰₀ = specify cov-prop
+
+        𝒰₀⊆𝒰' : 𝒰₀ ⊆ 𝒰'
+        𝒰₀⊆𝒰' U∈𝒰₀ = Prop.rec (isProp∈ 𝒰')
+          (λ (x , x∈A , x∈U , U∈𝒰') → U∈𝒰')
+          (∈→Inhab cov-prop U∈𝒰₀)
+
+        𝒰₀⊆𝒰 : 𝒰₀ ⊆ 𝒰
+        𝒰₀⊆𝒰 U∈𝒰₀ = Prop.rec (isProp∈ 𝒰)
+          (λ (x , x∈A , x∈U , U∈𝒰') →
+            a∈U+U∈𝒰+∁A→U∈𝒰 x∈A x∈U (𝒰'⊆𝒰+∁A U∈𝒰'))
+          (∈→Inhab cov-prop U∈𝒰₀)
+
+        fin𝒰₀ : isFinSub 𝒰₀
+        fin𝒰₀ = isFinSub⊆ 𝒰₀⊆𝒰' fin𝒰'
+
+        𝒰₀covA : 𝒰₀ covers A
+        𝒰₀covA .fst {x = x} x∈A = ∃→∈union ∃U
+          where
+          ∃U : ∥ Σ[ U ∈ ℙ X ] (x ∈ U) × (U ∈ 𝒰₀) ∥
+          ∃U = Prop.map
+            (λ (U , x∈U , U∈𝒰') →
+              U , x∈U , Inhab→∈ cov-prop ∣ x , x∈A , x∈U , U∈𝒰' ∣)
+            (∈union→∃ (𝒰'covK .fst (A⊆K x∈A)))
+        𝒰₀covA .snd U∈𝒰₀ = 𝒰covA .snd (𝒰₀⊆𝒰 U∈𝒰₀)
+
+        Σ𝒰₀ : Σ[ 𝒰₀ ∈ ℙ ℙ X ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers A
+        Σ𝒰₀ = 𝒰₀ , 𝒰₀⊆𝒰 , fin𝒰₀ , 𝒰₀covA
+
+      ∃𝒰₀ : ∥ Σ[ 𝒰₀ ∈ ℙ ℙ X ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers A ∥
+      ∃𝒰₀ = Prop.map
+        (λ (𝒰' , 𝒰'⊆𝒰+∁A , fin𝒰' , 𝒰'covK) →
+          Σ𝒰₀ 𝒰' 𝒰'⊆𝒰+∁A fin𝒰' 𝒰'covK)
+        (takefinK 𝒰+∁A-covK)

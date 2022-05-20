@@ -5,7 +5,7 @@ Topology of Real Numbers
 This file contains:
 - The canonical metric of ℝ and its induced topology;
 - Basics of closed interval;
-- Closed interval is closed and compact;
+- Basics of bounded subset of ℝ;
 - The Heine-Borel theorem.
 
 -}
@@ -129,11 +129,11 @@ module TopologyOfReal (decide : LEM) where
 
     -- Closed interval is compact.
 
-    isCompactInterval : isCompactSubset [ a , b ]
+    isCompactInterval : isCompactSub [ a , b ]
     isCompactInterval = cov[a,b]
       where
 
-      module _ {𝒰 : ℙ Subset}(𝒰cov𝐈 : 𝒰 covers [ a , b ]) where
+      module _ {𝒰 : ℙ ℙ ℝ}(𝒰cov𝐈 : 𝒰 covers [ a , b ]) where
 
         open Extremum decide (ℝCompleteOrderedField .fst)
         open Supremum
@@ -143,7 +143,7 @@ module TopologyOfReal (decide : LEM) where
         cov-prop : ℝ → hProp _
         cov-prop x =
           (Σ[ x∈𝐈 ∈ x ∈ [ a , b ] ]
-            ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers [ a , x ] ⦃ ∈→Inhab𝐈-L x∈𝐈 ⦄ ∥) ,
+            ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers [ a , x ] ⦃ ∈→Inhab𝐈-L x∈𝐈 ⦄ ∥) ,
           isPropΣ (isProp∈ [ a , b ]) (λ _ → squash)
 
         cov-sub = specify cov-prop
@@ -161,10 +161,10 @@ module TopologyOfReal (decide : LEM) where
         cov-sup : Supremum cov-sub
         cov-sup = getSup ∣ a , Inhab→∈ cov-prop (a∈𝐈 a b , cov-a) ∣ ∣ b , b≥x∈sub ∣
           where
-          cov-a : ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers [ a , a ] ⦃ ∈→Inhab𝐈-L (a∈𝐈 a b) ⦄ ∥
+          cov-a : ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers [ a , a ] ⦃ ∈→Inhab𝐈-L (a∈𝐈 a b) ⦄ ∥
           cov-a = Prop.map
             (λ (U , a∈U , U∈𝒰) →
-              [[ U ]] , A∈S→[A]⊆S U∈𝒰 , isFinSubset[x] ,
+              [[ U ]] , A∈S→[A]⊆S U∈𝒰 , isFinSub[x] ,
               (λ {x} x∈[a,a] →
                 let a≡x : a ≡ x
                     a≡x = x∈[a,b] refl x∈[a,a]
@@ -193,7 +193,7 @@ module TopologyOfReal (decide : LEM) where
             a≤y = a≤x∈sub y y∈sub
 
           module _
-            (𝒰₀ : ℙ ℙ ℝ)(𝒰₀⊆𝒰 : 𝒰₀ ⊆ 𝒰)(fin𝒰₀ : isFinSubset 𝒰₀)(cov : 𝒰₀ covers [ a , y ])
+            (𝒰₀ : ℙ ℙ ℝ)(𝒰₀⊆𝒰 : 𝒰₀ ⊆ 𝒰)(fin𝒰₀ : isFinSub 𝒰₀)(cov : 𝒰₀ covers [ a , y ])
             where
 
             𝒰₀+U : ℙ ℙ ℝ
@@ -202,8 +202,8 @@ module TopologyOfReal (decide : LEM) where
             𝒰₀+U∈𝒰 : 𝒰₀+U ⊆ 𝒰
             𝒰₀+U∈𝒰 = ⊆→⊆∪ {C = 𝒰} 𝒰₀⊆𝒰 (A∈S→[A]⊆S {S = 𝒰} U∈𝒰)
 
-            fin𝒰₀+U : isFinSubset 𝒰₀+U
-            fin𝒰₀+U = isfinsuc U fin𝒰₀
+            fin𝒰₀+U : isFinSub 𝒰₀+U
+            fin𝒰₀+U = isfinsuc fin𝒰₀ U
 
             ∪-helper : {x : ℝ} → (x ∈ union 𝒰₀) ⊎ (x ∈ U) → x ∈ union 𝒰₀+U
             ∪-helper (inl x∈∪𝒰₀) = union∪-left⊆ x∈∪𝒰₀
@@ -295,13 +295,14 @@ module TopologyOfReal (decide : LEM) where
         cov[a,b]' : cov-prop b .fst
         cov[a,b]' = ∈→Inhab cov-prop (subst (_∈ cov-sub) x₀≡b (x₀∈cov×¬x₀<b .fst))
 
-        cov[a,b] : ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSubset 𝒰₀ × 𝒰₀ covers [ a , b ] ∥
+        cov[a,b] : ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers [ a , b ] ∥
         cov[a,b] = cov[a,b]' .snd
+
 
     -- Closed interval is closed.
 
-    isClosedInterval : isClosedSubSet [ a , b ]
-    isClosedInterval = isCompactSubset→isClosedSubSet isHausdorffℝ isCompactInterval
+    isClosedInterval : isClosedSub [ a , b ]
+    isClosedInterval = isCompactSub→isClosedSub isHausdorffℝ isCompactInterval
 
 
   {-
@@ -313,19 +314,19 @@ module TopologyOfReal (decide : LEM) where
 
   -- Two usual formulation of boundedness, and they are equivalent.
 
-  isBounded : ℙ ℝ → Type
-  isBounded A = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] (a ≤ b) × ((x : ℝ) → x ∈ A → (a ≤ x) × (x ≤ b)) ∥
+  isBoundedSub : ℙ ℝ → Type
+  isBoundedSub A = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] (a ≤ b) × ((x : ℝ) → x ∈ A → (a ≤ x) × (x ≤ b)) ∥
 
   isBoundedByInterval : ℙ ℝ → Type
   isBoundedByInterval A = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] Σ[ a≤b ∈ a ≤ b ] A ⊆ [ a , b ] ⦃ a≤b ⦄ ∥
 
-  isBounded→isBoundedByInterval : {A : ℙ ℝ} → isBounded A → isBoundedByInterval A
-  isBounded→isBoundedByInterval =
+  isBoundedSub→isBoundedByInterval : {A : ℙ ℝ} → isBoundedSub A → isBoundedByInterval A
+  isBoundedSub→isBoundedByInterval =
     Prop.map (λ (a , b , a≤b , h) →
       a , b , a≤b , λ {x} x∈A → Inhab→∈𝐈 ⦃ a≤b ⦄ (h x x∈A .fst) (h x x∈A .snd))
 
-  isBoundedByInterval→isBounded : {A : ℙ ℝ} → isBoundedByInterval A → isBounded A
-  isBoundedByInterval→isBounded =
+  isBoundedByInterval→isBoundedSub : {A : ℙ ℝ} → isBoundedByInterval A → isBoundedSub A
+  isBoundedByInterval→isBoundedSub =
     Prop.map (λ (a , b , a≤b , A⊆𝐈) →
       a , b , a≤b , λ x x∈A → ∈→Inhab𝐈-L ⦃ a≤b ⦄ (A⊆𝐈 x∈A) , ∈→Inhab𝐈-R ⦃ a≤b ⦄ (A⊆𝐈 x∈A))
 
@@ -338,5 +339,9 @@ module TopologyOfReal (decide : LEM) where
 
   -- A bounded and closed subset of ℝ is compact under the canonical topology.
 
-  isBoundedClosed→isCompact : {A : ℙ ℝ} → isBounded A → isClosedSubSet A → isCompactSubset A
-  isBoundedClosed→isCompact = {!!}
+  isBoundedClosedSub→isCompactSub : {A : ℙ ℝ} → isBoundedSub A → isClosedSub A → isCompactSub A
+  isBoundedClosedSub→isCompactSub {A = A} bA cA =
+    Prop.rec isPropIsCompactSub
+    (λ (a , b , a≤b , A⊆𝐈) →
+      isClosedInCompact→isCompact A⊆𝐈 cA ( isCompactInterval a b ⦃ a≤b ⦄))
+    (isBoundedSub→isBoundedByInterval bA)
