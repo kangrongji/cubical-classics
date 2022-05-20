@@ -49,7 +49,7 @@ module Base (decide : LEM) where
   -- transforming a predicate into the subset of elements that satisfying it,
   -- in certain sense realizes the axiom of specification/separation in classical set theory.
 
-  specify : (X → hProp ℓ) → ℙ X
+  specify : {ℓ : Level} → (X → hProp ℓ) → ℙ X
   specify P x = bool (decide (P x .snd))
 
 
