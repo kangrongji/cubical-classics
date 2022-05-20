@@ -1,6 +1,6 @@
 {-
 
-This file is only used to put everything about powerset together,
+This only use of this file is to put everything about powerset together,
 so that importing will be more convenient.
 
 -}

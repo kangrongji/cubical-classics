@@ -6,7 +6,10 @@ This file contains:
 - Basic properties of real-number sequence;
 - The notion of convergence and limit of sequences;
 - The notion of Cauchy sequence;
-- The monotone convergence theorem.
+- The notion of cluster points;
+- The monotone convergence theorem;
+- The Bolzano-Weierstrass theorem;
+- The convergence of Cauchy sequences, or ℝ is Cauchy complete.
 
 -}
 {-# OPTIONS --safe #-}
@@ -14,15 +17,23 @@ module Classical.Analysis.Real.Sequence where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
-open import Cubical.Data.Nat using (ℕ ; suc) renaming (_+_ to _+ℕ_)
+open import Cubical.Data.Nat
+  using    (ℕ ; suc)
+  renaming (_+_ to _+ℕ_)
 open import Cubical.Data.Nat.Order
-  using (<-weaken) renaming (_>_ to _>ℕ_ ; _<_ to _<ℕ_ ; _≥_ to _≥ℕ_)
+  using    (<-weaken)
+  renaming (_>_ to _>ℕ_ ; _<_ to _<ℕ_
+          ; _≥_ to _≥ℕ_ ; _≤_ to _≤ℕ_
+          ; ≤-refl to ≤ℕ-refl)
+open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.Relation.Nullary
 
 open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
 open import Classical.Preliminary.Nat
+open import Classical.Preliminary.Logic
 open import Classical.Algebra.OrderedRing.AbsoluteValue
 open import Classical.Algebra.OrderedField
 open import Classical.Algebra.OrderedField.Extremum
@@ -47,6 +58,9 @@ module Cauchy (decide : LEM) where
   isConvergentTo : (ℕ → ℝ) → ℝ → Type
   isConvergentTo seq x = (ε : ℝ) → ε > 0 → ∥ Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n >ℕ n₀ → abs (x - seq n) < ε) ∥
 
+  isPropIsConvergentTo : {seq : ℕ → ℝ}{x : ℝ} → isProp (isConvergentTo seq x)
+  isPropIsConvergentTo = {!!}
+
   record Limit (seq : ℕ → ℝ) : Type where
     field
       lim : ℝ
@@ -54,6 +68,17 @@ module Cauchy (decide : LEM) where
 
   open Limit
 
+  -- The uniqueness of limit
+
+  isPropLimit : {seq : ℕ → ℝ} → isProp (Limit seq)
+  isPropLimit = {!!}
+{-  isPropLimit {seq = seq} p q i .lim = {!!}
+    where
+    ∣x-y∣<ε : (ε : ℝ) → ε > 0 → abs (p .lim - q .lim) < ε
+    ∣x-y∣<ε = {!!}
+  isPropLimit {seq = seq} p q i .conv =
+    isProp→PathP (λ i → isPropIsConvergentTo {x = isPropLimit p q i .lim}) (p .conv) (q .conv) i
+-}
 
   {-
 
@@ -78,10 +103,11 @@ module Cauchy (decide : LEM) where
   private
     getSup = ℝCompleteOrderedField .snd
 
+
   -- Monotone increasing and upper-bounded sequence has a limit.
 
-  monotoneLim : {seq : ℕ → ℝ} → isIncreasing seq → isUpperBoundedSequence seq → Limit seq
-  monotoneLim {seq = seq} incr boundSeq = record { lim = limit ; conv = λ ε ε>0 → ∣ n₀ ε ε>0 , ε-δ ε ε>0 ∣ }
+  isMonoBounded→Limit : {seq : ℕ → ℝ} → isIncreasing seq → isUpperBoundedSequence seq → Limit seq
+  isMonoBounded→Limit {seq = seq} incr boundSeq = record { lim = limit ; conv = λ ε ε>0 → ∣ n₀ ε ε>0 , ε-δ ε ε>0 ∣ }
     where
 
     seq-prop : ℝ → hProp _
@@ -111,7 +137,7 @@ module Cauchy (decide : LEM) where
       P n = limit - seq n < ε
 
       lim-ε<lim : limit - ε < limit
-      lim-ε<lim = +-rNeg→< (-Reverse>0 ε>0)
+      lim-ε<lim = -rPos→< ε>0
 
       ∃p : ∥ Σ[ n ∈ ℕ ] P n ∥
       ∃p = Prop.rec squash
@@ -145,9 +171,123 @@ module Cauchy (decide : LEM) where
 
   {-
 
+    Cluster Points
+
+  -}
+
+  isClusteringAt : (ℕ → ℝ) → ℝ → Type
+  isClusteringAt seq x = (ε : ℝ) → ε > 0 → ∥ Σ[ n ∈ ℕ ] abs (x - seq n) < ε ∥
+
+  isPropIsClusteringAt :  {seq : ℕ → ℝ}{x : ℝ} → isProp (isClusteringAt seq x)
+  isPropIsClusteringAt = {!!}
+
+  record ClusterPoint (seq : ℕ → ℝ) : Type where
+    field
+      real : ℝ
+      accum : isClusteringAt seq real
+
+  open ClusterPoint
+
+
+  {-
+
+    The Bolzano-Weierstrass Theorem
+
+  -}
+
+  -- Bounded sequence
+
+  isBoundedSequence : (ℕ → ℝ) → Type
+  isBoundedSequence seq = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] ((n : ℕ) → (a ≤ seq n) × (seq n ≤ b)) ∥
+
+
+  -- Sequence of real numbers admits cluster point when it is bounded.
+
+  isBounded→ClusterPoint : {seq : ℕ → ℝ} → isBoundedSequence seq → ClusterPoint seq
+  isBounded→ClusterPoint {seq = seq} bSeq = record { real = x₀ ; accum = ∃cluster }
+    where
+
+    accum-prop : ℝ → hProp _
+    accum-prop x = ((n : ℕ) → ∥ Σ[ n' ∈ ℕ ] (n ≤ℕ n') × (x ≤ seq n') ∥) ,
+      isPropΠ (λ _ → squash)
+
+    accum-sub = specify accum-prop
+
+    module _
+      ((a , b , bound) : Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] ((n : ℕ) → (a ≤ seq n) × (seq n ≤ b)))
+      where
+
+      a∈accum : a ∈ accum-sub
+      a∈accum = Inhab→∈ accum-prop (λ n → ∣ n , ≤ℕ-refl , bound n .fst ∣)
+
+      x∈accum→x≤b : (x : ℝ) → x ∈ accum-sub → x ≤ b
+      x∈accum→x≤b x x∈accum = ¬<→≥ ¬x>b
+        where
+        ¬x>b : ¬ x > b
+        ¬x>b x>b = Prop.rec isProp⊥
+          (λ (n , _ , x≤seqn) →
+            <≤-asym x>b (≤-trans x≤seqn (bound n .snd)))
+          (∈→Inhab accum-prop x∈accum 0)
+
+      inhabSub : isInhabited  accum-sub
+      inhabSub = ∣ a , a∈accum ∣
+
+      boundSub : isUpperBounded  accum-sub
+      boundSub = ∣ b , x∈accum→x≤b ∣
+
+    accum-sup : Supremum accum-sub
+    accum-sup = getSup (Prop.rec squash inhabSub bSeq) (Prop.rec squash boundSub bSeq)
+
+    x₀ = accum-sup .sup
+
+    open ClassicalLogic decide
+
+    ∃fin>x₀ : (ε : ℝ) → ε > 0 → ∥ Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n₀ ≤ℕ n → seq n < x₀ + ε) ∥
+    ∃fin>x₀  ε ε>0 = Prop.map
+      (λ (n₀ , ¬p) →
+        n₀ , λ n n₀≤n → ¬≤→> (¬∃→∀¬2 ¬p n n₀≤n))
+      (¬∀→∃¬ (λ _ → squash) (∉→Empty accum-prop
+        (¬∈→∉ {A = accum-sub} (>sup→¬∈ _ accum-sup (+-rPos→> ε>0)))))
+
+    ∃cluster : isClusteringAt seq x₀
+    ∃cluster ε ε>0 = Prop.rec2 squash
+      (λ (m , fin>x₀) (x , x₀-ε<x , x∈sub) → Prop.map
+      (λ (n , n≥m , x≤seqn) →
+        let x₀-ε<seqn : x₀ - ε < seq n
+            x₀-ε<seqn = <≤-trans x₀-ε<x x≤seqn
+            seqn<x₀+ε : seq n < x₀ + ε
+            seqn<x₀+ε = fin>x₀ n n≥m
+        in  n , absInOpenInterval ε>0 x₀-ε<seqn seqn<x₀+ε)
+      (∈→Inhab accum-prop x∈sub m)) (∃fin>x₀ ε ε>0)
+      (<sup→∃∈ _ accum-sup (-rPos→< ε>0))
+
+
+  {-
+
     Cauchy Sequence
 
   -}
 
   isCauchy : (ℕ → ℝ) → Type
   isCauchy seq = (ε : ℝ) → ε > 0 → ∥ Σ[ N ∈ ℕ ] ((m n : ℕ) → m >ℕ N → n >ℕ N → abs (seq m - seq n) < ε) ∥
+
+
+  -- Real Number is Cauchy Complete
+
+  converge : (seq : ℕ → ℝ) → isCauchy seq → Limit seq
+  converge = {!!}
+
+
+{-
+  -- The notion of sub-sequence
+
+  record Subsequence (seq : ℕ → ℝ) : Type where
+    field
+      incl : ℕ → ℕ
+      incrs : (n : ℕ) → incl (suc n) >ℕ incl n
+
+  open Subsequence
+
+  subseq : {seq : ℕ → ℝ} → Subsequence seq → ℕ → ℝ
+  subseq {seq = seq} sub n = seq (sub .incl n)
+-}

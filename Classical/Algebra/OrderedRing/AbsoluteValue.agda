@@ -153,7 +153,7 @@ module AbsoluteValue (𝓡 : OrderedRing ℓ ℓ') where
   ... | gt y>0 = Empty.rec (<-asym ∣x-y∣<-x (subst (_> - x) (sym ∣x-y∣≡-x-y) (-Reverse< x-y<x)))
     where
     x-y<x : x - y < x
-    x-y<x = +-rNeg→< (-Reverse>0 y>0)
+    x-y<x = -rPos→< y>0
     ∣x-y∣≡-x-y : abs (x - y) ≡ - (x - y)
     ∣x-y∣≡-x-y =  x<0→abs≡-x (<-trans x-y<x x<0)
 
@@ -190,6 +190,8 @@ module AbsoluteValue (𝓡 : OrderedRing ℓ ℓ') where
     case-split (lt x<y) = absInBetween<' d>0 x<y y<x+d
     case-split (eq x≡y) = subst (_< d) (sym (x≡0→abs≡0 (x≡y→diff≡0 x≡y))) d>0
 
+  absInBetween<≤ : d > 0r → x - d < y → y ≤ x → abs (x - y) < d
+  absInBetween<≤ d>0 x-d<y y≤x = absInOpenInterval d>0 x-d<y (≤<-trans y≤x (+-rPos→> d>0))
 
 
   private

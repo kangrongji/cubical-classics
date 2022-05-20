@@ -216,8 +216,7 @@ module TopologyOfReal (decide : LEM) where
               case-split (inl x>y) = ∪-helper (inr (ℬx₀r⊆U x∈ℬx₀r))
                 where
                 x∈ℬx₀r : x ∈ ℬ x₀ r
-                x∈ℬx₀r = Inhab→∈ℬ (absInOpenInterval r>0 (<-trans x₀-r<y x>y)
-                  (≤<-trans (∈→Inhab𝐈-R x∈[a,x₀]) (+-rPos→> r>0)))
+                x∈ℬx₀r = Inhab→∈ℬ (absInBetween<≤ r>0 (<-trans x₀-r<y x>y) (∈→Inhab𝐈-R x∈[a,x₀]))
               case-split (inr x≤y) = ∪-helper (inl (cov .fst x∈[a,y]))
                 where
                 x∈[a,y] : x ∈ [ a , y ]
@@ -287,7 +286,7 @@ module TopologyOfReal (decide : LEM) where
               y x₀-r<y y∈sub
               𝒰₀ 𝒰₀⊆𝒰 fin𝒰₀ cov)
           (∈→Inhab cov-prop y∈sub .snd))
-          (<sup→∃∈ (x₀ - r) cov-sup (+-rNeg→< (-Reverse>0 r>0)))) ∃ℬ
+          (<sup→∃∈ (x₀ - r) cov-sup (-rPos→< r>0))) ∃ℬ
 
         x₀≡b : x₀ ≡ b
         x₀≡b = ≤+¬<→≡ x₀≤b (x₀∈cov×¬x₀<b .snd)
@@ -312,7 +311,7 @@ module TopologyOfReal (decide : LEM) where
   -}
 
 
-  -- Two usual formulation of boundedness, and they are equivalent.
+  -- Two usual formulations of boundedness, and they are equivalent.
 
   isBoundedSub : ℙ ℝ → Type
   isBoundedSub A = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] (a ≤ b) × ((x : ℝ) → x ∈ A → (a ≤ x) × (x ≤ b)) ∥
