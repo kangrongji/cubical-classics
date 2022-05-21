@@ -46,7 +46,7 @@ open import Classical.Analysis.Real.Base
 open import Classical.Analysis.Real.Topology
 
 
-module SequenceOfReal ⦃ 🤖 : Oracle ⦄ where
+module _ ⦃ 🤖 : Oracle ⦄ where
 
   open Oracle 🤖
 
