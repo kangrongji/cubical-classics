@@ -124,7 +124,7 @@ module Archimedes (decide : LEM)
               r-u = r - u
               r-u+ε = (r - u) + ε
               r-u<r : r-u < r
-              r-u<r = +-rNeg→< (-Reverse>0 u>0)
+              r-u<r = -rPos→< u>0
               r-u>q : r-u > q
               r-u>q = >-exchange u<r-q
               r-u+ε>t : r-u+ε > t

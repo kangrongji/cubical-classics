@@ -155,7 +155,7 @@ module CompleteOrderedField (decide : LEM) where
           no-way' = <≤-asym q<p+ε (boundary .bound _ (Inhab→∈ P ∥n⋆ε>p+ε∥))
 
         q-ε<sup : boundary .sup - ε < boundary .sup
-        q-ε<sup = +-rNeg→< (-Reverse>0 ε>0)
+        q-ε<sup = -rPos→< ε>0
 
         no-way : ⊥
         no-way = Prop.rec isProp⊥ (λ (p , p>q-ε , p∈A) → no-way' _ p>q-ε p∈A) (<sup→∃∈ _ boundary q-ε<sup)

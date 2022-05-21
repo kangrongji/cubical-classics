@@ -46,6 +46,16 @@ private
 ¬∃→∀¬ : {P : X → Type ℓ'} → ¬ ∥ Σ[ x ∈ X ] P x ∥ → (x : X) → ¬ P x
 ¬∃→∀¬ f = ¬Σ→∀¬ ((¬map ∣_∣) f)
 
+¬Σ→∀¬2 : {Y : X → Type ℓ'}{Z : (x : X) → Y x → Type ℓ''}
+  → ¬ (Σ[ x ∈ X ] Σ[ y ∈ Y x ] Z x y)
+  → (x : X) → (y : Y x) → ¬ Z x y
+¬Σ→∀¬2 f x = ¬Σ→∀¬ (¬Σ→∀¬ f x)
+
+¬∃→∀¬2 : {Y : X → Type ℓ'}{Z : (x : X) → Y x → Type ℓ''}
+  → ¬ ∥ Σ[ x ∈ X ] Σ[ y ∈ Y x ] Z x y ∥
+  → (x : X) → (y : Y x) → ¬ Z x y
+¬∃→∀¬2 f = ¬Σ→∀¬2 ((¬map ∣_∣) f)
+
 
 takeOut∥Σ∥ : {P : X → Type ℓ'} → ∥ Σ[ x ∈ X ] ∥ P x ∥ ∥ → ∥ Σ[ x ∈ X ] P x ∥
 takeOut∥Σ∥ = Prop.rec squash (λ (x , ∥p∥) → Prop.map (λ p → x , p) ∥p∥)

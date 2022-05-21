@@ -193,11 +193,30 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   -rReverse< {x = x} {y = y} x<-y = subst (_< - x) (-Idempotent y) (-Reverse< x<-y)
 
 
+  -Reverse>0 : x > 0r → - x < 0r
+  -Reverse>0 {x = x} x>0 = subst (- x <_) 0Selfinverse (-Reverse< x>0)
+
+  -Reverse<0 : x < 0r → - x > 0r
+  -Reverse<0 {x = x} x<0 = subst (- x >_) 0Selfinverse (-Reverse< x<0)
+
+  -Reverse->0 : - x > 0r → x < 0r
+  -Reverse->0 {x = x} -x>0 = subst (_< 0r) (-Idempotent x) (-Reverse>0 -x>0)
+
+  -Reverse-<0 : - x < 0r → x > 0r
+  -Reverse-<0 {x = x} -x<0 = subst (_> 0r) (-Idempotent x) (-Reverse<0 -x<0)
+
+
   +-rPos→> : x > 0r → y + x > y
   +-rPos→> {x = x} {y = y} x>0 = subst (y + x >_) (+Rid y) (+-lPres< {z = y} x>0)
 
   +-rNeg→< : x < 0r → y + x < y
   +-rNeg→< {x = x} {y = y} x<0 = subst (_> y + x) (+Rid y) (+-lPres< {z = y} x<0)
+
+  -rPos→< : x > 0r → y - x < y
+  -rPos→< x>0 = +-rNeg→< (-Reverse>0 x>0)
+
+  -rNeg→> : x < 0r → y - x > y
+  -rNeg→> x<0 = +-rPos→> (-Reverse<0 x<0)
 
 
   ·-lPosPres< : x > 0r → y < z → x · y < x · z
@@ -218,19 +237,6 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
 
   ·-Pres>0 : x > 0r → y > 0r → x · y > 0r
   ·-Pres>0 {x = x} {y = y} = transport (λ i → >0≡>0r x i → >0≡>0r y i → >0≡>0r (x · y) i) (>0-· x y)
-
-
-  -Reverse>0 : x > 0r → - x < 0r
-  -Reverse>0 {x = x} x>0 = subst (- x <_) 0Selfinverse (-Reverse< x>0)
-
-  -Reverse<0 : x < 0r → - x > 0r
-  -Reverse<0 {x = x} x<0 = subst (- x >_) 0Selfinverse (-Reverse< x<0)
-
-  -Reverse->0 : - x > 0r → x < 0r
-  -Reverse->0 {x = x} -x>0 = subst (_< 0r) (-Idempotent x) (-Reverse>0 -x>0)
-
-  -Reverse-<0 : - x < 0r → x > 0r
-  -Reverse-<0 {x = x} -x<0 = subst (_> 0r) (-Idempotent x) (-Reverse<0 -x<0)
 
 
   >→Diff>0 : x > y → x - y > 0r
@@ -310,8 +316,11 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   -MoveRToL< : z < x - y → z + y < x
   -MoveRToL< {z = z} {x = x} {y = y} x-y>z = subst (x >_) (λ i → z + -Idempotent y i) (+-MoveRToL< x-y>z)
 
+  -MoveLToR<' : x - y < z → x < y + z
+  -MoveLToR<' {x = x} x-y<z = subst (x <_) (+Comm _ _) (-MoveLToR< x-y<z)
+
   -MoveRToL<' : z < x - y → y + z < x
-  -MoveRToL<' {z = z} {x = x} {y = y} x-y>z = subst (x >_) (+Comm _ _) (-MoveRToL< x-y>z)
+  -MoveRToL<' {x = x} x-y>z = subst (x >_) (+Comm _ _) (-MoveRToL< x-y>z)
 
 
   {-
@@ -387,6 +396,10 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   ≥→Diff≥0 (inl x>y) = inl (>→Diff>0 x>y)
   ≥→Diff≥0 {y = y} (inr x≡y) = inr (sym (+Rinv y) ∙ (λ i → x≡y i - y))
 
+  ≤→Diff≤0 : x ≤ y → x - y ≤ 0r
+  ≤→Diff≤0 (inl x<y) = inl (<→Diff<0 x<y)
+  ≤→Diff≤0 {y = y} (inr y≡x) = inr ((λ i → y≡x i - y) ∙ +Rinv y)
+
   Diff≥0→≥ : x - y ≥ 0r → x ≥ y
   Diff≥0→≥ (inl x-y>0) = inl (Diff>0→> x-y>0)
   Diff≥0→≥ {x = x} {y = y} (inr x-y≡0) = inr (sym (+Lid y) ∙ (λ i → x-y≡0 i + y) ∙ helper19 x y)
@@ -452,11 +465,16 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   ... | eq x≡y = inr (inr (sym x≡y))
   ... | gt x>y = inr (inl x>y)
 
+
   ¬<→≥ : ¬ x < y → x ≥ y
   ¬<→≥ {x = x} {y = y} ¬x<y with <≤-total x y
   ... | inl x<y = Empty.rec (¬x<y x<y)
   ... | inr x≥y = x≥y
 
+  ¬≤→> : ¬ x ≤ y → x > y
+  ¬≤→> {x = x} {y = y} ¬x≤y with <≤-total y x
+  ... | inl x>y = x>y
+  ... | inr x≤y = Empty.rec (¬x≤y x≤y)
 
   ≤+¬≡→< : x ≤ y → ¬ x ≡ y → x < y
   ≤+¬≡→< (inl x<y) _ = x<y
@@ -605,3 +623,54 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
 
   x-y≡-[y-x] : x - y ≡ - (y - x)
   x-y≡-[y-x] = helper2 _ _
+
+
+  {-
+
+    No Infinitesimal
+
+  -}
+
+  infinitesimal : x ≥ 0r → ((ε : R) → (ε > 0r) → x < ε) → x ≡ 0r
+  infinitesimal {x = x} x≥0 ∀ε>x = ≤-asym (¬<→≥ ¬x>0) x≥0
+    where
+    ¬x>0 : ¬ x > 0r
+    ¬x>0 x>0 = <-asym (∀ε>x x x>0) (∀ε>x x x>0)
+
+
+  {-
+
+    Minimum and Maximum of Two Elements
+
+  -}
+
+  min : (x y : R) → R
+  min x y with ≤-total x y
+  ... | inl x≤y = x
+  ... | inr x≥y = y
+
+  min≤left : min x y ≤ x
+  min≤left {x = x} {y = y} with ≤-total x y
+  ... | inl x≤y = ≤-refl refl
+  ... | inr x≥y = x≥y
+
+  min≤right : min x y ≤ y
+  min≤right {x = x} {y = y} with ≤-total x y
+  ... | inl x≤y = x≤y
+  ... | inr x≥y = ≤-refl refl
+
+
+  max : (x y : R) → R
+  max x y with ≤-total x y
+  ... | inl x≤y = y
+  ... | inr x≥y = x
+
+  max≥left : max x y ≥ x
+  max≥left {x = x} {y = y} with ≤-total x y
+  ... | inl x≤y = x≤y
+  ... | inr x≥y = ≤-refl refl
+
+  max≥right : max x y ≥ y
+  max≥right {x = x} {y = y} with ≤-total x y
+  ... | inl x≤y = ≤-refl refl
+  ... | inr x≥y = x≥y
