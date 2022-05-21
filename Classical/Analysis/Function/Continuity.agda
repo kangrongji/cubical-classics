@@ -20,7 +20,7 @@ open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
 open import Cubical.Algebra.CommRingSolver.Reflection
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 open import Classical.Foundations.Powerset
 
 open import Classical.Algebra.OrderedRing.AbsoluteValue
@@ -43,15 +43,13 @@ private
     helper3 = solve 𝓡
 
 
-module Continuity (decide : LEM) where
+module _ ⦃ 🤖 : Oracle ⦄ where
 
-  open Powerset decide
+  open Oracle 🤖
 
-  open Real     decide
   open AbsoluteValue   (ℝCompleteOrderedField .fst .fst)
   open OrderedFieldStr (ℝCompleteOrderedField .fst)
-  open CompleteOrderedField decide
-  open Completeness    (ℝCompleteOrderedField .fst)
+  open CompleteOrderedField (ℝCompleteOrderedField .fst)
 
 
   -- The continuous (partial) funtion defined on a subset of ℝ,
@@ -147,9 +145,9 @@ module Continuity (decide : LEM) where
   findZero f f0<0 f1>0 = x₀ , x₀∈𝐈 , fx₀≡0
     where
 
-    open Helpers (ℝCompleteOrderedField .fst .fst .fst)
+    open Helpers  (ℝCompleteOrderedField .fst .fst .fst)
 
-    open Extremum decide (ℝCompleteOrderedField .fst)
+    open Extremum (ℝCompleteOrderedField .fst)
     open Supremum
 
     getSup = ℝCompleteOrderedField .snd
