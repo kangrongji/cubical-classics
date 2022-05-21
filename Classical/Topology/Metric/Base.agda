@@ -68,6 +68,10 @@ module _ ⦃ 🤖 : Oracle ⦄ where
 
     -}
 
+    -- The distance is always non-negative.
+    -- Notice that we do not assume non-negativity in the definition,
+    -- but it's a corollary.
+
     dist≥0 : 𝓂 .dist x y ≥ 0
     dist≥0 {x = x} {y = y} with trichotomy (𝓂 .dist x y) 0
     ... | gt d>0 = inl d>0
@@ -76,6 +80,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       where
       d+d≥0 : 𝓂 .dist x y + 𝓂 .dist x y ≥ 0
       d+d≥0 = transport (λ i → 𝓂 .dist x y + dist-symm y x i ≥ dist-refl {x = x} refl i) (dist-Δ _ _ _)
+
 
     ¬x≡y→dist>0 : ¬ x ≡ y → 𝓂 .dist x y > 0
     ¬x≡y→dist>0 {x = x} {y = y} ¬x≡y with trichotomy (𝓂 .dist x y) 0
@@ -87,6 +92,9 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     dist>0→¬x≡y d>0 x≡y = <-arefl d>0 (sym (dist-refl x≡y))
 
 
+    -- Under our definition of metric space,
+    -- the underlying type is always an h-set.
+
     discreteMetric : Discrete X
     discreteMetric x y with trichotomy (𝓂 .dist x y) 0
     ... | gt d>0 = no (dist>0→¬x≡y d>0)
@@ -97,11 +105,20 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     isSetMetric = Discrete→isSet discreteMetric
 
 
+    -- If two points are `infinitely close to` each other, then they are equal.
+
+    infinitelyClose→≡ : {x y : X} → ((ε : ℝ) → (ε > 0) → 𝓂 .dist x y < ε) → x ≡ y
+    infinitelyClose→≡ ∀ε>∣x-y∣ = dist-id (infinitesimal dist≥0 ∀ε>∣x-y∣)
+
+
     {-
 
       Open Balls
 
     -}
+
+    -- Open ball is just the collection of points
+    -- of which distance to a fixed point is small than a given number.
 
     module _ (x : X)(r : ℝ) ⦃ r>0 : r > 0 ⦄ where
 
@@ -111,11 +128,13 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       ℬ : ℙ X
       ℬ = specify ball-prop
 
+
     Inhab→∈ℬ : {x y : X}{r : ℝ} ⦃ _ : r > 0 ⦄ → 𝓂 .dist x y < r → y ∈ ℬ x r
     Inhab→∈ℬ = Inhab→∈ (ball-prop _ _)
 
     ∈→Inhabℬ : {x y : X}{r : ℝ} ⦃ _ : r > 0 ⦄ → y ∈ ℬ x r → 𝓂 .dist x y < r
     ∈→Inhabℬ = ∈→Inhab (ball-prop _ _)
+
 
     x∈ℬxr : {x : X}{r : ℝ} ⦃ _ : r > 0 ⦄ → x ∈ ℬ x r
     x∈ℬxr {x = x} {r = r} ⦃ r>0 ⦄ = Inhab→∈ℬ (subst (_< r) (sym (dist-refl {x = x} refl)) r>0)
@@ -170,6 +189,9 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         MetricTopology = Metric→Topology
 
 
+    -- A subset U in a metric space is open
+    -- if and only if any point x ∈ U has a open ball (with center x) contained in U.
+
     module _ {U : ℙ X} where
 
       ∈→Inhab𝓂 : isOpenSub U → (x : X) → x ∈ U → ∥ Σ[ r ∈ ℝ ] Σ[ r>0 ∈ r > 0 ] ℬ x r ⦃ r>0 ⦄ ⊆ U ∥
@@ -222,18 +244,3 @@ module _ ⦃ 🤖 : Oracle ⦄ where
 
         ∩ℬ≡∅ : ⊥
         ∩ℬ≡∅ = Empty.rec (<≤-asym dx+dy<d (dist-Δ _ _ _))
-
-
-    instance
-      _ : isHausdorff
-      _ = isHausdorffMetric
-
-
-    {-
-
-    Infinitesimal Closedness
-
-    -}
-
-    infiClose : {x y : X} → ((ε : ℝ) → (ε > 0) → 𝓂 .dist x y < ε) → x ≡ y
-    infiClose ∀ε>∣x-y∣ = dist-id (infinitesimal dist≥0 ∀ε>∣x-y∣)

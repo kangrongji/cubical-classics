@@ -34,6 +34,9 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   open Topology
 
 
+  -- As is usually formulated, a topological space X is Hausdorff,
+  -- if any two different points x y of X merely have neighbourhoods that do not intersect.
+
   record isHausdorff {X : Type ℓ} ⦃ 𝒯 : Topology X ⦄ : Type ℓ where
     field
       separate : {x y : X} → ¬ x ≡ y → ∥ Σ[ U ∈ ℙ X ] Σ[ V ∈ ℙ X ] (U ∈ ℕbh x) × (V ∈ ℕbh y) × (U ∩ V ≡ ∅) ∥
@@ -42,6 +45,12 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   module _ {X : Type ℓ} ⦃ 𝒯 : Topology X ⦄ ⦃ haus : isHausdorff ⦄ where
 
       open isHausdorff haus
+
+      {-
+
+        Corollaries of Hausdorff-ness
+
+      -}
 
       -- In a Hausdorff space X,
       -- point x ∈ X and subset K ⊆ X are separating by open sets

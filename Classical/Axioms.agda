@@ -35,4 +35,4 @@ record Oracle : Typeω where
 -- Neighbors speak highly of 🤖.
 -- But one thing...
 -- Sometimes 🤖 knows the answer,
--- but 🤖 won't tell anyone.
+-- but 🤖 just won't tell.

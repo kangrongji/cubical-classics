@@ -34,6 +34,12 @@ module _ ⦃ 🤖 : Oracle ⦄ where
 
   module _ {X : Type ℓ} ⦃ 𝒯 : Topology X ⦄ where
 
+    {-
+
+      Basics
+
+    -}
+
     -- Neighbourhood around a given point
 
     ℕbh : X → ℙ ℙ X
@@ -57,6 +63,13 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         (𝒯 .∩-close (N∈ℕbhx→N∈Open U∈ℕx) (N∈ℕbhx→N∈Open V∈ℕx))
 
 
+    {-
+
+      Interior of Subset
+
+    -}
+
+
     -- Inside interior of some someset
 
     _Σ∈∘_ : (x : X) → (U : ℙ X) → Type _
@@ -73,8 +86,8 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     ∈→∈∘ {U = U} U∈Open x∈U = ∣ _ , makeℕbh x∈U U∈Open , ⊆-refl {A = U} ∣
 
 
-    -- If every point of a subset U is its interior point,
-    -- the subset U is open subset.
+    -- A subset U is open,
+    -- if every point x ∈ U merely has a neighberhood contained in U,
 
     ℕbhCriterionOfOpenness : {U : ℙ X} → ((x : X) → x ∈ U → x ∈∘ U) → U ∈ Open
     ℕbhCriterionOfOpenness {U = U} p = U∈Open
@@ -167,9 +180,9 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       x∉K→x∈∘∁K x x∈∁K = Sep→∈∘∁ (sep x (∈∁→∉ {A = K} x∈∁K))
 
 
-    -- Given a finite covering 𝒰
-    -- such that for any open U ∈ 𝒰, there merely exists a neighbourhood of x not intersecting with U,
-    -- then there merely exists a neighbourhood of x that is not intersecting with the union of opens in 𝒰.
+    -- Given a finite covering 𝒰 such that,
+    -- for any open U ∈ 𝒰, there merely exists a neighbourhood of x outside U,
+    -- then there merely exists a neighbourhood of x that does not intersect with the union of opens in 𝒰.
 
     unionSep : (x : X)
       (𝒰 : ℙ ℙ X)(𝒰⊆Open : 𝒰 ⊆ Open)

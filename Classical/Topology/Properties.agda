@@ -64,6 +64,8 @@ module _ ⦃ 🤖 : Oracle ⦄ where
 
     -}
 
+    -- We say `𝒰 covers K` if the members of 𝒰 are all open, and their union contains K.
+
     _covers_ : ℙ ℙ X → ℙ X → Type _
     _covers_ 𝒰 A = A ⊆ union 𝒰 × 𝒰 ⊆ Open
 

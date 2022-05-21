@@ -50,6 +50,11 @@ module _ ⦃ 🤖 : Oracle ⦄
 
   -}
 
+  -- A sequence seq converges to a point x,
+  -- if for any ε > 0, there merely exists n₀ : ℕ,
+  -- such that whenever n > n₀,
+  -- the distance between x and seq n is smaller than ε.
+
   isConvergentTo : (ℕ → X) → X → Type
   isConvergentTo seq x = (ε : ℝ) → ε > 0 → ∥ Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n >ℕ n₀ → 𝓂 .dist x (seq n) < ε) ∥
 
@@ -79,7 +84,7 @@ module _ ⦃ 🤖 : Oracle ⦄
   isPropLimit : {seq : ℕ → X} → isProp (Limit seq)
   isPropLimit {seq = seq} p q i .conv =
     isProp→PathP (λ i → isPropIsConvergentTo {x = isPropLimit p q i .lim}) (p .conv) (q .conv) i
-  isPropLimit {seq = seq} p q i .lim = infiClose ∣x-y∣<ε i
+  isPropLimit {seq = seq} p q i .lim = infinitelyClose→≡ ∣x-y∣<ε i
     where
 
     module _ (ε : ℝ)(ε>0 : ε > 0) where
@@ -102,6 +107,10 @@ module _ ⦃ 🤖 : Oracle ⦄
     Cluster Points
 
   -}
+
+  -- A point x is a cluster point of a sequence seq,
+  -- if for any n : ℕ and ε > 0, there merely exists n₀ : ℕ,
+  -- such that the distance between x and seq n₀ is smaller than ε.
 
   isClusteringAt : (ℕ → X) → X → Type
   isClusteringAt seq x = (n₀ : ℕ)(ε : ℝ) → ε > 0 → ∥ Σ[ n ∈ ℕ ] (n₀ <ℕ n) × (𝓂 .dist x (seq n) < ε) ∥
@@ -133,10 +142,10 @@ module _ ⦃ 🤖 : Oracle ⦄
 
   -}
 
-  -- We say a sequence is Cauchy,
-  -- if for any ε > 0, there merely exists N ∈ ℕ
+  -- A sequence seq is a Cauchy sequence,
+  -- if for any ε > 0, there merely exists N : ℕ
   -- such that whenever m n > N,
-  -- the distance between the m-th and n-th terms is smaller than ε.
+  -- the distance between the seq m and seq n is smaller than ε.
   -- In other words, the terms are crowding together when n approaching infinity.
 
   isCauchy : (ℕ → X) → Type
