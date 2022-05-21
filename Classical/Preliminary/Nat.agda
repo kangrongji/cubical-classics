@@ -134,9 +134,11 @@ module _
 
 -}
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 
-module FindByOracle (decide : LEM) where
+module _ ⦃ 🤖 : Oracle ⦄  where
+
+  open Oracle 🤖
 
   findByOracle :
     {P : ℕ → Type ℓ}
@@ -151,12 +153,11 @@ module FindByOracle (decide : LEM) where
 
 -}
 
-module LimitedOmniscience (decide : LEM) where
+module LimitedOmniscience ⦃ 🤖 : Oracle ⦄  where
 
   open import Classical.Preliminary.Logic
 
-  open ClassicalLogic decide
-  open FindByOracle   decide
+  open Oracle 🤖
 
   module _
     {P : ℕ → Type ℓ}

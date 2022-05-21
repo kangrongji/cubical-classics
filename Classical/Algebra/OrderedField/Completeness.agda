@@ -69,8 +69,6 @@ module CompleteOrderedField ⦃ 🤖 : Oracle ⦄ (𝒦 : OrderedField ℓ ℓ')
   open Supremum
   open Infimum
 
-  open ClassicalLogic decide
-
 
   {-
 

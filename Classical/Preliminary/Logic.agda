@@ -15,7 +15,7 @@ open import Cubical.Data.Empty as Empty
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 
 private
   variable
@@ -61,9 +61,14 @@ takeOut∥Σ∥ : {P : X → Type ℓ'} → ∥ Σ[ x ∈ X ] ∥ P x ∥ ∥ �
 takeOut∥Σ∥ = Prop.rec squash (λ (x , ∥p∥) → Prop.map (λ p → x , p) ∥p∥)
 
 
-module ClassicalLogic (decide : LEM) where
+module _ ⦃ 🤖 : Oracle ⦄ where
 
-  open DoubleNegationElim decide
+  open Oracle 🤖
+
+
+  ¬¬elim : DNE
+  ¬¬elim = LEM→DNE decide
+
 
   module _
     {P : X → Type ℓ'}

@@ -141,8 +141,6 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
       map-helper = map-sup .sup
 
 
-      open ClassicalLogic decide
-
       >sup-helper : (x : K') → ¬ x ∈ map-sub → ∥ Σ[ q ∈ K ] q ∈ a .upper × (f-map q <' x) ∥
       >sup-helper x ¬∈sub =
         Prop.rec squash

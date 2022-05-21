@@ -124,8 +124,6 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       isPropP : isProp ∥ Σ[ x ∈ X ] (¬ x ∈ B) × (x ∈ A) ∥
       isPropP = squash
 
-    open ClassicalLogic decide
-
     ⊈→∃ : ∥ Σ[ x ∈ X ] (¬ x ∈ B) × (x ∈ A) ∥
     ⊈→∃ with decide isPropP
     ... | yes p = p

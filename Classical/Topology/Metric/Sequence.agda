@@ -41,9 +41,6 @@ module _ ⦃ 🤖 : Oracle ⦄
   open Oracle 🤖
 
   open OrderedFieldStr (ℝCompleteOrderedField .fst)
-
-  open FindByOracle decide
-
   open Metric 𝓂
 
 

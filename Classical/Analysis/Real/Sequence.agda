@@ -54,8 +54,6 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   open AbsoluteValue   (ℝCompleteOrderedField .fst .fst)
   open Metric   ℝMetric
 
-  open FindByOracle decide
-
   open CompleteOrderedField (ℝCompleteOrderedField .fst)
   open Extremum        (ℝCompleteOrderedField .fst)
   open Supremum
@@ -204,8 +202,6 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     accum-sup = getSup (Prop.rec squash inhabSub bSeq) (Prop.rec squash boundSub bSeq)
 
     x₀ = accum-sup .sup
-
-    open ClassicalLogic decide
 
     ∃fin>x₀ : (ε : ℝ) → ε > 0 → ∥ Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n₀ ≤ℕ n → seq n < x₀ + ε) ∥
     ∃fin>x₀  ε ε>0 = Prop.map

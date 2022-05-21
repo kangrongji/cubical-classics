@@ -97,8 +97,6 @@ module Order ⦃ 🤖 : Oracle ⦄
     (λ (x , ¬x∈upper , x∈upper) → x , ¬∈upper→<upper a x ¬x∈upper , x∈upper)
     (⊈→∃ ¬a≤b)
 
-  open DoubleNegationElim decide
-
   ¬a>b→a≤b : (a b : 𝕂) → ¬ (a >𝕂 b) → a ≤𝕂 b
   ¬a>b→a≤b a b ¬a>b = ¬¬elim (isProp≤𝕂 {a = a} {b = b}) (¬map (¬a≤b→a>b a b) ¬a>b)
 

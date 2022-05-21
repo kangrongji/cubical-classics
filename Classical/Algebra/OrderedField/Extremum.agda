@@ -97,8 +97,6 @@ module Extremum ⦃ 🤖 : Oracle ⦄ (𝒦 : OrderedField ℓ ℓ') where
 
   -}
 
-  open ClassicalLogic decide
-
   <sup→∃∈ : {A : ℙ K}(q : K)(boundary : Supremum A) → q < boundary .sup → ∥ Σ[ x ∈ K ] (q < x) × (x ∈ A) ∥
   <sup→∃∈ {A = A} q boundary q<sup with decide (squash {A = Σ[ x ∈ K ] (q < x) × (x ∈ A)})
   ... | yes p = p
