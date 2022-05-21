@@ -57,7 +57,7 @@ module SequenceOfReal ⦃ 🤖 : Oracle ⦄ where
   open FindByOracle decide
 
   open CompleteOrderedField (ℝCompleteOrderedField .fst)
-  open Extremum     (ℝCompleteOrderedField .fst)
+  open Extremum        (ℝCompleteOrderedField .fst)
   open Supremum
 
   open Limit

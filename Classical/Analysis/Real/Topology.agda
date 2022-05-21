@@ -44,7 +44,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
 
   private
     variable
-      x y z : ℝ
+      x y : ℝ
 
 
   {-
