@@ -276,7 +276,7 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
         in  ∣ n , lower+n·ε>a ∣
 
       interval : Σ[ n ∈ ℕ ] (¬ P n) × P (suc n)
-      interval = findInterval isPropP decP ¬P0 ∃Pn
+      interval = findInterval decP ¬P0 ∃Pn
 
       n₀ = interval .fst
 

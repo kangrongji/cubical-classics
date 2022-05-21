@@ -11,7 +11,7 @@ open import Cubical.Data.Nat.Literals public
 open import Cubical.HITs.Rationals.QuoQ
 open import Cubical.Algebra.Ring
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 open import Classical.Preliminary.QuoQ
 open import Classical.Algebra.OrderedRing
 open import Classical.Algebra.OrderedRing.Morphism
@@ -21,29 +21,32 @@ open import Classical.Algebra.OrderedField.Completeness
 open import Classical.Algebra.OrderedField.Completion
 
 
+module _ ⦃ 🤖 : Oracle ⦄ where
+
+
 {-
 
   The Axioms of Real Number
 
 -}
 
-module AxiomsOfRealNumber (decide : LEM) where
+  module AxiomsOfRealNumber where
 
-  open CompleteOrderedField decide
+    open CompleteOrderedField
 
-  -- Real Number is a complete ordered field as is usually defined in classical mathematics.
+    -- Real Number is a complete ordered field as is usually defined in classical mathematics.
 
-  Reals : Type (ℓ-suc ℓ-zero)
-  Reals = CompleteOrderedField ℓ-zero ℓ-zero
+    Reals : Type (ℓ-suc ℓ-zero)
+    Reals = CompleteOrderedField ℓ-zero ℓ-zero
 
-  open InclusionFromℚ
-  open Completion decide ℚOrderedField isArchimedeanℚ
+    open InclusionFromℚ
+    open Completion ℚOrderedField isArchimedeanℚ
 
-  -- The Existence and Uniqueness of Real Number
+    -- The Existence and Uniqueness of Real Number
 
-  isContrReals : isContr Reals
-  isContrReals .fst = complete
-  isContrReals .snd 𝒦 i = uaCompleteOrderedField complete 𝒦 (extend 𝒦 (ℚ→KOrderedFieldHom (𝒦 .fst))) i
+    isContrReals : isContr Reals
+    isContrReals .fst = complete
+    isContrReals .snd 𝒦 i = uaCompleteOrderedField complete 𝒦 (extend 𝒦 (ℚ→KOrderedFieldHom (𝒦 .fst))) i
 
 
 {-
@@ -52,13 +55,11 @@ module AxiomsOfRealNumber (decide : LEM) where
 
 -}
 
-module Real (decide : LEM) where
+  open AxiomsOfRealNumber
 
-  open CompleteOrderedField decide
+  open CompleteOrderedField
   open InclusionFromℚ
   open OrderedRingHom
-
-  open AxiomsOfRealNumber   decide
 
 
   abstract

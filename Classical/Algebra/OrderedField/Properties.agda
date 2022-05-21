@@ -302,4 +302,4 @@ module _ (𝒦 : OrderedField ℓ ℓ')(archimedes : isArchimedean (𝒦 .fst)) 
           in  n , <-close _ _ (1r/n>0 _) 1/n<ε pε) ∃ε
 
     findExplicit : Σ[ ε ∈ K ] (ε > 0r) × P ε
-    findExplicit = let (n , p) = find (λ _ → isPropP _) (λ _ → decP _) ∃P'n in 1r / (1+ n) , (1r/n>0 _) , p
+    findExplicit = let (n , p) = find (λ _ → decP _) ∃P'n in 1r / (1+ n) , (1r/n>0 _) , p

@@ -1,5 +1,6 @@
 {-# OPTIONS --safe #-}
 module Solver.Formula where
+
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels using (isProp×; isPropΠ)
 open import Cubical.Foundations.Univalence using (ua)

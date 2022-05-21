@@ -14,8 +14,8 @@ open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
 open import Cubical.Algebra.CommRingSolver.Reflection
 
+open import Classical.Axioms
 open import Classical.Preliminary.Nat
-open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
 
 open import Classical.Algebra.OrderedRing.Archimedes
@@ -43,17 +43,18 @@ private
     helper4 = solve 𝓡
 
 
-module Archimedes (decide : LEM)
+module Archimedes ⦃ 🤖 : Oracle ⦄
   (𝒦 : OrderedField ℓ ℓ')(archimedesK : isArchimedean (𝒦 . fst))
   where
+
+  open Oracle 🤖
 
   private
     K = 𝒦 .fst .fst .fst
 
-  open Powerset decide
 
   open OrderedFieldStr 𝒦
-  open Basics   decide 𝒦
+  open Basics   𝒦
   open DedekindCut
 
   open Helpers (𝒦 .fst .fst)
@@ -88,7 +89,7 @@ module Archimedes (decide : LEM)
           (a .upper-inhab)
 
         interval : Σ[ n ∈ ℕ ] (¬ P n) × P (suc n)
-        interval = findInterval isPropP decP ¬P0 ∃Pn
+        interval = findInterval decP ¬P0 ∃Pn
 
       archimedes'' : Σ[ r ∈ K ] (¬ r ∈ a .upper) × (p ≤ r) × (r + ε) ∈ a .upper
       archimedes'' = _ , interval .snd .fst , +-rPos→≥ (n⋆q≥0 (interval .fst) ε ε>0) ,

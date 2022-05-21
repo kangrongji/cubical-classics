@@ -20,8 +20,8 @@ open import Cubical.Data.Empty as Empty
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 
-open import Classical.Axioms.ExcludedMiddle
-open import Classical.Foundations.Powerset
+open import Classical.Axioms
+open import Classical.Foundations.Powerset renaming ([_] to [[_]])
 
 open import Classical.Algebra.OrderedRing.AbsoluteValue
 open import Classical.Algebra.OrderedField
@@ -35,22 +35,16 @@ open import Classical.Topology.Hausdorff
 open import Classical.Topology.Metric
 
 
-module TopologyOfReal (decide : LEM) where
+module _ ⦃ 🤖 : Oracle ⦄ where
 
-  open Powerset decide renaming ([_] to [[_]])
-  open Real     decide
   open AbsoluteValue   (ℝCompleteOrderedField .fst .fst)
   open OrderedFieldStr (ℝCompleteOrderedField .fst)
-  open MetricStr   decide
-  open TopologyStr decide
-  open TopologyProperties decide
-  open Hausdorff   decide
   open Topology
   open Metric
 
   private
     variable
-      x y z : ℝ
+      x y : ℝ
 
 
   {-
@@ -65,19 +59,21 @@ module TopologyOfReal (decide : LEM) where
 
     ℝMetric : Metric ℝ
     ℝMetric .dist x y = abs (x - y)
-    ℝMetric .dist-id _ _ d≡0 = diff≡0→x≡y (abs≡0→x≡0 d≡0)
-    ℝMetric .dist-refl _ _ x≡y = x≡0→abs≡0 (x≡y→diff≡0 x≡y)
+    ℝMetric .dist-id   d≡0 = diff≡0→x≡y (abs≡0→x≡0 d≡0)
+    ℝMetric .dist-refl x≡y = x≡0→abs≡0 (x≡y→diff≡0 x≡y)
     ℝMetric .dist-symm _ _ = absx≡→abs-x ∙ cong abs (sym x-y≡-[y-x])
     ℝMetric .dist-Δ _ _ _ = Δ-Inequality
 
     ℝTopology : Topology ℝ
-    ℝTopology = Metric→Topology ⦃ ℝMetric ⦄
+    ℝTopology = Metric→Topology
 
 
   -- ℝ is Hausdorff space
 
-  isHausdorffℝ : isHausdorff ⦃ ℝTopology ⦄
-  isHausdorffℝ = isHausdorffMetric
+  instance
+
+    isHausdorffℝ : isHausdorff
+    isHausdorffℝ = isHausdorffMetric
 
 
   {-
@@ -135,7 +131,7 @@ module TopologyOfReal (decide : LEM) where
 
       module _ {𝒰 : ℙ ℙ ℝ}(𝒰cov𝐈 : 𝒰 covers [ a , b ]) where
 
-        open Extremum decide (ℝCompleteOrderedField .fst)
+        open Extremum (ℝCompleteOrderedField .fst)
         open Supremum
 
         getSup = ℝCompleteOrderedField .snd
@@ -301,7 +297,7 @@ module TopologyOfReal (decide : LEM) where
     -- Closed interval is closed.
 
     isClosedInterval : isClosedSub [ a , b ]
-    isClosedInterval = isCompactSub→isClosedSub isHausdorffℝ isCompactInterval
+    isClosedInterval = isCompactSub→isClosedSub isCompactInterval
 
 
   {-

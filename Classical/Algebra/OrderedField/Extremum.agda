@@ -16,8 +16,8 @@ open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 
+open import Classical.Axioms
 open import Classical.Preliminary.Logic
-open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset
 open import Classical.Algebra.OrderedField
 
@@ -26,9 +26,10 @@ private
     ℓ ℓ' : Level
 
 
-module Extremum (decide : LEM)(𝒦 : OrderedField ℓ ℓ') where
+module Extremum ⦃ 🤖 : Oracle ⦄ (𝒦 : OrderedField ℓ ℓ') where
 
-  open Powerset decide
+  open Oracle 🤖
+
   open OrderedFieldStr 𝒦
 
   private
@@ -95,8 +96,6 @@ module Extremum (decide : LEM)(𝒦 : OrderedField ℓ ℓ') where
     Basic Properties
 
   -}
-
-  open ClassicalLogic decide
 
   <sup→∃∈ : {A : ℙ K}(q : K)(boundary : Supremum A) → q < boundary .sup → ∥ Σ[ x ∈ K ] (q < x) × (x ∈ A) ∥
   <sup→∃∈ {A = A} q boundary q<sup with decide (squash {A = Σ[ x ∈ K ] (q < x) × (x ∈ A)})

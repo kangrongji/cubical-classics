@@ -11,7 +11,7 @@ open import Cubical.Foundations.HLevels
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 open import Classical.Foundations.Powerset
 
 open import Classical.Algebra.OrderedRing.Archimedes
@@ -27,28 +27,25 @@ private
     ℓ ℓ' : Level
 
 
-module CompletenessOfCuts (decide : LEM)
+module CompletenessOfCuts ⦃ 🤖 : Oracle ⦄
   (𝒦 : OrderedField ℓ ℓ')(archimedes : isArchimedean (𝒦 . fst))
   where
 
   private
     K = 𝒦 .fst .fst .fst
 
-  open Powerset decide
-
   open OrderedFieldStr 𝒦
-  open Basics   decide 𝒦
-  open Order    decide 𝒦 archimedes
-  open Multiplication decide 𝒦 archimedes
+  open Basics   𝒦
+  open Order    𝒦 archimedes
+  open Multiplication 𝒦 archimedes
   open DedekindCut
 
-  open CompleteOrderedField decide
-  open Completeness
-  open Extremum decide 𝕂OrderedField
+  open CompleteOrderedField
+  open Extremum 𝕂OrderedField
   open Supremum
 
   open OrderedFieldStr 𝕂OrderedField using ()
-      renaming (_<_ to _<𝕂'_ ; _>_ to _>𝕂'_ ; _≤_ to _≤𝕂'_ ; _≥_ to _≥𝕂'_)
+    renaming (_<_ to _<𝕂'_ ; _>_ to _>𝕂'_ ; _≤_ to _≤𝕂'_ ; _≥_ to _≥𝕂'_)
 
 
   module _

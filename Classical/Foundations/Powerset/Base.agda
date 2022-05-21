@@ -23,7 +23,7 @@ open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Bool
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 open import Classical.Foundations.Prelude
 
 private
@@ -32,7 +32,9 @@ private
     X : Type ℓ
 
 
-module Base (decide : LEM) where
+module _ ⦃ 🤖 : Oracle ⦄ where
+
+  open Oracle 🤖
 
 
   -- The powerset construction, namely the type of all possible "subsets",

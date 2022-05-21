@@ -15,7 +15,7 @@ open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
 open import Cubical.Algebra.CommRingSolver.Reflection
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 open import Classical.Foundations.Powerset
 
 open import Classical.Algebra.OrderedRing.Archimedes
@@ -44,18 +44,17 @@ private
     helper4 = solve 𝓡
 
 
-module Algebra (decide : LEM)
+module Algebra ⦃ 🤖 : Oracle ⦄
   (𝒦 : OrderedField ℓ ℓ')(archimedesK : isArchimedean (𝒦 . fst))
   where
 
   private
     K = 𝒦 .fst .fst .fst
 
-  open Powerset decide
 
   open OrderedFieldStr 𝒦
-  open Basics     decide 𝒦
-  open Archimedes decide 𝒦 archimedesK
+  open Basics      𝒦
+  open Archimedes  𝒦 archimedesK
   open DedekindCut
 
   open Helpers (𝒦 .fst .fst)

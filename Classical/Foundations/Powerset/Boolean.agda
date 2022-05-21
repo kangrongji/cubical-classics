@@ -15,8 +15,8 @@ open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
 open import Cubical.HITs.PropositionalTruncation as Prop
 
+open import Classical.Axioms
 open import Classical.Preliminary.Bool
-open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset.Base
 open import Classical.Foundations.Powerset.Membership
 
@@ -26,10 +26,7 @@ private
     X : Type ℓ
 
 
-module Boolean (decide : LEM) where
-
-  open Base       decide
-  open Membership decide
+module _ ⦃ 🤖 : Oracle ⦄ where
 
 
   {-

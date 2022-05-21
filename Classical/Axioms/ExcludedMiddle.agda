@@ -81,14 +81,6 @@ DNE→LEM : DNE → LEM
 DNE→LEM p = DNEOfLevel→LEMOfLevel p
 
 
--- For conveniently importing
-
-module DoubleNegationElim (decide : LEM) where
-
-  ¬¬elim : DNE
-  ¬¬elim = LEM→DNE decide
-
-
 {-
 
   Some corollarie of LEM

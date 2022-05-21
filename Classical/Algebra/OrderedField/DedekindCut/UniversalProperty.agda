@@ -19,7 +19,7 @@ open import Cubical.Algebra.Ring
 open import Cubical.Algebra.CommRing
 open import Cubical.Algebra.CommRingSolver.Reflection hiding (K')
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 open import Classical.Foundations.Powerset
 open import Classical.Preliminary.Logic
 
@@ -51,22 +51,22 @@ private
     helper2 = solve 𝓡
 
 
-module UniversalProperty (decide : LEM)
+module UniversalProperty ⦃ 🤖 : Oracle ⦄
   (𝒦  : OrderedField ℓ ℓ')(archimedes : isArchimedean (𝒦 . fst)) where
 
-  open CompleteOrderedField decide
-  open Completeness
+  open Oracle 🤖
+
+  open CompleteOrderedField
 
   module _
     (𝒦' : CompleteOrderedField ℓ'' ℓ''')(f : OrderedFieldHom 𝒦 (𝒦' .fst)) where
 
-    open Powerset decide
 
     open OrderedFieldStr 𝒦
-    open Basics   decide 𝒦
-    open Algebra  decide 𝒦 archimedes
-    open Order    decide 𝒦 archimedes
-    open Multiplication decide 𝒦 archimedes
+    open Basics   𝒦
+    open Algebra  𝒦 archimedes
+    open Order    𝒦 archimedes
+    open Multiplication 𝒦 archimedes
     open DedekindCut
 
     open OrderedFieldStr (𝒦' .fst) using ()
@@ -110,7 +110,7 @@ module UniversalProperty (decide : LEM)
     getSup = 𝒦' .snd
     findBetween = isArchimedean→isDense (isComplete→isArchimedean _ (𝒦' .snd))
 
-    open Extremum decide (𝒦' .fst)
+    open Extremum (𝒦' .fst)
     open Supremum
 
 
@@ -140,8 +140,6 @@ module UniversalProperty (decide : LEM)
       map-helper : K'
       map-helper = map-sup .sup
 
-
-      open ClassicalLogic decide
 
       >sup-helper : (x : K') → ¬ x ∈ map-sub → ∥ Σ[ q ∈ K ] q ∈ a .upper × (f-map q <' x) ∥
       >sup-helper x ¬∈sub =

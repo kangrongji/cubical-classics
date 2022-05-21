@@ -9,7 +9,7 @@ module Classical.Foundations.Powerset.Finiteness where
 open import Cubical.Foundations.Prelude
 open import Cubical.Data.Sum
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 open import Classical.Foundations.Powerset.Base
 open import Classical.Foundations.Powerset.Membership
 open import Classical.Foundations.Powerset.Boolean
@@ -22,13 +22,7 @@ private
     X : Type ℓ
 
 
-module Finiteness (decide : LEM) where
-
-  open Base       decide
-  open Membership decide
-  open Boolean    decide
-  open Properties decide
-  open BigOps     decide
+module _ ⦃ 🤖 : Oracle ⦄ where
 
 
   {-
