@@ -100,6 +100,23 @@ module _
 
 {-
 
+  Find under LEM
+
+-}
+
+open import Classical.Axioms.ExcludedMiddle
+
+module FindByOracle (decide : LEM) where
+
+  findByOracle :
+    {P : ℕ → Type ℓ}
+    (isPropP : (n : ℕ) → isProp (P n))
+    → ∥ Σ[ n ∈ ℕ ] P n ∥ → Σ[ n ∈ ℕ ] P n
+  findByOracle isPropP = find isPropP (λ n → decide (isPropP n))
+
+
+{-
+
   Lemmas for Conveniently Induction on ≤
 
 -}

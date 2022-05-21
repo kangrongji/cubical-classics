@@ -65,8 +65,8 @@ module TopologyOfReal (decide : LEM) where
 
     ℝMetric : Metric ℝ
     ℝMetric .dist x y = abs (x - y)
-    ℝMetric .dist-id _ _ d≡0 = diff≡0→x≡y (abs≡0→x≡0 d≡0)
-    ℝMetric .dist-refl _ _ x≡y = x≡0→abs≡0 (x≡y→diff≡0 x≡y)
+    ℝMetric .dist-id   d≡0 = diff≡0→x≡y (abs≡0→x≡0 d≡0)
+    ℝMetric .dist-refl x≡y = x≡0→abs≡0 (x≡y→diff≡0 x≡y)
     ℝMetric .dist-symm _ _ = absx≡→abs-x ∙ cong abs (sym x-y≡-[y-x])
     ℝMetric .dist-Δ _ _ _ = Δ-Inequality
 
