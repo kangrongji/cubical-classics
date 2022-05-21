@@ -8,7 +8,7 @@ This file contains:
 
 -}
 {-# OPTIONS --safe #-}
-module Classical.Analysis.Real.Continuity where
+module Classical.Analysis.Function.Continuity where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels

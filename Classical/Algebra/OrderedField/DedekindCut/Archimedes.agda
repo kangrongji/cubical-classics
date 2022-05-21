@@ -88,7 +88,7 @@ module Archimedes (decide : LEM)
           (a .upper-inhab)
 
         interval : Σ[ n ∈ ℕ ] (¬ P n) × P (suc n)
-        interval = findInterval isPropP decP ¬P0 ∃Pn
+        interval = findInterval decP ¬P0 ∃Pn
 
       archimedes'' : Σ[ r ∈ K ] (¬ r ∈ a .upper) × (p ≤ r) × (r + ε) ∈ a .upper
       archimedes'' = _ , interval .snd .fst , +-rPos→≥ (n⋆q≥0 (interval .fst) ε ε>0) ,

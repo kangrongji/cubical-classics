@@ -155,8 +155,8 @@ module SequenceInMetricSpace (decide : LEM) where
     isCauchyΣ : (ℕ → X) → Type
     isCauchyΣ seq = (ε : ℝ) → ε > 0 → Σ[ N ∈ ℕ ] ((m n : ℕ) → m >ℕ N → n >ℕ N → 𝓂 .dist (seq m) (seq n) < ε)
 
-    isCauchyTo→isCauchyΣ : {seq : ℕ → X}{x : X} → isCauchy seq → isCauchyΣ seq
-    isCauchyTo→isCauchyΣ cauchy ε ε>0 = findByOracle (λ _ → isPropΠ4 (λ _ _ _ _ → isProp<)) (cauchy ε ε>0)
+    isCauchy→isCauchyΣ : {seq : ℕ → X}{x : X} → isCauchy seq → isCauchyΣ seq
+    isCauchy→isCauchyΣ cauchy ε ε>0 = findByOracle (λ _ → isPropΠ4 (λ _ _ _ _ → isProp<)) (cauchy ε ε>0)
 
 
     -- A metric space is Cauchy complete if every Cauchy sequence has a limit.

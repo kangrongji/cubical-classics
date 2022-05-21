@@ -1,6 +1,6 @@
 {-
 
-A useful lemma for induction
+Useful lemmas about ℕ
 
 -}
 {-# OPTIONS --safe #-}
@@ -78,24 +78,54 @@ module _
         ... | inl f = Empty.rec (f _ ≤-refl p₀)
         ... | inr m = m
 
-
-    findMin : ∥ Σ[ n ∈ ℕ ] P n ∥ → InhabMin P
-    findMin = Prop.rec isPropInhabMin (λ (n , p) → find-helper n p)
-
-    findInterval : ∥ Σ[ n ∈ ℕ ] P n ∥ → Σ[ n ∈ ℕ ] (¬ P n) × P (suc n)
-    findInterval p .fst = findMin p .fst
-    findInterval p .snd .fst = findMin p .snd .snd _ ≤-refl
-    findInterval p .snd .snd = findMin p .snd .fst
+    findMinProp : ∥ Σ[ n ∈ ℕ ] P n ∥ → InhabMin P
+    findMinProp = Prop.rec isPropInhabMin (λ (n , p) → find-helper n p)
 
 
-  module _
-    (decP : (n : ℕ) → Dec (P n))
-    where
+module _
+  {P : ℕ → Type ℓ}
+  (decP : (n : ℕ) → Dec (P n))
+  where
 
-    find : ∥ Σ[ n ∈ ℕ ] P n ∥ → Σ[ n ∈ ℕ ] P n
-    find ∃p with decP 0
-    ... | yes p = 0 , p
-    ... | no ¬p = let (n , p , h) = findMin decP ¬p ∃p in suc n , p
+  private
+    module _ (¬p₀ : ¬ P zero)(∃p : ∥ Σ[ n ∈ ℕ ] P n ∥) where
+
+      dec∥P∥ : (n : ℕ) → Dec ∥ P n ∥
+      dec∥P∥ n with decP n
+      ... | yes p = yes ∣ p ∣
+      ... | no ¬p = no (Prop.rec isProp⊥ ¬p)
+
+      ¬∣p₀∣ : ¬ ∥ P zero ∥
+      ¬∣p₀∣ = Prop.rec isProp⊥ ¬p₀
+
+      ∃∣p∣ : ∥ Σ[ n ∈ ℕ ] ∥ P n ∥ ∥
+      ∃∣p∣ = Prop.map (λ (n , p) → n , ∣ p ∣) ∃p
+
+      ∥inhabMin∥ = findMinProp (λ _ → squash) dec∥P∥ ¬∣p₀∣ ∃∣p∣
+
+      n₀ = ∥inhabMin∥ .fst
+
+      Σp : P (suc n₀)
+      Σp with decP (suc n₀)
+      ... | yes p = p
+      ... | no ¬p = Empty.rec (Prop.rec isProp⊥ ¬p (∥inhabMin∥ .snd .fst))
+
+      isMin : (m : ℕ) → m ≤ n₀ → ¬ P m
+      isMin m m≤n₀ p = ∥inhabMin∥ .snd .snd m m≤n₀ ∣ p ∣
+
+
+  findMin : ¬ P zero → ∥ Σ[ n ∈ ℕ ] P n ∥ → InhabMin P
+  findMin ¬p₀ ∃p = n₀ ¬p₀ ∃p , Σp ¬p₀ ∃p , isMin ¬p₀ ∃p
+
+  findInterval : ¬ P zero → ∥ Σ[ n ∈ ℕ ] P n ∥ → Σ[ n ∈ ℕ ] (¬ P n) × P (suc n)
+  findInterval ¬p₀ p .fst = findMin ¬p₀ p .fst
+  findInterval ¬p₀ p .snd .fst = findMin ¬p₀ p .snd .snd _ ≤-refl
+  findInterval ¬p₀ p .snd .snd = findMin ¬p₀ p .snd .fst
+
+  find : ∥ Σ[ n ∈ ℕ ] P n ∥ → Σ[ n ∈ ℕ ] P n
+  find ∃p with decP 0
+  ... | yes p = 0 , p
+  ... | no ¬p = let (n , p , h) = findMin ¬p ∃p in suc n , p
 
 
 {-
@@ -112,7 +142,35 @@ module FindByOracle (decide : LEM) where
     {P : ℕ → Type ℓ}
     (isPropP : (n : ℕ) → isProp (P n))
     → ∥ Σ[ n ∈ ℕ ] P n ∥ → Σ[ n ∈ ℕ ] P n
-  findByOracle isPropP = find isPropP (λ n → decide (isPropP n))
+  findByOracle isPropP = find (λ n → decide (isPropP n))
+
+
+{-
+
+  The Limited Principle of Omniscience by Errett Bishop
+
+-}
+
+module LimitedOmniscience (decide : LEM) where
+
+  open import Classical.Preliminary.Logic
+
+  open ClassicalLogic decide
+  open FindByOracle   decide
+
+  module _
+    {P : ℕ → Type ℓ}
+    (isPropP : (n : ℕ) → isProp (P n)) where
+
+    ∥LPO∥ : ∥ Σ[ n ∈ ℕ ] P n ∥ ⊎ ((n : ℕ) → ¬ P n)
+    ∥LPO∥ with decide (isPropΠ (λ n → isProp¬ (P n)))
+    ... | yes ∀¬p = inr ∀¬p
+    ... | no ¬∀¬p = inl (¬∀¬→∃ ¬∀¬p)
+
+    LPO : (Σ[ n ∈ ℕ ] P n) ⊎ ((n : ℕ) → ¬ P n)
+    LPO with ∥LPO∥
+    ... | inl  ∃p = inl (findByOracle isPropP ∃p)
+    ... | inr ∀¬p = inr ∀¬p
 
 
 {-
