@@ -38,7 +38,7 @@ private module test (P Q R : Type) (pP : isProp P) (pQ : isProp Q) (pR : isProp 
     using (_⊎_)
   open import Cubical.Relation.Nullary.Base
     using (¬_; ∥_∥)
-  
+
   _↔_ : Type → Type → Type
   P ↔ Q = (P → Q) × (Q → P)
 
@@ -49,4 +49,3 @@ private module test (P Q R : Type) (pP : isProp P) (pQ : isProp Q) (pR : isProp 
   test : (P × Q → R) ↔ (P → ¬ Q ∥⊎∥ R)
   test = Solve (0 ∧ᶠ 1 →ᶠ 2) ↔ᶠ (0 →ᶠ ¬ᶠ 1 ∨ᶠ 2)
     ⟦ P , pP ⅋ Q , pQ ⅋ R , pR ⟧
-
