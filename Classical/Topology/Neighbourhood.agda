@@ -16,7 +16,7 @@ open import Cubical.Foundations.HLevels
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 open import Classical.Foundations.Powerset
 
 open import Classical.Topology.Base
@@ -27,11 +27,8 @@ private
     ℓ : Level
 
 
-module Neighbourhood (decide : LEM) where
+module _ ⦃ 🤖 : Oracle ⦄ where
 
-  open Powerset    decide
-  open TopologyStr decide
-  open TopologyProperties decide
   open Topology
 
 

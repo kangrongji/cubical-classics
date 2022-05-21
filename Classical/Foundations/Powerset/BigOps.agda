@@ -14,8 +14,8 @@ open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 
+open import Classical.Axioms
 open import Classical.Preliminary.Logic
-open import Classical.Axioms.ExcludedMiddle
 open import Classical.Foundations.Powerset.Base
 open import Classical.Foundations.Powerset.Membership
 open import Classical.Foundations.Powerset.Boolean
@@ -27,12 +27,8 @@ private
     X : Type ℓ
 
 
-module BigOps (decide : LEM) where
+module _ ⦃ 🤖 : Oracle ⦄ where
 
-  open Base       decide
-  open Membership decide
-  open Boolean    decide
-  open Properties decide
 
   {-
 

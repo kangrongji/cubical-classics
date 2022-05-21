@@ -32,7 +32,7 @@ open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 open import Classical.Foundations.Powerset
 open import Classical.Preliminary.Nat
 open import Classical.Preliminary.Logic
@@ -46,24 +46,20 @@ open import Classical.Analysis.Real.Base
 open import Classical.Analysis.Real.Topology
 
 
-module SequenceOfReal (decide : LEM) where
+module SequenceOfReal ⦃ 🤖 : Oracle ⦄ where
 
-  open Powerset  decide
-  open Real      decide
+  open Oracle 🤖
+
   open OrderedFieldStr (ℝCompleteOrderedField .fst)
   open AbsoluteValue   (ℝCompleteOrderedField .fst .fst)
-  open TopologyOfReal decide
-  open MetricStr decide
   open Metric   ℝMetric
 
-  open FindByOracle   decide
+  open FindByOracle decide
 
-  open CompleteOrderedField  decide
-  open Completeness    (ℝCompleteOrderedField .fst)
-  open Extremum decide (ℝCompleteOrderedField .fst)
+  open CompleteOrderedField (ℝCompleteOrderedField .fst)
+  open Extremum     (ℝCompleteOrderedField .fst)
   open Supremum
 
-  open SequenceInMetricSpace decide
   open Limit
   open ClusterPoint
 
@@ -290,7 +286,7 @@ module SequenceOfReal (decide : LEM) where
 
   -- Real Number is Cauchy Complete
 
-  isCauchy→Limit : isCauchyComplete ⦃ ℝMetric ⦄
+  isCauchy→Limit : isCauchyComplete
   isCauchy→Limit {seq = seq} cauchy = record { lim = cluster .point ; conv = converge }
     where
 

@@ -17,7 +17,7 @@ open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 open import Classical.Foundations.Powerset
 
 open import Classical.Topology.Base
@@ -29,25 +29,19 @@ private
     ℓ : Level
 
 
-module Hausdorff (decide : LEM) where
+module _ ⦃ 🤖 : Oracle ⦄ where
 
-  open Powerset      decide
-  open TopologyStr   decide
-  open TopologyProperties decide
-  open Neighbourhood decide
   open Topology
 
 
-  module _ {X : Type ℓ} ⦃ 𝒯 : Topology X ⦄ where
-
-    -- The Hausdorff Separation Axiom
-
-    isHausdorff : Type _
-    isHausdorff =
-      {x y : X} → ¬ x ≡ y → ∥ Σ[ U ∈ ℙ X ] Σ[ V ∈ ℙ X ] (U ∈ ℕbh x) × (V ∈ ℕbh y) × (U ∩ V ≡ ∅) ∥
+  record isHausdorff {X : Type ℓ} ⦃ 𝒯 : Topology X ⦄ : Type ℓ where
+    field
+      separate : {x y : X} → ¬ x ≡ y → ∥ Σ[ U ∈ ℙ X ] Σ[ V ∈ ℙ X ] (U ∈ ℕbh x) × (V ∈ ℕbh y) × (U ∩ V ≡ ∅) ∥
 
 
-    module _ (separate : isHausdorff) where
+  module _ {X : Type ℓ} ⦃ 𝒯 : Topology X ⦄ ⦃ haus : isHausdorff ⦄ where
+
+      open isHausdorff haus
 
       -- In a Hausdorff space X,
       -- point x ∈ X and subset K ⊆ X are separating by open sets

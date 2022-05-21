@@ -14,7 +14,7 @@ open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 open import Classical.Foundations.Powerset
 
 open import Classical.Algebra.Field
@@ -31,19 +31,17 @@ private
     ℓ ℓ' : Level
 
 
-module Multiplication (decide : LEM)
+module Multiplication ⦃ 🤖 : Oracle ⦄
   (𝒦 : OrderedField ℓ ℓ')(archimedes : isArchimedean (𝒦 . fst))
   where
 
   private
     K = 𝒦 .fst .fst .fst
 
-  open Powerset decide
-
   open OrderedFieldStr 𝒦
-  open Basics   decide 𝒦
-  open Algebra  decide 𝒦 archimedes
-  open Order    decide 𝒦 archimedes
+  open Basics   𝒦
+  open Algebra  𝒦 archimedes
+  open Order    𝒦 archimedes
   open DedekindCut
 
 

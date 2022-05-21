@@ -20,7 +20,7 @@ open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 open import Classical.Foundations.Powerset
 
 open import Classical.Topology.Base
@@ -36,13 +36,11 @@ private
     ℓ : Level
 
 
-module MetricStr (decide : LEM) where
+module _ ⦃ 🤖 : Oracle ⦄ where
 
-  open Powerset    decide
-  open Real        decide
+  open Oracle 🤖
+
   open OrderedFieldStr (ℝCompleteOrderedField .fst)
-  open TopologyStr decide
-  open TopologyProperties decide
   open Topology
 
 
@@ -202,11 +200,10 @@ module MetricStr (decide : LEM) where
 
     -}
 
-    open Neighbourhood decide
-    open Hausdorff     decide
+    open isHausdorff
 
-    isHausdorffMetric : isHausdorff ⦃ MetricTopology ⦄
-    isHausdorffMetric {x = x} {y = y} ¬x≡y =
+    isHausdorffMetric : isHausdorff
+    isHausdorffMetric .separate {x = x} {y = y} ¬x≡y =
       ∣ ℬ x d/2 , ℬ y d/2 , makeℕbh x∈ℬxr isOpenℬ , makeℕbh x∈ℬxr isOpenℬ , →∩∅' ∩ℬ≡∅ ∣
       where
 
@@ -225,6 +222,11 @@ module MetricStr (decide : LEM) where
 
         ∩ℬ≡∅ : ⊥
         ∩ℬ≡∅ = Empty.rec (<≤-asym dx+dy<d (dist-Δ _ _ _))
+
+
+    instance
+      _ : isHausdorff
+      _ = isHausdorffMetric
 
 
     {-

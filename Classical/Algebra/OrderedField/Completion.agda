@@ -13,7 +13,7 @@ as indicated in `https://github.com/kangrongji/cubical-classics/issues/10`.
 module Classical.Algebra.OrderedField.Completion where
 
 open import Cubical.Foundations.Prelude
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 open import Classical.Algebra.OrderedRing.Archimedes
 open import Classical.Algebra.OrderedField.Base
 open import Classical.Algebra.OrderedField.Morphism
@@ -26,16 +26,15 @@ private
     ℓ ℓ' ℓ'' ℓ''' : Level
 
 
-module Completion (decide : LEM)
+module Completion ⦃ 🤖 : Oracle ⦄
   (𝒦 : OrderedField ℓ ℓ')(archimedes : isArchimedean (𝒦 .fst)) where
 
-  open CompleteOrderedField decide
-  open Completeness
-  open CompletenessOfCuts
-  open UniversalProperty
+  open CompleteOrderedField
+  open CompletenessOfCuts 𝒦
+  open UniversalProperty  𝒦
 
   complete : CompleteOrderedField (ℓ-max ℓ ℓ') (ℓ-max ℓ ℓ')
-  complete = 𝕂CompleteOrderedField decide 𝒦 archimedes
+  complete = 𝕂CompleteOrderedField archimedes
 
   extend : (𝒦' : CompleteOrderedField ℓ'' ℓ''') → OrderedFieldHom 𝒦 (𝒦' .fst) → OrderedFieldHom (complete .fst) (𝒦' .fst)
-  extend = extendedOrderedFieldHom decide 𝒦 archimedes
+  extend = extendedOrderedFieldHom archimedes

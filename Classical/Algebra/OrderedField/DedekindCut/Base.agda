@@ -16,7 +16,7 @@ open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
 open import Cubical.Algebra.CommRingSolver.Reflection
 
-open import Classical.Axioms.ExcludedMiddle
+open import Classical.Axioms
 open import Classical.Foundations.Powerset
 open import Classical.Algebra.OrderedField
 
@@ -39,14 +39,16 @@ private
     helper1' = solve 𝓡
 
 
-module Basics (decide : LEM)
+module Basics ⦃ 🤖 : Oracle ⦄
   (𝒦 : OrderedField ℓ ℓ')
   where
+
+  open Oracle 🤖
 
   private
     K = 𝒦 .fst .fst .fst
 
-  open Powerset   decide
+
   open OrderedFieldStr 𝒦
 
   open Helpers (𝒦 .fst .fst)
