@@ -18,15 +18,19 @@ module Classical.Analysis.Real.Sequence where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Nat
-  using    (ℕ ; suc ; max)
+  using    (ℕ ; suc ; zero)
   renaming (_+_ to _+ℕ_)
 open import Cubical.Data.Nat.Order
-  using    (<-weaken ; left-≤-max ; right-≤-max)
+  using    (<-weaken ; ≤0→≡0)
   renaming (_>_ to _>ℕ_ ; _<_ to _<ℕ_
           ; _≥_ to _≥ℕ_ ; _≤_ to _≤ℕ_
-          ; ≤-refl to ≤ℕ-refl
+          ; isProp≤  to isProp≤ℕ
+          ; ≤-refl   to ≤ℕ-refl
+          ; <-trans  to <ℕ-trans
+          ; <≤-trans to <≤ℕ-trans
           ; ≤<-trans to ≤<ℕ-trans)
 open import Cubical.Data.Empty as Empty
+open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
@@ -44,12 +48,15 @@ open import Classical.Analysis.Real.Base
 open import Classical.Analysis.Real.Topology
 
 
-module Cauchy (decide : LEM) where
+module Sequence (decide : LEM) where
 
-  open Powerset decide
-  open Real     decide
+  open Powerset  decide
+  open Real      decide
   open OrderedFieldStr (ℝCompleteOrderedField .fst)
   open AbsoluteValue   (ℝCompleteOrderedField .fst .fst)
+  open TopologyOfReal decide
+  open MetricStr decide
+  open Metric   ℝMetric
 
 
   {-
@@ -71,6 +78,7 @@ module Cauchy (decide : LEM) where
 
   open Limit
 
+
   -- The uniqueness of limit
 
   isPropLimit : {seq : ℕ → ℝ} → isProp (Limit seq)
@@ -84,31 +92,13 @@ module Cauchy (decide : LEM) where
       ε/2 = middle 0 ε
       ε/2>0 = middle>l ε>0
 
-      module _
-        (n₀ : ℕ)(abs<₀ : (n : ℕ) → n >ℕ n₀ → abs (p .lim - seq n) < ε/2)
-        (n₁ : ℕ)(abs<₁ : (n : ℕ) → n >ℕ n₁ → abs (q .lim - seq n) < ε/2) where
-
-        n : ℕ
-        n = suc (max n₀ n₁)
-
-        n>n₀ : n >ℕ n₀
-        n>n₀ = ≤<ℕ-trans left-≤-max ≤ℕ-refl
-
-        n>n₁ : n >ℕ n₁
-        n>n₁ = ≤<ℕ-trans right-≤-max ≤ℕ-refl
-
-        open TopologyOfReal decide
-        open MetricStr decide
-        open Metric   ℝMetric
-
-        abs< : abs (p .lim - q .lim) < ε
-        abs< = ≤<-trans (dist-Δ _ _ _) (transport
-          (λ i → abs (p .lim - seq n) + dist-symm (q .lim) (seq n) i < x/2+x/2≡x ε i)
-          (+-Pres< (abs<₀ _ n>n₀) (abs<₁ _ n>n₁)))
-
       ∣x-y∣<ε : abs (p .lim - q .lim) < ε
       ∣x-y∣<ε = Prop.rec2 isProp<
-        (λ (n₀ , abs<₀) (n₁ , abs<₁) → abs< n₀ abs<₀ n₁ abs<₁)
+        (λ (n₀ , abs<₀) (n₁ , abs<₁) →
+          let n = sucmax n₀ n₁ in
+          ≤<-trans (dist-Δ _ _ _) (transport
+            (λ i → abs (p .lim - seq n) + dist-symm (q .lim) (seq n) i < x/2+x/2≡x ε i)
+            (+-Pres< (abs<₀ _ sucmax>left) (abs<₁ _ sucmax>right))))
         (p .conv ε/2 ε/2>0) (q .conv ε/2 ε/2>0)
 
 
@@ -208,10 +198,10 @@ module Cauchy (decide : LEM) where
   -}
 
   isClusteringAt : (ℕ → ℝ) → ℝ → Type
-  isClusteringAt seq x = (ε : ℝ) → ε > 0 → ∥ Σ[ n ∈ ℕ ] abs (x - seq n) < ε ∥
+  isClusteringAt seq x = (n₀ : ℕ)(ε : ℝ) → ε > 0 → ∥ Σ[ n ∈ ℕ ] (n₀ <ℕ n) × (abs (x - seq n) < ε) ∥
 
   isPropIsClusteringAt :  {seq : ℕ → ℝ}{x : ℝ} → isProp (isClusteringAt seq x)
-  isPropIsClusteringAt = isPropΠ2 (λ _ _ → squash)
+  isPropIsClusteringAt = isPropΠ3 (λ _ _ _ → squash)
 
   record ClusterPoint (seq : ℕ → ℝ) : Type where
     field
@@ -219,6 +209,17 @@ module Cauchy (decide : LEM) where
       accum : isClusteringAt seq real
 
   open ClusterPoint
+
+
+  -- A stronger version with more-than-mere-existence,
+  -- but they turn out to be (logically) equivalent.
+
+  isClusteringAtΣ : (ℕ → ℝ) → ℝ → Type
+  isClusteringAtΣ seq x = (n₀ : ℕ)(ε : ℝ) → ε > 0 → Σ[ n ∈ ℕ ] (n₀ <ℕ n) × (abs (x - seq n) < ε)
+
+  isClusteringAt→isClusteringAtΣ : {seq : ℕ → ℝ}{x : ℝ} → isClusteringAt seq x → isClusteringAtΣ seq x
+  isClusteringAt→isClusteringAtΣ cluster n₀ ε ε>0 =
+    find (λ _ → isProp× isProp≤ℕ isProp<) (λ _ → decide (isProp× isProp≤ℕ isProp<)) (cluster n₀ ε ε>0)
 
 
   {-
@@ -282,14 +283,16 @@ module Cauchy (decide : LEM) where
         (¬∈→∉ {A = accum-sub} (>sup→¬∈ _ accum-sup (+-rPos→> ε>0)))))
 
     ∃cluster : isClusteringAt seq x₀
-    ∃cluster ε ε>0 = Prop.rec2 squash
-      (λ (m , fin>x₀) (x , x₀-ε<x , x∈sub) → Prop.map
+    ∃cluster n₀ ε ε>0 = Prop.rec2 squash
+      (λ (m₀ , fin>x₀) (x , x₀-ε<x , x∈sub) →
+      let m = sucmax n₀ m₀ in Prop.map
       (λ (n , n≥m , x≤seqn) →
         let x₀-ε<seqn : x₀ - ε < seq n
             x₀-ε<seqn = <≤-trans x₀-ε<x x≤seqn
             seqn<x₀+ε : seq n < x₀ + ε
-            seqn<x₀+ε = fin>x₀ n n≥m
-        in  n , absInOpenInterval ε>0 x₀-ε<seqn seqn<x₀+ε)
+            seqn<x₀+ε = fin>x₀ n (<-weaken (<≤ℕ-trans sucmax>right n≥m))
+        in  n , <≤ℕ-trans sucmax>left n≥m ,
+            absInOpenInterval ε>0 x₀-ε<seqn seqn<x₀+ε)
       (∈→Inhab accum-prop x∈sub m)) (∃fin>x₀ ε ε>0)
       (<sup→∃∈ _ accum-sup (-rPos→< ε>0))
 
@@ -304,7 +307,7 @@ module Cauchy (decide : LEM) where
   -- if for any ε > 0, there merely exists N ∈ ℕ
   -- such that whenever m n > N,
   -- the distance between the m-th and n-th terms is smaller than ε.
-  -- In other words, the sequence is condensed when n approaching infinity.
+  -- In other words, the terms are crowding together when n approaching infinity.
 
   isCauchy : (ℕ → ℝ) → Type
   isCauchy seq = (ε : ℝ) → ε > 0 → ∥ Σ[ N ∈ ℕ ] ((m n : ℕ) → m >ℕ N → n >ℕ N → abs (seq m - seq n) < ε) ∥
@@ -313,10 +316,70 @@ module Cauchy (decide : LEM) where
   -- Cauchy sequence is bounded
 
   isCauchy→isBoundedSequence : {seq : ℕ → ℝ} → isCauchy seq → isBoundedSequence seq
-  isCauchy→isBoundedSequence = {!!}
+  isCauchy→isBoundedSequence {seq = seq} cauchy = bSeq
+    where
+
+    finBound : (n : ℕ) → Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] ((m : ℕ) → (m ≤ℕ n) → (a ≤ seq m) × (seq m ≤ b))
+    finBound zero = seq 0 , seq 0 , λ m m≤n →
+      subst (λ k → (seq 0 ≤ seq k) × (seq k ≤ seq 0)) (sym (≤0→≡0 m≤n)) (≤-refl refl , ≤-refl refl)
+    finBound (suc n) = a , b , λ m m≤n → case-split m (≤-ind m≤n)
+      where
+      a' = finBound n .fst
+      b' = finBound n .snd .fst
+      bfin = finBound n .snd .snd
+
+      a = min a' (seq (suc n))
+      b = max b' (seq (suc n))
+
+      case-split : (m : ℕ) → (m ≤ℕ n) ⊎ (m ≡ suc n) → (a ≤ seq m) × (seq m ≤ b)
+      case-split m (inl m≤n) = ≤-trans min≤left (bfin _ m≤n .fst) , ≤-trans (bfin _ m≤n .snd) max≥left
+      case-split m (inr m≡sn) = subst (λ k → (a ≤ seq k) × (seq k ≤ b)) (sym m≡sn) (min≤right , max≥right)
+
+    module _
+      (ε : ℝ)(ε>0 : ε > 0)(n₀ : ℕ)
+      (abs< : (n : ℕ) → n >ℕ n₀ → abs (seq n₀ - seq n) < ε) where
+
+      a = finBound n₀ .fst
+      b = finBound n₀ .snd .fst
+      bfin = finBound n₀ .snd .snd
+
+      case-split : (n : ℕ) → (n >ℕ n₀) ⊎ (n ≤ℕ n₀) → (a - ε ≤ seq n) × (seq n ≤ b + ε)
+      case-split n (inr n≤n₀) =
+        ≤-trans (inl (-rPos→< ε>0)) (bfin _ n≤n₀ .fst) ,
+        ≤-trans (bfin _ n≤n₀ .snd) (inl (+-rPos→> ε>0))
+      case-split n (inl n>n₀) =
+        inl (absSuppress≥ (bfin _ ≤ℕ-refl .fst) (abs< _ n>n₀)) ,
+        inl (absSuppress≤ (bfin _ ≤ℕ-refl .snd) (abs< _ n>n₀))
+
+      ΣbSeq : Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] ((n : ℕ) → (a ≤ seq n) × (seq n ≤ b))
+      ΣbSeq = a - ε , b + ε , λ n → case-split n (<≤-split n₀ n)
+
+    bSeq : isBoundedSequence seq
+    bSeq = Prop.map
+      (λ (n₀ , abs<') → ΣbSeq 1 1>0 (suc n₀)
+        (λ n n>sn₀ →
+          abs<' (suc n₀) n ≤ℕ-refl (<ℕ-trans ≤ℕ-refl n>sn₀)))
+      (cauchy 1 1>0)
 
 
   -- Real Number is Cauchy Complete
 
   isCauchy→Limit : {seq : ℕ → ℝ} → isCauchy seq → Limit seq
-  isCauchy→Limit {seq = seq} cauchy = {!!}
+  isCauchy→Limit {seq = seq} cauchy = record { lim = cluster .real ; conv = convergent }
+    where
+
+    cluster = isBounded→ClusterPoint (isCauchy→isBoundedSequence cauchy)
+
+    module _ (ε : ℝ)(ε>0 : ε > 0) where
+
+      ε/2 = middle 0 ε
+      ε/2>0 = middle>l ε>0
+
+      convergent : ∥ Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n >ℕ n₀ → abs (cluster .real - seq n) < ε) ∥
+      convergent = Prop.rec squash
+        (λ (n₀ , ∀abs<) → Prop.map
+        (λ (n₁ , n₁>n₀ , abs<) →
+          n₁ , λ n n>n₁ → subst (abs (cluster .real - seq n) <_) (x/2+x/2≡x ε)
+            (≤<-trans (dist-Δ _ _ _) (+-Pres< abs< (∀abs< n₁ n n₁>n₀ (<ℕ-trans n₁>n₀ n>n₁)))))
+        (cluster .accum n₀ ε/2 ε/2>0))
+        (cauchy ε/2 ε/2>0)

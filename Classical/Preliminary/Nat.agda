@@ -96,3 +96,41 @@ module _
     find ∃p with decP 0
     ... | yes p = 0 , p
     ... | no ¬p = let (n , p , h) = findMin decP ¬p ∃p in suc n , p
+
+
+{-
+
+  Lemmas for Conveniently Induction on ≤
+
+-}
+
+≤-ind : {m n : ℕ} → m ≤ suc n → (m ≤ n) ⊎ (m ≡ suc n)
+≤-ind {m = m} {n = n} m≤sn = case-split (≤-split m≤sn)
+  where
+  case-split : (m < suc n) ⊎ (m ≡ suc n) → _
+  case-split (inl sm≤sn) = inl (pred-≤-pred sm≤sn)
+  case-split (inr m≡sn) = inr m≡sn
+
+<≤-split : (m n : ℕ) → (m < n) ⊎ (m ≥ n)
+<≤-split m n = case-split (m ≟ n)
+  where
+  case-split : Trichotomy m n → _
+  case-split (lt m<n) = inl m<n
+  case-split (eq m≡n) = inr (_ , sym m≡n)
+  case-split (gt m>n) = inr (<-weaken m>n)
+
+
+{-
+
+  A Variant of Maximum
+
+-}
+
+sucmax : (m n : ℕ) → ℕ
+sucmax m n = suc (max m n)
+
+sucmax>left : {m n : ℕ} → sucmax m n > m
+sucmax>left = ≤<-trans left-≤-max ≤-refl
+
+sucmax>right : {m n : ℕ} → sucmax m n > n
+sucmax>right = ≤<-trans right-≤-max ≤-refl

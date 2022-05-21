@@ -129,6 +129,27 @@ module AbsoluteValue (𝓡 : OrderedRing ℓ ℓ') where
   ... | gt x>0 = sym (-Idempotent _) ∙ sym (x<0→abs≡-x (-Reverse>0 x>0))
 
 
+  absSuppress≤ : x ≤ z → abs (x - y) < d → y < z + d
+  absSuppress≤ {x = x} {y = y} {d = d} x≤z ∣x-y∣<d = case-split (<≤-total y x)
+    where
+    case-split : (x > y) ⊎ (x ≤ y) → _
+    case-split (inl x>y) = <-trans (<≤-trans x>y x≤z) (+-rPos→> (≤<-trans abs≥0 ∣x-y∣<d))
+    case-split (inr x≤y) = <≤-trans (-MoveLToR<' y-x<d) (+-rPres≤ x≤z)
+      where
+      y-x<d : y - x < d
+      y-x<d = subst (_< d) (x≤0→abs≡-x (≤→Diff≤0 x≤y) ∙ (sym (helper8 _ _))) ∣x-y∣<d
+
+  absSuppress≥ : z ≤ x → abs (x - y) < d → z - d < y
+  absSuppress≥ {x = x} {y = y} {d = d} z≤x ∣x-y∣<d = case-split (<≤-total x y)
+    where
+    case-split : (y > x) ⊎ (y ≤ x) → _
+    case-split (inl y>x) = <-trans (-rPos→< (≤<-trans abs≥0 ∣x-y∣<d)) (≤<-trans z≤x y>x)
+    case-split (inr y≤x) = ≤<-trans (+-rPres≤ z≤x) (+-MoveRToL< (-MoveLToR<' x-y<d))
+      where
+      x-y<d : x - y < d
+      x-y<d = subst (_< d) (x≥0→abs≡x (≥→Diff≥0 y≤x)) ∣x-y∣<d
+
+
   absKeepSign+ : x > 0r → abs (x - y) < x → y > 0r
   absKeepSign+ {x = x} {y = y} x>0 ∣x-y∣<x with trichotomy y 0r
   ... | lt y<0 = Empty.rec (<-asym ∣x-y∣<x (subst (_> x) (sym ∣x-y∣≡x-y) x-y>x))

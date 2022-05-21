@@ -316,8 +316,11 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   -MoveRToL< : z < x - y → z + y < x
   -MoveRToL< {z = z} {x = x} {y = y} x-y>z = subst (x >_) (λ i → z + -Idempotent y i) (+-MoveRToL< x-y>z)
 
+  -MoveLToR<' : x - y < z → x < y + z
+  -MoveLToR<' {x = x} x-y<z = subst (x <_) (+Comm _ _) (-MoveLToR< x-y<z)
+
   -MoveRToL<' : z < x - y → y + z < x
-  -MoveRToL<' {z = z} {x = x} {y = y} x-y>z = subst (x >_) (+Comm _ _) (-MoveRToL< x-y>z)
+  -MoveRToL<' {x = x} x-y>z = subst (x >_) (+Comm _ _) (-MoveRToL< x-y>z)
 
 
   {-
@@ -392,6 +395,10 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   ≥→Diff≥0 : x ≥ y → x - y ≥ 0r
   ≥→Diff≥0 (inl x>y) = inl (>→Diff>0 x>y)
   ≥→Diff≥0 {y = y} (inr x≡y) = inr (sym (+Rinv y) ∙ (λ i → x≡y i - y))
+
+  ≤→Diff≤0 : x ≤ y → x - y ≤ 0r
+  ≤→Diff≤0 (inl x<y) = inl (<→Diff<0 x<y)
+  ≤→Diff≤0 {y = y} (inr y≡x) = inr ((λ i → y≡x i - y) ∙ +Rinv y)
 
   Diff≥0→≥ : x - y ≥ 0r → x ≥ y
   Diff≥0→≥ (inl x-y>0) = inl (Diff>0→> x-y>0)
@@ -629,3 +636,41 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
     where
     ¬x>0 : ¬ x > 0r
     ¬x>0 x>0 = <-asym (∀ε>x x x>0) (∀ε>x x x>0)
+
+
+  {-
+
+    Minimum and Maximum of Two Elements
+
+  -}
+
+  min : (x y : R) → R
+  min x y with ≤-total x y
+  ... | inl x≤y = x
+  ... | inr x≥y = y
+
+  min≤left : min x y ≤ x
+  min≤left {x = x} {y = y} with ≤-total x y
+  ... | inl x≤y = ≤-refl refl
+  ... | inr x≥y = x≥y
+
+  min≤right : min x y ≤ y
+  min≤right {x = x} {y = y} with ≤-total x y
+  ... | inl x≤y = x≤y
+  ... | inr x≥y = ≤-refl refl
+
+
+  max : (x y : R) → R
+  max x y with ≤-total x y
+  ... | inl x≤y = y
+  ... | inr x≥y = x
+
+  max≥left : max x y ≥ x
+  max≥left {x = x} {y = y} with ≤-total x y
+  ... | inl x≤y = x≤y
+  ... | inr x≥y = ≤-refl refl
+
+  max≥right : max x y ≥ y
+  max≥right {x = x} {y = y} with ≤-total x y
+  ... | inl x≤y = ≤-refl refl
+  ... | inr x≥y = x≥y
