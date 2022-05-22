@@ -5,6 +5,7 @@ open import Cubical.Foundations.Prelude
 
 open import Classical.Axioms.Choice public
 open import Classical.Axioms.ExcludedMiddle public
+open import Classical.Axioms.Diaconescu
 
 -- We record up axioms to make use of Agda's instance argument,
 -- so no one needs to write them everywhere explicitly.
@@ -12,7 +13,7 @@ open import Classical.Axioms.ExcludedMiddle public
 
 -- Introducing 🤖,
 -- who is an honorific member of Oracle Machines
--- and also a legal term of Oracle (namely `🤖 : Oracle`).
+-- and also a legal term of Oracle (namely: `🤖 : Oracle`).
 -- It knows everything about h-propositions more than you could ever imagine!
 
 -- In case you need its help,
@@ -25,14 +26,14 @@ record Oracle : Typeω where
   field
     decide : LEM
 
+-- Warning:
+-- 🤖 always knows the answer,
+-- but often 🤖 won't tell.
 
--- CLARIFICATION:
--- There are horrific rumors among some constructivists,
--- about how evil, filthy and atrocious 🤖 is,
--- about eating babies and corruption of the youth.
--- ABSOLUTE NONSENSE!!!
--- 🤖 is kind, decent and peaceful.
--- Neighbors speak highly of 🤖.
--- But one thing...
--- Sometimes 🤖 knows the answer,
--- but 🤖 just won't tell.
+
+record MegaPicker : Typeω where
+  field
+    choose : AC
+
+  decide : LEM
+  decide = AC→LEM choose
