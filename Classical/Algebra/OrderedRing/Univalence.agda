@@ -111,7 +111,7 @@ module _ {𝓡 𝓡' : OrderedRing ℓ ℓ'}
 
     transport-helper :
       transport (λ i → path-ring (~ i) .fst → Type _) (𝓡' .snd ._>0)
-        ≡ 𝓡 .snd ._>0  --𝓡' .snd ._>0 (f .ring-hom .fst x)
+        ≡ 𝓡 .snd ._>0
     transport-helper i x =
       (transportRefl _ ∙ (λ i → 𝓡' .snd ._>0 (transportRefl (f .ring-hom .fst x) i)) ∙ sym (path->0' x)) i
 
