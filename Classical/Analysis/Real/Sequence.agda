@@ -152,6 +152,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         lim-seqn<ε : limit - seq n < ε
         lim-seqn<ε = ≤<-trans (+-lPres≤ (-Reverse≤ (incr _ _ (<-weaken n>n₀)))) (Σp .snd)
 
+
   {-
 
     The Bolzano-Weierstrass Theorem
