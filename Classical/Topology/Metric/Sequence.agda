@@ -56,10 +56,10 @@ module _ ⦃ 🤖 : Oracle ⦄
   -- the distance between x and seq n is smaller than ε.
 
   isConvergentTo : (ℕ → X) → X → Type
-  isConvergentTo seq x = (ε : ℝ) → ε > 0 → ∥ Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n >ℕ n₀ → 𝓂 .dist x (seq n) < ε) ∥
+  isConvergentTo seq x = (ε : ℝ) → ε > 0 → ∥ Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n >ℕ n₀ → dist x (seq n) < ε) ∥₁
 
   isPropIsConvergentTo : {seq : ℕ → X}{x : X} → isProp (isConvergentTo seq x)
-  isPropIsConvergentTo = isPropΠ2 (λ _ _ → squash)
+  isPropIsConvergentTo = isPropΠ2 (λ _ _ → squash₁)
 
   record Limit (seq : ℕ → X) : Type ℓ where
     field
@@ -73,7 +73,7 @@ module _ ⦃ 🤖 : Oracle ⦄
   -- but they turn out to be (logically) equivalent.
 
   isConvergentToΣ : (ℕ → X) → X → Type
-  isConvergentToΣ seq x = (ε : ℝ) → ε > 0 → Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n >ℕ n₀ → 𝓂 .dist x (seq n) < ε)
+  isConvergentToΣ seq x = (ε : ℝ) → ε > 0 → Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n >ℕ n₀ → dist x (seq n) < ε)
 
   isConvergentTo→isConvergentToΣ : {seq : ℕ → X}{x : X} → isConvergentTo seq x → isConvergentToΣ seq x
   isConvergentTo→isConvergentToΣ converge ε ε>0 = findByOracle (λ _ → isPropΠ2 (λ _ _ → isProp<)) (converge ε ε>0)
@@ -92,12 +92,12 @@ module _ ⦃ 🤖 : Oracle ⦄
       ε/2 = middle 0 ε
       ε/2>0 = middle>l ε>0
 
-      ∣x-y∣<ε : 𝓂 .dist (p .lim) (q .lim) < ε
+      ∣x-y∣<ε : dist (p .lim) (q .lim) < ε
       ∣x-y∣<ε = Prop.rec2 isProp<
         (λ (n₀ , abs<₀) (n₁ , abs<₁) →
           let n = sucmax n₀ n₁ in
           ≤<-trans (dist-Δ _ _ _) (transport
-            (λ i → 𝓂 .dist (p .lim) (seq n) + dist-symm (q .lim) (seq n) i < x/2+x/2≡x ε i)
+            (λ i → dist (p .lim) (seq n) + dist-symm (q .lim) (seq n) i < x/2+x/2≡x ε i)
             (+-Pres< (abs<₀ _ sucmax>left) (abs<₁ _ sucmax>right))))
         (p .conv ε/2 ε/2>0) (q .conv ε/2 ε/2>0)
 
@@ -113,10 +113,10 @@ module _ ⦃ 🤖 : Oracle ⦄
   -- such that the distance between x and seq n₀ is smaller than ε.
 
   isClusteringAt : (ℕ → X) → X → Type
-  isClusteringAt seq x = (n₀ : ℕ)(ε : ℝ) → ε > 0 → ∥ Σ[ n ∈ ℕ ] (n₀ <ℕ n) × (𝓂 .dist x (seq n) < ε) ∥
+  isClusteringAt seq x = (n₀ : ℕ)(ε : ℝ) → ε > 0 → ∥ Σ[ n ∈ ℕ ] (n₀ <ℕ n) × (dist x (seq n) < ε) ∥₁
 
   isPropIsClusteringAt :  {seq : ℕ → X}{x : X} → isProp (isClusteringAt seq x)
-  isPropIsClusteringAt = isPropΠ3 (λ _ _ _ → squash)
+  isPropIsClusteringAt = isPropΠ3 (λ _ _ _ → squash₁)
 
   record ClusterPoint (seq : ℕ → X) : Type ℓ where
     field
@@ -130,7 +130,7 @@ module _ ⦃ 🤖 : Oracle ⦄
   -- but they turn out to be (logically) equivalent.
 
   isClusteringAtΣ : (ℕ → X) → X → Type
-  isClusteringAtΣ seq x = (n₀ : ℕ)(ε : ℝ) → ε > 0 → Σ[ n ∈ ℕ ] (n₀ <ℕ n) × (𝓂 .dist x (seq n) < ε)
+  isClusteringAtΣ seq x = (n₀ : ℕ)(ε : ℝ) → ε > 0 → Σ[ n ∈ ℕ ] (n₀ <ℕ n) × (dist x (seq n) < ε)
 
   isClusteringAt→isClusteringAtΣ : {seq : ℕ → X}{x : X} → isClusteringAt seq x → isClusteringAtΣ seq x
   isClusteringAt→isClusteringAtΣ cluster n₀ ε ε>0 = findByOracle (λ _ → isProp× isProp≤ℕ isProp<) (cluster n₀ ε ε>0)
@@ -149,14 +149,14 @@ module _ ⦃ 🤖 : Oracle ⦄
   -- In other words, the terms are crowding together when n approaching infinity.
 
   isCauchy : (ℕ → X) → Type
-  isCauchy seq = (ε : ℝ) → ε > 0 → ∥ Σ[ N ∈ ℕ ] ((m n : ℕ) → m >ℕ N → n >ℕ N → 𝓂 .dist (seq m) (seq n) < ε) ∥
+  isCauchy seq = (ε : ℝ) → ε > 0 → ∥ Σ[ N ∈ ℕ ] ((m n : ℕ) → m >ℕ N → n >ℕ N → dist (seq m) (seq n) < ε) ∥₁
 
 
   -- A stronger version with more-than-mere-existence,
   -- but they turn out to be (logically) equivalent.
 
   isCauchyΣ : (ℕ → X) → Type
-  isCauchyΣ seq = (ε : ℝ) → ε > 0 → Σ[ N ∈ ℕ ] ((m n : ℕ) → m >ℕ N → n >ℕ N → 𝓂 .dist (seq m) (seq n) < ε)
+  isCauchyΣ seq = (ε : ℝ) → ε > 0 → Σ[ N ∈ ℕ ] ((m n : ℕ) → m >ℕ N → n >ℕ N → dist (seq m) (seq n) < ε)
 
   isCauchy→isCauchyΣ : {seq : ℕ → X}{x : X} → isCauchy seq → isCauchyΣ seq
   isCauchy→isCauchyΣ cauchy ε ε>0 = findByOracle (λ _ → isPropΠ4 (λ _ _ _ _ → isProp<)) (cauchy ε ε>0)

@@ -33,12 +33,12 @@ open import Cubical.HITs.Rationals.QuoQ
 open import Cubical.HITs.SetQuotients as SetQuot
 open import Cubical.Algebra.Ring
 open import Cubical.Algebra.CommRing
+open import Cubical.Algebra.CommRing.Instances.QuoQ
+  using    (ℚCommRing)
 open import Cubical.Relation.Nullary
 
-open import Classical.Preliminary.QuoInt
-  using    (ℤOrder ; ℕ₊₁→ℤ>0 ; -1·n≡-n)
-open import Classical.Preliminary.CommRing.Instances.QuoQ using ()
-  renaming (ℚ to ℚRing)
+open import Classical.Algebra.OrderedRing.Instances.QuoInt
+  using    (ℤOrderedRing ; ℕ₊₁→ℤ>0 ; -1·n≡-n)
 open import Classical.Algebra.OrderedRing
 
 private
@@ -46,8 +46,8 @@ private
     p q r s : ℚ
 
 
-open OrderedRingStr ℤOrder
-open RingTheory  (CommRing→Ring (ℤOrder .fst))
+open OrderedRingStr ℤOrderedRing
+open RingTheory  (CommRing→Ring (ℤOrderedRing .fst))
 
 private
   >0-path : (x y : ℤ × ℕ₊₁)(r : x ∼ y) → (x .fst > 0) ≡ (y .fst > 0)
@@ -107,7 +107,7 @@ private
   (λ (a , _) (c , _) a>0 c>0 → ·-Pres>0 {x = a} {y = c} a>0 c>0)
 
 private
-  trichotomy>0-helper : (x : ℤ × ℕ₊₁) → Trichotomy>0 ℚRing _>0 [ x ]
+  trichotomy>0-helper : (x : ℤ × ℕ₊₁) → Trichotomy>0 ℚCommRing _>0 [ x ]
   trichotomy>0-helper (a , b) with trichotomy a 0
   ... | lt a<0 = lt (subst (_> 0) (sym (-1·n≡-n a)) (-Reverse<0 {x = a} a<0))
   ... | eq a≡0 = eq (eq/ (a , b) (0 , 1) (a·1≡0 ∙ sym 0·b≡0))
@@ -117,8 +117,8 @@ private
           0·b≡0 = 0LeftAnnihilates (ℕ₊₁→ℤ b)
   ... | gt a>0 = gt a>0
 
-trichotomy>0 : (q : ℚ) → Trichotomy>0 ℚRing _>0 q
-trichotomy>0 = elimProp (isPropTrichotomy>0 ℚRing _>0 isProp>0 >0-asym) trichotomy>0-helper
+trichotomy>0 : (q : ℚ) → Trichotomy>0 ℚCommRing _>0 q
+trichotomy>0 = elimProp (isPropTrichotomy>0 ℚCommRing _>0 isProp>0 >0-asym) trichotomy>0-helper
 
 
 {-
@@ -127,9 +127,9 @@ trichotomy>0 = elimProp (isPropTrichotomy>0 ℚRing _>0 isProp>0 >0-asym) tricho
 
 -}
 
-ℚOrder : OrderedRing _ _
-ℚOrder = ℚRing , orderstr _>0 isProp>0 1>0' >0-asym >0-+ >0-· trichotomy>0
+ℚOrderedRing : OrderedRing _ _
+ℚOrderedRing = ℚCommRing , orderstr _>0 isProp>0 1>0' >0-asym >0-+ >0-· trichotomy>0
   where
-  open Helpers (ℤOrder .fst)
+  open Helpers (ℤOrderedRing .fst)
   1>0' : 1 > 0
   1>0' = subst (_> 0) helper1 _

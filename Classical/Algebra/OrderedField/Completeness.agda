@@ -116,13 +116,13 @@ module CompleteOrderedField ⦃ 🤖 : Oracle ⦄ (𝒦 : OrderedField ℓ ℓ')
       insurmountable n = ¬<→≥ (insurmountable' n)
 
       P : K → hProp _
-      P q = ∥ Σ[ n ∈ ℕ ] n ⋆ ε > q ∥ , squash
+      P q = ∥ Σ[ n ∈ ℕ ] n ⋆ ε > q ∥₁ , squash₁
 
       bounded : ℙ K
       bounded = specify P
 
       0∈bounded : 0r ∈ bounded
-      0∈bounded = Inhab→∈ P ∣ 1 , subst (_> 0r) (sym (1⋆q≡q _)) ε>0 ∣
+      0∈bounded = Inhab→∈ P ∣ 1 , subst (_> 0r) (sym (1⋆q≡q _)) ε>0 ∣₁
 
       q-bound : (x : K) → x ∈ bounded → x < q
       q-bound x x∈b = Prop.rec isProp<
@@ -133,11 +133,11 @@ module CompleteOrderedField ⦃ 🤖 : Oracle ⦄ (𝒦 : OrderedField ℓ ℓ')
       q-bound' x x∈b = inl (q-bound x x∈b)
 
       boundary : Supremum bounded
-      boundary = getSup ∣ 0r , 0∈bounded ∣ ∣ q , q-bound' ∣
+      boundary = getSup ∣ 0r , 0∈bounded ∣₁ ∣ q , q-bound' ∣₁
 
       module _ (p : K)(p>q-ε : boundary .sup - ε < p)(p∈A : p ∈ bounded) where
 
-        ∥n⋆ε>p+ε∥ : ∥ Σ[ n ∈ ℕ ] n ⋆ ε > p + ε ∥
+        ∥n⋆ε>p+ε∥ : ∥ Σ[ n ∈ ℕ ] n ⋆ ε > p + ε ∥₁
         ∥n⋆ε>p+ε∥ = Prop.map
           (λ (n , n⋆ε>p) → suc n ,
             subst (_> p + ε) (sym (sucn⋆q≡n⋆q+q n _)) (+-rPres< {z = ε} n⋆ε>p))
@@ -269,7 +269,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     isEmbedding-f = injEmbedding isSetK isSetK' (λ p → homRefl≡ _ _ p)
 
     isSurjection-f : isSurjection f-map
-    isSurjection-f y = ∣ _ , fiber-path y ∣
+    isSurjection-f y = ∣ _ , fiber-path y ∣₁
 
     -- Homomorphism between complete ordered fields is always an isomorphism.
 

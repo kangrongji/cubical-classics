@@ -139,8 +139,8 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         cov-prop : ℝ → hProp _
         cov-prop x =
           (Σ[ x∈𝐈 ∈ x ∈ [ a , b ] ]
-            ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers [ a , x ] ⦃ ∈→Inhab𝐈-L x∈𝐈 ⦄ ∥) ,
-          isPropΣ (isProp∈ [ a , b ]) (λ _ → squash)
+            ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers [ a , x ] ⦃ ∈→Inhab𝐈-L x∈𝐈 ⦄ ∥₁) ,
+          isPropΣ (isProp∈ [ a , b ]) (λ _ → squash₁)
 
         cov-sub = specify cov-prop
 
@@ -155,9 +155,9 @@ module _ ⦃ 🤖 : Oracle ⦄ where
           a≤a = inr refl
 
         cov-sup : Supremum cov-sub
-        cov-sup = getSup ∣ a , Inhab→∈ cov-prop (a∈𝐈 a b , cov-a) ∣ ∣ b , b≥x∈sub ∣
+        cov-sup = getSup ∣ a , Inhab→∈ cov-prop (a∈𝐈 a b , cov-a) ∣₁ ∣ b , b≥x∈sub ∣₁
           where
-          cov-a : ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers [ a , a ] ⦃ ∈→Inhab𝐈-L (a∈𝐈 a b) ⦄ ∥
+          cov-a : ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers [ a , a ] ⦃ ∈→Inhab𝐈-L (a∈𝐈 a b) ⦄ ∥₁
           cov-a = Prop.map
             (λ (U , a∈U , U∈𝒰) →
               [[ U ]] , A∈S→[A]⊆S U∈𝒰 , isFinSub[x] ,
@@ -220,7 +220,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
             covSup .snd = ⊆-trans {A = 𝒰₀+U} 𝒰₀+U∈𝒰 (𝒰cov𝐈 .snd)
 
             x₀∈cov : x₀ ∈ cov-sub
-            x₀∈cov = Inhab→∈ cov-prop (x₀∈𝐈 , ∣ 𝒰₀+U , 𝒰₀+U∈𝒰 , fin𝒰₀+U , covSup ∣)
+            x₀∈cov = Inhab→∈ cov-prop (x₀∈𝐈 , ∣ 𝒰₀+U , 𝒰₀+U∈𝒰 , fin𝒰₀+U , covSup ∣₁)
 
             module _ (x₀<b : x₀ < b) where
 
@@ -257,13 +257,13 @@ module _ ⦃ 🤖 : Oracle ⦄ where
               no-way = <≤-asym (+-rPos→> ε>0) (cov-sup .bound _ x₀+ε∈cov)
                 where
                 x₀+ε∈cov : (x₀ + ε) ∈ cov-sub
-                x₀+ε∈cov = Inhab→∈ cov-prop (x₀+ε∈𝐈 , ∣ 𝒰₀+U , 𝒰₀+U∈𝒰 , fin𝒰₀+U , covMore ∣)
+                x₀+ε∈cov = Inhab→∈ cov-prop (x₀+ε∈𝐈 , ∣ 𝒰₀+U , 𝒰₀+U∈𝒰 , fin𝒰₀+U , covMore ∣₁)
 
             x₀∈cov×¬x₀<b' : (x₀ ∈ cov-sub) × (¬ x₀ < b)
             x₀∈cov×¬x₀<b' = x₀∈cov , no-way
 
-        ∃ℬ : ∥ Σ[ U ∈ ℙ ℝ ] Σ[ r ∈ ℝ ] Σ[ r>0 ∈ r > 0 ] (U ∈ 𝒰) × (ℬ x₀ r ⦃ r>0 ⦄ ⊆ U) ∥
-        ∃ℬ = Prop.rec squash
+        ∃ℬ : ∥ Σ[ U ∈ ℙ ℝ ] Σ[ r ∈ ℝ ] Σ[ r>0 ∈ r > 0 ] (U ∈ 𝒰) × (ℬ x₀ r ⦃ r>0 ⦄ ⊆ U) ∥₁
+        ∃ℬ = Prop.rec squash₁
           (λ (U , x₀∈U , U∈𝒰) → Prop.map
           (λ (r , r>0 , ℬxr⊆U) → U , r , r>0 , U∈𝒰 , (λ p → ℬxr⊆U p))
           (∈→Inhab𝓂 (𝒰cov𝐈 .snd U∈𝒰) x₀ x₀∈U))
@@ -290,7 +290,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         cov[a,b]' : cov-prop b .fst
         cov[a,b]' = ∈→Inhab cov-prop (subst (_∈ cov-sub) x₀≡b (x₀∈cov×¬x₀<b .fst))
 
-        cov[a,b] : ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers [ a , b ] ∥
+        cov[a,b] : ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers [ a , b ] ∥₁
         cov[a,b] = cov[a,b]' .snd
 
 
@@ -310,10 +310,10 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   -- Two usual formulations of boundedness, and they are equivalent.
 
   isBoundedSub : ℙ ℝ → Type
-  isBoundedSub A = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] (a ≤ b) × ((x : ℝ) → x ∈ A → (a ≤ x) × (x ≤ b)) ∥
+  isBoundedSub A = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] (a ≤ b) × ((x : ℝ) → x ∈ A → (a ≤ x) × (x ≤ b)) ∥₁
 
   isBoundedByInterval : ℙ ℝ → Type
-  isBoundedByInterval A = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] Σ[ a≤b ∈ a ≤ b ] A ⊆ [ a , b ] ⦃ a≤b ⦄ ∥
+  isBoundedByInterval A = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] Σ[ a≤b ∈ a ≤ b ] A ⊆ [ a , b ] ⦃ a≤b ⦄ ∥₁
 
   isBoundedSub→isBoundedByInterval : {A : ℙ ℝ} → isBoundedSub A → isBoundedByInterval A
   isBoundedSub→isBoundedByInterval =

@@ -63,10 +63,10 @@ module Multiplication ⦃ 🤖 : Oracle ⦄
     rZeroSign a = lZeroSign a ∙ ·s-Comm (sign 𝟘) (sign a)
 
     lZero : (a : 𝕂) → abs𝕂 𝟘 ≡ abs𝕂 𝟘 ·𝕂₊ abs𝕂 a
-    lZero a = abs𝟘 ∙ sym (·𝕂₊-lZero (abs𝕂 a)) ∙ (λ i → abs𝟘 (~ i) ·𝕂₊ abs𝕂 a)
+    lZero a = abs𝟘 ∙ sym (·𝕂₊ZeroL (abs𝕂 a)) ∙ (λ i → abs𝟘 (~ i) ·𝕂₊ abs𝕂 a)
 
     rZero : (a : 𝕂) → abs𝕂 𝟘 ≡ abs𝕂 a ·𝕂₊ abs𝕂 𝟘
-    rZero a = lZero a ∙ ·𝕂₊-Comm (abs𝕂 𝟘) (abs𝕂 a)
+    rZero a = lZero a ∙ ·𝕂₊Comm (abs𝕂 𝟘) (abs𝕂 a)
 
   sign· : (a b : 𝕂) → sign (a ·𝕂 b) ≡ sign a ·s sign b
   sign· a b = case-split (trichotomy𝕂 a 𝟘) (trichotomy𝕂 b 𝟘)
@@ -113,32 +113,32 @@ module Multiplication ⦃ 🤖 : Oracle ⦄
       ∙ rZero a ∙ (λ i → abs𝕂 a ·𝕂₊ abs𝕂 (b≡0 (~ i)))
 
 
-  ·𝕂-Comm : (a b : 𝕂) → a ·𝕂 b ≡ b ·𝕂 a
-  ·𝕂-Comm a b i = signed (·s-Comm (sign a) (sign b) i) (·𝕂₊-Comm (abs𝕂 a) (abs𝕂 b) i)
+  ·𝕂Comm : (a b : 𝕂) → a ·𝕂 b ≡ b ·𝕂 a
+  ·𝕂Comm a b i = signed (·s-Comm (sign a) (sign b) i) (·𝕂₊Comm (abs𝕂 a) (abs𝕂 b) i)
 
-  ·𝕂-Assoc : (a b c : 𝕂) → a ·𝕂 (b ·𝕂 c) ≡ (a ·𝕂 b) ·𝕂 c
-  ·𝕂-Assoc a b c =
+  ·𝕂Assoc : (a b c : 𝕂) → a ·𝕂 (b ·𝕂 c) ≡ (a ·𝕂 b) ·𝕂 c
+  ·𝕂Assoc a b c =
     let p = λ i → signed (sign a ·s sign· b c i) (abs𝕂 a ·𝕂₊ abs· b c i)
         q = λ i → signed (sign· a b i ·s sign c) (abs· a b i ·𝕂₊ abs𝕂 c)
-        r = λ i → signed (·s-Assoc (sign a) (sign b) (sign c) i) (·𝕂₊-Assoc (abs𝕂 a) (abs𝕂 b) (abs𝕂 c) i)
+        r = λ i → signed (·s-Assoc (sign a) (sign b) (sign c) i) (·𝕂₊Assoc (abs𝕂 a) (abs𝕂 b) (abs𝕂 c) i)
     in  p ∙ r ∙ sym q
 
 
-  ·𝕂-rUnit : (a : 𝕂) → a ·𝕂 𝟙 ≡ a
-  ·𝕂-rUnit a = (λ i → signed (sign-path i) (abs𝕂 a ·𝕂₊ abs𝟙 i))
-    ∙ (λ i → signed (sign a) (·𝕂₊-rUnit (abs𝕂 a) i))
+  ·𝕂IdR : (a : 𝕂) → a ·𝕂 𝟙 ≡ a
+  ·𝕂IdR a = (λ i → signed (sign-path i) (abs𝕂 a ·𝕂₊ abs𝟙 i))
+    ∙ (λ i → signed (sign a) (·𝕂₊IdR (abs𝕂 a) i))
     ∙ sign-abs-≡ a
     where
     sign-path : sign a ·s sign 𝟙 ≡ sign a
     sign-path = (λ i → sign a ·s sign𝟙 i) ∙ ·s-rUnit (sign a)
 
-  ·𝕂-rZero : (a : 𝕂) → a ·𝕂 𝟘 ≡ 𝟘
-  ·𝕂-rZero a = (λ i → signed (sign a ·s sign 𝟘) (abs𝕂 a ·𝕂₊ abs𝟘 i))
-    ∙ (λ i → signed (sign a ·s sign 𝟘) (·𝕂₊-rZero (abs𝕂 a) i))
+  ·𝕂ZeroR : (a : 𝕂) → a ·𝕂 𝟘 ≡ 𝟘
+  ·𝕂ZeroR a = (λ i → signed (sign a ·s sign 𝟘) (abs𝕂 a ·𝕂₊ abs𝟘 i))
+    ∙ (λ i → signed (sign a ·s sign 𝟘) (·𝕂₊ZeroR (abs𝕂 a) i))
     ∙ signed𝟘 (sign a ·s sign 𝟘)
 
-  ·𝕂-lZero : (a : 𝕂) → 𝟘 ·𝕂 a ≡ 𝟘
-  ·𝕂-lZero a = ·𝕂-Comm 𝟘 a ∙ ·𝕂-rZero a
+  ·𝕂ZeroL : (a : 𝕂) → 𝟘 ·𝕂 a ≡ 𝟘
+  ·𝕂ZeroL a = ·𝕂Comm 𝟘 a ∙ ·𝕂ZeroR a
 
 
   neg-·𝕂 : (a b : 𝕂) → ((-𝕂 a) ·𝕂 b) ≡ -𝕂 (a ·𝕂 b)
@@ -147,10 +147,10 @@ module Multiplication ⦃ 🤖 : Oracle ⦄
     ∙ signed- (sign a ·s sign b) (abs𝕂 a ·𝕂₊ abs𝕂 b)
 
   ·𝕂-neg : (a b : 𝕂) → (a ·𝕂 (-𝕂 b)) ≡ -𝕂 (a ·𝕂 b)
-  ·𝕂-neg a b = ·𝕂-Comm a (-𝕂 b) ∙ neg-·𝕂 b a ∙ cong (-𝕂_) (·𝕂-Comm b a)
+  ·𝕂-neg a b = ·𝕂Comm a (-𝕂 b) ∙ neg-·𝕂 b a ∙ cong (-𝕂_) (·𝕂Comm b a)
 
   neg-·𝕂-neg : (a b : 𝕂) → ((-𝕂 a) ·𝕂 (-𝕂 b)) ≡ a ·𝕂 b
-  neg-·𝕂-neg a b = neg-·𝕂 a (-𝕂 b) ∙ cong (-𝕂_) (·𝕂-neg a b) ∙ -𝕂-Involutive (a ·𝕂 b)
+  neg-·𝕂-neg a b = neg-·𝕂 a (-𝕂 b) ∙ cong (-𝕂_) (·𝕂-neg a b) ∙ -𝕂Involutive (a ·𝕂 b)
 
 
   private
@@ -162,14 +162,14 @@ module Multiplication ⦃ 🤖 : Oracle ⦄
       case-split _ (lt b<0) = Empty.rec (<≤𝕂-asym b 𝟘 b<0 b≥0)
       case-split (eq a≡0) _ =
           (λ i → a≡0 i ·𝕂 b)
-        ∙ ·𝕂-lZero b
-        ∙ (λ i → (·𝕂₊-lZero (abs𝕂 b) (~ i)) .fst)
+        ∙ ·𝕂ZeroL b
+        ∙ (λ i → (·𝕂₊ZeroL (abs𝕂 b) (~ i)) .fst)
         ∙ (λ i → (abs𝟘 (~ i) ·𝕂₊ (abs𝕂 b)) .fst)
         ∙ (λ i → (abs𝕂 (a≡0 (~ i)) ·𝕂₊ (abs𝕂 b)) .fst)
       case-split _ (eq b≡0) =
         (λ i → a ·𝕂 b≡0 i)
-        ∙ ·𝕂-rZero a
-        ∙ (λ i → (·𝕂₊-rZero (abs𝕂 a) (~ i)) .fst)
+        ∙ ·𝕂ZeroR a
+        ∙ (λ i → (·𝕂₊ZeroR (abs𝕂 a) (~ i)) .fst)
         ∙ (λ i → ((abs𝕂 a) ·𝕂₊ abs𝟘 (~ i)) .fst)
         ∙ (λ i → ((abs𝕂 a) ·𝕂₊ abs𝕂 (b≡0 (~ i))) .fst)
       case-split (gt a>0) (gt b>0) i =
@@ -182,106 +182,106 @@ module Multiplication ⦃ 🤖 : Oracle ⦄
             path : abs𝕂 (a +𝕂 b) .fst ≡ ((abs𝕂 a) +𝕂₊ (abs𝕂 b)) .fst
             path = abs≥0 (a +𝕂 b) a+b≥0 ∙ (λ i → abs≥0 a a≥0 (~ i) +𝕂 abs≥0 b b≥0 (~ i))
 
-  ·𝕂-lDistb-PosPosPos : (a b c : 𝕂)
+  ·𝕂DistR-PosPosPos : (a b c : 𝕂)
     → a ≥𝕂 𝟘 → b ≥𝕂 𝟘 → c ≥𝕂 𝟘
     → (a ·𝕂 b) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
-  ·𝕂-lDistb-PosPosPos a b c a≥0 b≥0 c≥0 =
+  ·𝕂DistR-PosPosPos a b c a≥0 b≥0 c≥0 =
       (λ i → ·pos-helper a b a≥0 b≥0 i +𝕂 ·pos-helper a c a≥0 c≥0 i)
-    ∙ (λ i → ·𝕂₊-lDistrib (abs𝕂 a) (abs𝕂 b) (abs𝕂 c) i .fst)
+    ∙ (λ i → ·𝕂₊DistR (abs𝕂 a) (abs𝕂 b) (abs𝕂 c) i .fst)
     ∙ (λ i → ((abs𝕂 a) ·𝕂₊ +pos-helper b c b≥0 c≥0 (~ i)) .fst)
     ∙ sym (·pos-helper a (b +𝕂 c) a≥0 b+c≥0)
     where
     b+c≥0 : (b +𝕂 c) ≥𝕂 𝟘
     b+c≥0 = +𝕂-Pres≥0 b c b≥0 c≥0
 
-  ·𝕂-lDistb-PosPosNeg : (a b c : 𝕂)
+  ·𝕂DistR-PosPosNeg : (a b c : 𝕂)
     → a ≥𝕂 𝟘 → b ≥𝕂 𝟘 → c <𝕂 𝟘 → (b +𝕂 c) ≥𝕂 𝟘
     → (a ·𝕂 b) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
-  ·𝕂-lDistb-PosPosNeg a b c a≥0 b≥0 c<0 b+c≥0 = (λ i → path1 (~ i) +𝕂 (a ·𝕂 c)) ∙ path2
+  ·𝕂DistR-PosPosNeg a b c a≥0 b≥0 c<0 b+c≥0 = (λ i → path1 (~ i) +𝕂 (a ·𝕂 c)) ∙ path2
     where
     path1 : (a ·𝕂 (b +𝕂 c)) +𝕂 (-𝕂 (a ·𝕂 c)) ≡ a ·𝕂 b
     path1 = (λ i → (a ·𝕂 (b +𝕂 c)) +𝕂 ·𝕂-neg a c (~ i))
-      ∙ ·𝕂-lDistb-PosPosPos a (b +𝕂 c) (-𝕂 c) a≥0 b+c≥0 (<0-reverse c c<0)
-      ∙ (λ i → a ·𝕂 +𝕂-Assoc b c (-𝕂 c) (~ i))
-      ∙ (λ i → a ·𝕂 (b +𝕂 +𝕂-rInverse c i)) ∙ (λ i → a ·𝕂 (+𝕂-rUnit b i))
+      ∙ ·𝕂DistR-PosPosPos a (b +𝕂 c) (-𝕂 c) a≥0 b+c≥0 (<0-reverse c c<0)
+      ∙ (λ i → a ·𝕂 +𝕂Assoc b c (-𝕂 c) (~ i))
+      ∙ (λ i → a ·𝕂 (b +𝕂 +𝕂InvR c i)) ∙ (λ i → a ·𝕂 (+𝕂IdR b i))
     path2 : ((a ·𝕂 (b +𝕂 c)) +𝕂 (-𝕂 (a ·𝕂 c))) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
-    path2 = sym (+𝕂-Assoc _ _ _) ∙ (λ i → (a ·𝕂 (b +𝕂 c)) +𝕂 +𝕂-lInverse (a ·𝕂 c) i) ∙ +𝕂-rUnit _
+    path2 = sym (+𝕂Assoc _ _ _) ∙ (λ i → (a ·𝕂 (b +𝕂 c)) +𝕂 +𝕂InvL (a ·𝕂 c) i) ∙ +𝕂IdR _
 
-  ·𝕂-lDistb-PosPos : (a b c : 𝕂)
+  ·𝕂DistR-PosPos : (a b c : 𝕂)
     → a ≥𝕂 𝟘 → (b +𝕂 c) ≥𝕂 𝟘
     → (a ·𝕂 b) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
-  ·𝕂-lDistb-PosPos a b c a≥0 b+c≥0 = case-split (dichotomy𝕂 b 𝟘) (dichotomy𝕂 c 𝟘)
+  ·𝕂DistR-PosPos a b c a≥0 b+c≥0 = case-split (dichotomy𝕂 b 𝟘) (dichotomy𝕂 c 𝟘)
     where
     case-split : Dichotomy𝕂 b 𝟘 → Dichotomy𝕂 c 𝟘 → (a ·𝕂 b) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
-    case-split (ge b≥0) (ge c≥0) = ·𝕂-lDistb-PosPosPos a b c a≥0 b≥0 c≥0
-    case-split (lt b<0) (ge c≥0) = +𝕂-Comm _ _
-      ∙ (λ i → ·𝕂-lDistb-PosPosNeg a c b a≥0 c≥0 b<0 c+b≥0 i)
-      ∙ (λ i → a ·𝕂 +𝕂-Comm c b i)
+    case-split (ge b≥0) (ge c≥0) = ·𝕂DistR-PosPosPos a b c a≥0 b≥0 c≥0
+    case-split (lt b<0) (ge c≥0) = +𝕂Comm _ _
+      ∙ (λ i → ·𝕂DistR-PosPosNeg a c b a≥0 c≥0 b<0 c+b≥0 i)
+      ∙ (λ i → a ·𝕂 +𝕂Comm c b i)
       where c+b≥0 : (c +𝕂 b) ≥𝕂 𝟘
-            c+b≥0 = subst (_≥𝕂 𝟘) (+𝕂-Comm b c) b+c≥0
-    case-split (ge b≥0) (lt c<0) = ·𝕂-lDistb-PosPosNeg a b c a≥0 b≥0 c<0 b+c≥0
+            c+b≥0 = subst (_≥𝕂 𝟘) (+𝕂Comm b c) b+c≥0
+    case-split (ge b≥0) (lt c<0) = ·𝕂DistR-PosPosNeg a b c a≥0 b≥0 c<0 b+c≥0
     case-split (lt b<0) (lt c<0) = Empty.rec (<≤𝕂-asym (b +𝕂 c) 𝟘 (+𝕂-Pres<0 b c b<0 c<0) b+c≥0)
 
   private
     alg-helper' : (a b c d : 𝕂) → (a +𝕂 b) +𝕂 (c +𝕂 d) ≡ (a +𝕂 c) +𝕂 (b +𝕂 d)
-    alg-helper' a b c d = +𝕂-Assoc (a +𝕂 b) c d
-      ∙ (λ i → +𝕂-Assoc a b c (~ i) +𝕂 d)
-      ∙ (λ i → (a +𝕂 +𝕂-Comm b c i) +𝕂 d)
-      ∙ (λ i → +𝕂-Assoc a c b i +𝕂 d)
-      ∙ sym (+𝕂-Assoc (a +𝕂 c) b d)
+    alg-helper' a b c d = +𝕂Assoc (a +𝕂 b) c d
+      ∙ (λ i → +𝕂Assoc a b c (~ i) +𝕂 d)
+      ∙ (λ i → (a +𝕂 +𝕂Comm b c i) +𝕂 d)
+      ∙ (λ i → +𝕂Assoc a c b i +𝕂 d)
+      ∙ sym (+𝕂Assoc (a +𝕂 c) b d)
 
     alg-helper : (a b : 𝕂) → -𝕂 (a +𝕂 b) ≡ (-𝕂 a) +𝕂 (-𝕂 b)
-    alg-helper a b = sym (+𝕂-rUnit (-𝕂 (a +𝕂 b)))
+    alg-helper a b = sym (+𝕂IdR (-𝕂 (a +𝕂 b)))
       ∙ (λ i → (-𝕂 (a +𝕂 b)) +𝕂 path (~ i))
-      ∙ +𝕂-Assoc _ _ _
-      ∙ (λ i → +𝕂-lInverse (a +𝕂 b) i +𝕂 ((-𝕂 a) +𝕂 (-𝕂 b)))
-      ∙ +𝕂-lUnit ((-𝕂 a) +𝕂 (-𝕂 b))
+      ∙ +𝕂Assoc _ _ _
+      ∙ (λ i → +𝕂InvL (a +𝕂 b) i +𝕂 ((-𝕂 a) +𝕂 (-𝕂 b)))
+      ∙ +𝕂IdL ((-𝕂 a) +𝕂 (-𝕂 b))
       where
       path : (a +𝕂 b) +𝕂 ((-𝕂 a) +𝕂 (-𝕂 b)) ≡ 𝟘
-      path = alg-helper' _ _ _ _ ∙ (λ i → +𝕂-rInverse a i +𝕂 +𝕂-rInverse b i) ∙ +𝕂-rUnit 𝟘
+      path = alg-helper' _ _ _ _ ∙ (λ i → +𝕂InvR a i +𝕂 +𝕂InvR b i) ∙ +𝕂IdR 𝟘
 
-  ·𝕂-lDistb-NegPos : (a b c : 𝕂)
+  ·𝕂DistR-NegPos : (a b c : 𝕂)
     → a <𝕂 𝟘 → (b +𝕂 c) ≥𝕂 𝟘
     → (a ·𝕂 b) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
-  ·𝕂-lDistb-NegPos a b c a<0 b+c≥0 =
-    sym (-𝕂-Involutive _) ∙ (λ i → -𝕂 path i) ∙ -𝕂-Involutive _
+  ·𝕂DistR-NegPos a b c a<0 b+c≥0 =
+    sym (-𝕂Involutive _) ∙ (λ i → -𝕂 path i) ∙ -𝕂Involutive _
     where
     path : -𝕂 ((a ·𝕂 b) +𝕂 (a ·𝕂 c)) ≡ -𝕂 (a ·𝕂 (b +𝕂 c))
     path = alg-helper (a ·𝕂 b) (a ·𝕂 c)
       ∙ (λ i → neg-·𝕂 a b (~ i) +𝕂 neg-·𝕂 a c (~ i))
-      ∙ ·𝕂-lDistb-PosPos (-𝕂 a) b c (<0-reverse a a<0) b+c≥0
+      ∙ ·𝕂DistR-PosPos (-𝕂 a) b c (<0-reverse a a<0) b+c≥0
       ∙ neg-·𝕂 a (b +𝕂 c)
 
-  ·𝕂-lDistb-Pos : (a b c : 𝕂)
+  ·𝕂DistR-Pos : (a b c : 𝕂)
     → (b +𝕂 c) ≥𝕂 𝟘
     → (a ·𝕂 b) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
-  ·𝕂-lDistb-Pos a b c b+c≥0 = case-split (dichotomy𝕂 a 𝟘)
+  ·𝕂DistR-Pos a b c b+c≥0 = case-split (dichotomy𝕂 a 𝟘)
     where
     case-split : Dichotomy𝕂 a 𝟘 → (a ·𝕂 b) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
-    case-split (ge a≥0) = ·𝕂-lDistb-PosPos a b c a≥0 b+c≥0
-    case-split (lt a<0) = ·𝕂-lDistb-NegPos a b c a<0 b+c≥0
+    case-split (ge a≥0) = ·𝕂DistR-PosPos a b c a≥0 b+c≥0
+    case-split (lt a<0) = ·𝕂DistR-NegPos a b c a<0 b+c≥0
 
-  ·𝕂-lDistb-Neg : (a b c : 𝕂)
+  ·𝕂DistR-Neg : (a b c : 𝕂)
     → (b +𝕂 c) <𝕂 𝟘
     → (a ·𝕂 b) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
-  ·𝕂-lDistb-Neg a b c b+c<0 =
-    sym (-𝕂-Involutive _) ∙ (λ i → -𝕂 path i) ∙ -𝕂-Involutive _
+  ·𝕂DistR-Neg a b c b+c<0 =
+    sym (-𝕂Involutive _) ∙ (λ i → -𝕂 path i) ∙ -𝕂Involutive _
     where
     -b+-k≥0 : ((-𝕂 b) +𝕂 (-𝕂 c)) ≥𝕂 𝟘
     -b+-k≥0 = subst (_≥𝕂 𝟘) (alg-helper b c) (<0-reverse (b +𝕂 c) b+c<0)
     path : -𝕂 ((a ·𝕂 b) +𝕂 (a ·𝕂 c)) ≡ -𝕂 (a ·𝕂 (b +𝕂 c))
     path = alg-helper (a ·𝕂 b) (a ·𝕂 c)
       ∙ (λ i → ·𝕂-neg a b (~ i) +𝕂 ·𝕂-neg a c (~ i))
-      ∙ ·𝕂-lDistb-Pos a (-𝕂 b) (-𝕂 c) -b+-k≥0
+      ∙ ·𝕂DistR-Pos a (-𝕂 b) (-𝕂 c) -b+-k≥0
       ∙ (λ i → a ·𝕂 alg-helper b c (~ i))
       ∙ ·𝕂-neg a (b +𝕂 c)
 
-  ·𝕂-lDistb : (a b c : 𝕂) → (a ·𝕂 b) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
-  ·𝕂-lDistb a b c = case-split (dichotomy𝕂 (b +𝕂 c) 𝟘)
+  ·𝕂DistR : (a b c : 𝕂) → (a ·𝕂 b) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
+  ·𝕂DistR a b c = case-split (dichotomy𝕂 (b +𝕂 c) 𝟘)
     where
     case-split : Dichotomy𝕂 (b +𝕂 c) 𝟘 → (a ·𝕂 b) +𝕂 (a ·𝕂 c) ≡ a ·𝕂 (b +𝕂 c)
-    case-split (ge b+c≥0) = ·𝕂-lDistb-Pos a b c b+c≥0
-    case-split (lt b+c<0) = ·𝕂-lDistb-Neg a b c b+c<0
+    case-split (ge b+c≥0) = ·𝕂DistR-Pos a b c b+c≥0
+    case-split (lt b+c<0) = ·𝕂DistR-Neg a b c b+c<0
 
 
   -- The previously defined _·𝕂₊_ is equal to _·𝕂_ when both variables are non-negative.
@@ -301,8 +301,8 @@ module Multiplication ⦃ 🤖 : Oracle ⦄
   𝕂CommRing : CommRing (ℓ-max ℓ ℓ')
   𝕂CommRing = makeCommRing {R = 𝕂}
       𝟘 𝟙 _+𝕂_ _·𝕂_ -𝕂_ isSet𝕂
-    +𝕂-Assoc +𝕂-rUnit +𝕂-rInverse +𝕂-Comm
-    ·𝕂-Assoc ·𝕂-rUnit (λ x y z → sym (·𝕂-lDistb x y z)) ·𝕂-Comm
+    +𝕂Assoc +𝕂IdR +𝕂InvR +𝕂Comm
+    ·𝕂Assoc ·𝕂IdR (λ x y z → sym (·𝕂DistR x y z)) ·𝕂Comm
 
 
   {-
@@ -342,12 +342,12 @@ module Multiplication ⦃ 🤖 : Oracle ⦄
     renaming (_<_ to _<𝕂'_ ; _>_ to _>𝕂'_ ; _≤_ to _≤𝕂'_ ; _≥_ to _≥𝕂'_)
 
   <𝕂→<𝕂' : (a b : 𝕂) → a <𝕂 b → a <𝕂' b
-  <𝕂→<𝕂' a b a<b = subst ((b +𝕂 (-𝕂 a)) >𝕂_) (+𝕂-rInverse a) (+𝕂-rPres< a b (-𝕂 a) a<b)
+  <𝕂→<𝕂' a b a<b = subst ((b +𝕂 (-𝕂 a)) >𝕂_) (+𝕂InvR a) (+𝕂-rPres< a b (-𝕂 a) a<b)
 
   <𝕂'→<𝕂 : (a b : 𝕂) → a <𝕂' b → a <𝕂 b
-  <𝕂'→<𝕂 a b 0<b-a = transport (λ i → +𝕂-lUnit a i <𝕂 b-a+b≡b i) (+𝕂-rPres< 𝟘 (b +𝕂 (-𝕂 a)) a 0<b-a)
+  <𝕂'→<𝕂 a b 0<b-a = transport (λ i → +𝕂IdL a i <𝕂 b-a+b≡b i) (+𝕂-rPres< 𝟘 (b +𝕂 (-𝕂 a)) a 0<b-a)
     where b-a+b≡b : (b +𝕂 (-𝕂 a)) +𝕂 a ≡ b
-          b-a+b≡b = sym (+𝕂-Assoc _ _ _) ∙ (λ i → b +𝕂 +𝕂-lInverse a i) ∙ +𝕂-rUnit b
+          b-a+b≡b = sym (+𝕂Assoc _ _ _) ∙ (λ i → b +𝕂 +𝕂InvL a i) ∙ +𝕂IdR b
 
   ≤𝕂→≤𝕂' : (a b : 𝕂) → a ≤𝕂 b → a ≤𝕂' b
   ≤𝕂→≤𝕂' a b a≤b with split≤𝕂 a b a≤b
@@ -372,28 +372,28 @@ module Multiplication ⦃ 🤖 : Oracle ⦄
   isPropIsInv a (x , p) (y , q) i .fst = x≡y i
     where
     x≡y : x ≡ y
-    x≡y = sym (·𝕂₊-rUnit x)
+    x≡y = sym (·𝕂₊IdR x)
       ∙ (λ i → x ·𝕂₊ path-𝕂₊ (a ·𝕂₊ y) 𝟙₊ q (~ i))
-      ∙ ·𝕂₊-Assoc x a y
-      ∙ (λ i → ·𝕂₊-Comm x a i ·𝕂₊ y)
+      ∙ ·𝕂₊Assoc x a y
+      ∙ (λ i → ·𝕂₊Comm x a i ·𝕂₊ y)
       ∙ (λ i → path-𝕂₊ (a ·𝕂₊ x) 𝟙₊ p i ·𝕂₊ y)
-      ∙ ·𝕂₊-lUnit y
+      ∙ ·𝕂₊IdL y
   isPropIsInv a u@(x , p) v@(y , q) i .snd j =
     isSet→SquareP (λ _ _ → isSet𝕂) p q
       (λ i → (a ·𝕂₊ isPropIsInv a u v i .fst) .fst) refl i j
 
-  ·𝕂₊-rInv : (a : 𝕂₊) → a .fst >𝕂 𝟘 → isInv𝕂₊ a
-  ·𝕂₊-rInv a = Prop.rec (isPropIsInv a)
+  ·𝕂₊InvR : (a : 𝕂₊) → a .fst >𝕂 𝟘 → isInv𝕂₊ a
+  ·𝕂₊InvR a = Prop.rec (isPropIsInv a)
     (λ (q , q<r∈a , q∈𝟘) →
       let q>0 = q∈𝕂₊→q>0 𝟘₊ q q∈𝟘 in
-      inv𝕂₊ (a .fst) q q>0 q<r∈a , ·𝕂₊-rInv' a q q>0 q<r∈a)
+      inv𝕂₊ (a .fst) q q>0 q<r∈a , ·𝕂₊InvR' a q q>0 q<r∈a)
 
   inv𝕂₊>0 : (a : 𝕂₊)(a⁻¹ : isInv𝕂₊ a) → a⁻¹ .fst .fst >𝕂 𝟘
   inv𝕂₊>0 a ((a' , a'≥0) , p) with split≤𝕂 𝟘 a' a'≥0
   ... | lt 0<a' = 0<a'
   ... | eq 0≡a' = Empty.rec (<𝕂-arefl 1>𝕂0 𝟘≡𝟙)
     where 𝟘≡𝟙 : 𝟘 ≡ 𝟙
-          𝟘≡𝟙 = (λ i → ·𝕂₊-rZero a (~ i) .fst)
+          𝟘≡𝟙 = (λ i → ·𝕂₊ZeroR a (~ i) .fst)
             ∙ (λ i → (a ·𝕂₊ path-𝕂₊ 𝟘₊ (a' , a'≥0) 0≡a' i) .fst) ∙ p
 
 
@@ -405,34 +405,34 @@ module Multiplication ⦃ 🤖 : Oracle ⦄
     private
       a₊ : 𝕂₊
       a₊ = a , <𝕂→≤𝕂 {a = 𝟘} {b = a} a>0
-      Σa⁻¹ = ·𝕂₊-rInv a₊ a>0
+      Σa⁻¹ = ·𝕂₊InvR a₊ a>0
       a₊⁻¹ = Σa⁻¹ .fst
       a⁻¹ = Σa⁻¹ .fst .fst
       a⁻¹>0 = inv𝕂₊>0 _ Σa⁻¹
 
-    ·𝕂-rInv-Pos : isInv𝕂 a
-    ·𝕂-rInv-Pos .fst = a⁻¹
-    ·𝕂-rInv-Pos .snd =
+    ·𝕂InvR-Pos : isInv𝕂 a
+    ·𝕂InvR-Pos .fst = a⁻¹
+    ·𝕂InvR-Pos .snd =
         sym (·𝕂-Pos-helper a a⁻¹ a>0 a⁻¹>0)
       ∙ (λ i → (path-𝕂₊ (abs𝕂 a) a₊ (abs≥0 a (a₊ .snd)) i
           ·𝕂₊ path-𝕂₊ (abs𝕂 a⁻¹) a₊⁻¹ (abs≥0 a⁻¹ (a₊⁻¹ .snd)) i) .fst)
       ∙ Σa⁻¹ .snd
 
 
-  ·𝕂-rInv-Neg : (a : 𝕂)(a<0 : a <𝕂 𝟘) → isInv𝕂 a
-  ·𝕂-rInv-Neg a a<0 = -𝕂 -a⁻¹ , ·𝕂-neg a -a⁻¹ ∙ sym (neg-·𝕂 a -a⁻¹) ∙  Σ-a⁻¹ .snd
+  ·𝕂InvR-Neg : (a : 𝕂)(a<0 : a <𝕂 𝟘) → isInv𝕂 a
+  ·𝕂InvR-Neg a a<0 = -𝕂 -a⁻¹ , ·𝕂-neg a -a⁻¹ ∙ sym (neg-·𝕂 a -a⁻¹) ∙  Σ-a⁻¹ .snd
     where Σ-a⁻¹ : isInv𝕂 (-𝕂 a)
-          Σ-a⁻¹ = ·𝕂-rInv-Pos (-𝕂 a) (-reverse<0 a a<0)
+          Σ-a⁻¹ = ·𝕂InvR-Pos (-𝕂 a) (-reverse<0 a a<0)
           -a⁻¹ : 𝕂
           -a⁻¹ = Σ-a⁻¹ .fst
 
 
-  ·𝕂-rInv : (a : 𝕂) → ¬ a ≡ 𝟘 → isInv𝕂 a
-  ·𝕂-rInv a ¬a≡0 = case-split (trichotomy𝕂 a 𝟘)
+  ·𝕂InvR : (a : 𝕂) → ¬ a ≡ 𝟘 → isInv𝕂 a
+  ·𝕂InvR a ¬a≡0 = case-split (trichotomy𝕂 a 𝟘)
     where
     case-split : Trichotomy𝕂 a 𝟘 → isInv𝕂 a
-    case-split (gt a>0) = ·𝕂-rInv-Pos a a>0
-    case-split (lt a<0) = ·𝕂-rInv-Neg a a<0
+    case-split (gt a>0) = ·𝕂InvR-Pos a a>0
+    case-split (lt a<0) = ·𝕂InvR-Neg a a<0
     case-split (eq a≡0) = Empty.rec (¬a≡0 a≡0)
 
 
@@ -443,7 +443,7 @@ module Multiplication ⦃ 🤖 : Oracle ⦄
   -}
 
   isField𝕂 : isField 𝕂CommRing
-  isField𝕂 = ·𝕂-rInv
+  isField𝕂 = ·𝕂InvR
 
   𝕂OrderedField : OrderedField (ℓ-max ℓ ℓ') (ℓ-max ℓ ℓ')
   𝕂OrderedField = 𝕂OrderedRing , isField𝕂

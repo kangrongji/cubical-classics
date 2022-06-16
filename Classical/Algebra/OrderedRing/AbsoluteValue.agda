@@ -221,9 +221,9 @@ module AbsoluteValue (𝓡 : OrderedRing ℓ ℓ') where
       transport (λ i → left (~ i) ≥ right (~ i)) (inr refl)
       where
       left : abs x + abs y ≡ abs y
-      left = (λ i → x≡0→abs≡0 (sym 0≡x) i + abs y) ∙ +Lid _
+      left = (λ i → x≡0→abs≡0 (sym 0≡x) i + abs y) ∙ +IdL _
       right : abs (x + y) ≡ abs y
-      right = cong abs ((λ i → 0≡x (~ i) + y) ∙ +Lid _)
+      right = cong abs ((λ i → 0≡x (~ i) + y) ∙ +IdL _)
     absIneq+Pos {x = x} {y = y} (inl x>0) = case-split (trichotomy y 0r) (trichotomy (x + y) 0r)
       where
       case-split : Trichotomy y 0r → Trichotomy (x + y) 0r → _
@@ -231,9 +231,9 @@ module AbsoluteValue (𝓡 : OrderedRing ℓ ℓ') where
         transport (λ i → left (~ i) ≥ right (~ i)) (inr refl)
         where
         left : abs x + abs y ≡ abs x
-        left = (λ i → abs x + x≡0→abs≡0 y≡0 i) ∙ +Rid _
+        left = (λ i → abs x + x≡0→abs≡0 y≡0 i) ∙ +IdR _
         right : abs (x + y) ≡ abs x
-        right = cong abs ((λ i → x + y≡0 i) ∙ +Rid _)
+        right = cong abs ((λ i → x + y≡0 i) ∙ +IdR _)
       case-split (gt y>0) _ =
         transport (λ i → x>0→abs≡x x>0 (~ i) + x>0→abs≡x y>0 (~ i) ≥ x>0→abs≡x ineq (~ i)) (inr refl)
         where

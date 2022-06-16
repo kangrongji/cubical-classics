@@ -124,7 +124,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   ∈A∪B→∈A+∈B : {x : X}(A B : ℙ X) → x ∈ (A ∪ B) → (x ∈ A) ⊎ (x ∈ B)
   ∈A∪B→∈A+∈B {x = x} A B x∈A∪B = or-dichotomy (A x) (B x) x∈A∪B
 
-  ∈A+∈B→∈A∪B : {x : X}(A B : ℙ X) → ∥ (x ∈ A) ⊎ (x ∈ B) ∥ → x ∈ (A ∪ B)
+  ∈A+∈B→∈A∪B : {x : X}(A B : ℙ X) → ∥ (x ∈ A) ⊎ (x ∈ B) ∥₁ → x ∈ (A ∪ B)
   ∈A+∈B→∈A∪B {x = x} A B = Prop.rec (isProp∈ (A ∪ B)) (λ ∈A+∈B → or≡true (A x) (B x) ∈A+∈B)
 
   ⊆→⊆∪ : {A B C : ℙ X} → A ⊆ C → B ⊆ C → A ∪ B ⊆ C
@@ -278,7 +278,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     ... | inl p = inl (∈→Inhab P p)
     ... | inr q = inr (∈→Inhab Q q)
 
-    Inhab⊎→∈-∪ : (x : X) → ∥ P x .fst ⊎ Q x .fst ∥ → x ∈ specify P ∪ specify Q
+    Inhab⊎→∈-∪ : (x : X) → ∥ P x .fst ⊎ Q x .fst ∥₁ → x ∈ specify P ∪ specify Q
     Inhab⊎→∈-∪ x =
       Prop.rec (isProp∈ (specify P ∪ specify Q))
       (λ { (inl p) → ∪-left∈  (specify P) (specify Q) (Inhab→∈ P p)

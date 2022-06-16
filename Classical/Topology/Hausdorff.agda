@@ -39,7 +39,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
 
   record isHausdorff {X : Type ℓ} ⦃ 𝒯 : Topology X ⦄ : Type ℓ where
     field
-      separate : {x y : X} → ¬ x ≡ y → ∥ Σ[ U ∈ ℙ X ] Σ[ V ∈ ℙ X ] (U ∈ ℕbh x) × (V ∈ ℕbh y) × (U ∩ V ≡ ∅) ∥
+      separate : {x y : X} → ¬ x ≡ y → ∥ Σ[ U ∈ ℙ X ] Σ[ V ∈ ℙ X ] (U ∈ ℕbh x) × (V ∈ ℕbh y) × (U ∩ V ≡ ∅) ∥₁
 
 
   module _ {X : Type ℓ} ⦃ 𝒯 : Topology X ⦄ ⦃ haus : isHausdorff ⦄ where
@@ -60,7 +60,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       sepOpenCompact {x = x₀} {K = K} takefin x₀∉K = sepOpen
         where
         P : ℙ X → hProp _
-        P U = ∥ Σ[ x ∈ X ] (x ∈ K) × (U ∈ ℕbh x) × (Sep x₀ U) ∥ , squash
+        P U = ∥ Σ[ x ∈ X ] (x ∈ K) × (U ∈ ℕbh x) × (Sep x₀ U) ∥₁ , squash₁
 
         𝒰 : ℙ ℙ X
         𝒰 = specify P
@@ -77,7 +77,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         K⊆𝕌 x∈K =
           Prop.rec (isProp∈ 𝕌)
           (λ (U , V , U∈ℕx , V∈ℕx₀ , U∩V≡∅) →
-             ∃→∈union ∣ U , N∈ℕbhx→x∈N U∈ℕx , Inhab→∈ P ∣ _ , x∈K , U∈ℕx , ∣ V , V∈ℕx₀ , U∩V≡∅ ∣ ∣ ∣)
+             ∃→∈union ∣ U , N∈ℕbhx→x∈N U∈ℕx , Inhab→∈ P ∣ _ , x∈K , U∈ℕx , ∣ V , V∈ℕx₀ , U∩V≡∅ ∣₁ ∣₁ ∣₁)
           (separate (∈∉→≢ x∈K x₀∉K))
 
         𝒰-covers-K : 𝒰 covers K
@@ -87,16 +87,16 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         𝕌∈Open = union∈Open 𝒰⊆Open
 
         -- Another shuffle of propositions
-        ∃𝒰₀ : ∥ Σ[ 𝒰₀ ∈ ℙ ℙ X ] 𝒰₀ ⊆ Open × isFinSub 𝒰₀ × 𝒰₀ covers K × ((U : ℙ X) → U ∈ 𝒰₀ → Sep x₀ U) ∥
+        ∃𝒰₀ : ∥ Σ[ 𝒰₀ ∈ ℙ ℙ X ] 𝒰₀ ⊆ Open × isFinSub 𝒰₀ × 𝒰₀ covers K × ((U : ℙ X) → U ∈ 𝒰₀ → Sep x₀ U) ∥₁
         ∃𝒰₀ =
           Prop.map
           (λ (𝒰₀ , 𝒰₀⊆𝒰 , fin𝒰₀ , 𝒰₀covK) →
               𝒰₀ , ⊆-trans {C = Open} 𝒰₀⊆𝒰 𝒰⊆Open , fin𝒰₀ , 𝒰₀covK ,
-              λ U U∈𝒰₀ → Prop.rec squash (λ (_ , _ , _ , sep) → sep) (∈→Inhab P (∈⊆-trans {B = 𝒰} U∈𝒰₀ 𝒰₀⊆𝒰)))
+              λ U U∈𝒰₀ → Prop.rec squash₁ (λ (_ , _ , _ , sep) → sep) (∈→Inhab P (∈⊆-trans {B = 𝒰} U∈𝒰₀ 𝒰₀⊆𝒰)))
           (takefin 𝒰-covers-K)
 
         sepOpen : SepOpen x₀ K
-        sepOpen = Prop.rec squash
+        sepOpen = Prop.rec squash₁
           (λ (_ , 𝒰₀⊆Open , fin⊆𝒰₀ , 𝒰₀covK , sep)
               →  SepOpen⊆ (union∈Open 𝒰₀⊆Open) (𝒰₀covK .fst) (unionSep _ _ 𝒰₀⊆Open sep fin⊆𝒰₀)) ∃𝒰₀
 

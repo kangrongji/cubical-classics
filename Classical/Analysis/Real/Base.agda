@@ -12,7 +12,7 @@ open import Cubical.HITs.Rationals.QuoQ
 open import Cubical.Algebra.Ring
 
 open import Classical.Axioms
-open import Classical.Preliminary.QuoQ
+open import Classical.Algebra.OrderedField.Instances.QuoQ
 open import Classical.Algebra.OrderedRing
 open import Classical.Algebra.OrderedRing.Morphism
 open import Classical.Algebra.OrderedField

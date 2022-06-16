@@ -46,10 +46,10 @@ module Extremum ⦃ 🤖 : Oracle ⦄ (𝒦 : OrderedField ℓ ℓ') where
   -}
 
   isUpperBounded : ℙ K → Type (ℓ-max ℓ ℓ')
-  isUpperBounded A = ∥ Σ[ b ∈ K ] ((r : K) → r ∈ A → r ≤ b) ∥
+  isUpperBounded A = ∥ Σ[ b ∈ K ] ((r : K) → r ∈ A → r ≤ b) ∥₁
 
   isLowerBounded : ℙ K → Type (ℓ-max ℓ ℓ')
-  isLowerBounded A = ∥ Σ[ b ∈ K ] ((r : K) → r ∈ A → b ≤ r) ∥
+  isLowerBounded A = ∥ Σ[ b ∈ K ] ((r : K) → r ∈ A → b ≤ r) ∥₁
 
 
   {-
@@ -97,8 +97,8 @@ module Extremum ⦃ 🤖 : Oracle ⦄ (𝒦 : OrderedField ℓ ℓ') where
 
   -}
 
-  <sup→∃∈ : {A : ℙ K}(q : K)(boundary : Supremum A) → q < boundary .sup → ∥ Σ[ x ∈ K ] (q < x) × (x ∈ A) ∥
-  <sup→∃∈ {A = A} q boundary q<sup with decide (squash {A = Σ[ x ∈ K ] (q < x) × (x ∈ A)})
+  <sup→∃∈ : {A : ℙ K}(q : K)(boundary : Supremum A) → q < boundary .sup → ∥ Σ[ x ∈ K ] (q < x) × (x ∈ A) ∥₁
+  <sup→∃∈ {A = A} q boundary q<sup with decide (squash₁ {A = Σ[ x ∈ K ] (q < x) × (x ∈ A)})
   ... | yes p = p
   ... | no ¬p = Empty.rec (<≤-asym q<sup (boundary .least _ (λ r r∈A → case-split r (trichotomy q r) r∈A)))
     where
@@ -116,8 +116,8 @@ module Extremum ⦃ 🤖 : Oracle ⦄ (𝒦 : OrderedField ℓ ℓ') where
   ⊆→sup≤ {A = A} {B = B} A⊆B SupA SupB = SupA .least _ (λ r r∈A → SupB .bound r (A⊆B r∈A))
 
 
-  >inf→∃∈ : {A : ℙ K}(q : K)(boundary : Infimum A) → q > boundary .inf → ∥ Σ[ x ∈ K ] (x < q) × (x ∈ A) ∥
-  >inf→∃∈ {A = A} q boundary q>inf with decide (squash {A = Σ[ x ∈ K ] (x < q) × (x ∈ A)})
+  >inf→∃∈ : {A : ℙ K}(q : K)(boundary : Infimum A) → q > boundary .inf → ∥ Σ[ x ∈ K ] (x < q) × (x ∈ A) ∥₁
+  >inf→∃∈ {A = A} q boundary q>inf with decide (squash₁ {A = Σ[ x ∈ K ] (x < q) × (x ∈ A)})
   ... | yes p = p
   ... | no ¬p = Empty.rec (<≤-asym q>inf (boundary .most _ (λ r r∈A → case-split r (trichotomy q r) r∈A)))
     where
@@ -143,7 +143,7 @@ module Extremum ⦃ 🤖 : Oracle ⦄ (𝒦 : OrderedField ℓ ℓ') where
     allBound x y y∈A = Empty.rec (¬isInhabited→¬x∈A ¬q∈A y y∈A)
 
   Sup→isUpperBounded : {A : ℙ K} → Supremum A → isUpperBounded A
-  Sup→isUpperBounded Sup = ∣ Sup .sup , Sup .bound ∣
+  Sup→isUpperBounded Sup = ∣ Sup .sup , Sup .bound ∣₁
 
 
   -- Supremum of { x | x ≤ b } is just b itself.

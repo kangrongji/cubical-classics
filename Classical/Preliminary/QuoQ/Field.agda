@@ -40,17 +40,15 @@ open import Cubical.Data.Int.MoreInts.QuoInt
 open import Cubical.HITs.SetQuotients as SetQuot hiding (_/_)
 open import Cubical.HITs.Rationals.QuoQ
   using    (ℚ ; ℕ₊₁→ℤ ; isEquivRel∼)
+open import Cubical.Algebra.CommRing.Instances.QuoInt
+open import Cubical.Algebra.CommRing.Instances.QuoQ
 
 
 open import Cubical.Relation.Nullary
 
 open import Classical.Algebra.Field
-open import Classical.Preliminary.QuoInt
+open import Classical.Algebra.OrderedRing.Instances.QuoInt
   using    (ℕ₊₁→ℤ>0 ; -1·n≡-n)
-open import Classical.Preliminary.CommRing.Instances.QuoInt
-  renaming (ℤ to ℤRing)
-open import Classical.Preliminary.CommRing.Instances.QuoQ
-  renaming (ℚ to ℚRing)
 
 
 -- A rational number is zero if and only if its numerator is zero
@@ -67,10 +65,10 @@ a≡0→a/b≡0 (a , b) a≡0 = eq/ _ _ a·1≡0·b
 
 -- ℚ is a field
 
-open CommRingStr (ℚRing .snd)
-open Units        ℚRing
+open CommRingStr (ℚCommRing .snd)
+open Units        ℚCommRing
 
-open Helpers      ℤRing
+open Helpers      ℤCommRing
 
 private
   inv-helper : (x : ℤ × ℕ₊₁) → ¬ x .fst ≡ 0 → ℚ
@@ -87,12 +85,12 @@ private
   inv·-helper (signed spos (suc a) , b) _ = eq/ _ _ (helper1 (pos (suc a)) (ℕ₊₁→ℤ b))
   inv·-helper (signed sneg (suc a) , b) _ = eq/ _ _ (helper2 (pos (suc a)) (ℕ₊₁→ℤ b))
 
-isFieldℚ : isField ℚRing
+isFieldℚ : isField ℚCommRing
 isFieldℚ = SetQuot.elimProp (λ q → isPropΠ (λ _ → inverseUniqueness q))
   (λ x x≢0 → let a≢0 = λ a≡0 → x≢0 (a≡0→a/b≡0 x a≡0) in inv-helper x a≢0 , inv·-helper x a≢0)
 
 ℚField : Field ℓ-zero
-ℚField = ℚRing , isFieldℚ
+ℚField = ℚCommRing , isFieldℚ
 
 
 {-
@@ -108,7 +106,7 @@ _/_ : ℚ → ℕ₊₁ → ℚ
 q / n = q · [ 1 , n ]
 
 ·-/-rInv : (q : ℚ)(n : ℕ₊₁) → (q / n) · [ ℕ₊₁→ℤ n , 1 ] ≡ q
-·-/-rInv q n = sym (·Assoc q _ _) ∙ (λ i → q · 1/n·n≡1 n i) ∙ ·Rid q
+·-/-rInv q n = sym (·Assoc q _ _) ∙ (λ i → q · 1/n·n≡1 n i) ∙ ·IdR q
 
 ·-/-lInv : (q : ℚ)(n : ℕ₊₁) → [ ℕ₊₁→ℤ n , 1 ] · (q / n) ≡ q
 ·-/-lInv q n = ·Comm _ (q / n) ∙ ·-/-rInv q n

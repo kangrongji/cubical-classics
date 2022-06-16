@@ -37,13 +37,13 @@ module _ (𝓡 : OrderedRing ℓ ℓ') where
   isArchimedean = (q ε : R) → ε > 0r → Σ[ n ∈ ℕ ] n ⋆ ε > q
 
   isArchimedean∥∥ : Type (ℓ-max ℓ ℓ')
-  isArchimedean∥∥ = (q ε : R) → ε > 0r → ∥ Σ[ n ∈ ℕ ] n ⋆ ε > q ∥
+  isArchimedean∥∥ = (q ε : R) → ε > 0r → ∥ Σ[ n ∈ ℕ ] n ⋆ ε > q ∥₁
 
 
   -- The equivalence, and one-side is rather trivial.
 
   isArchimedean→isArchimedean∥∥ : isArchimedean → isArchimedean∥∥
-  isArchimedean→isArchimedean∥∥ archimedes q ε ε>0 = ∣ archimedes q ε ε>0 ∣
+  isArchimedean→isArchimedean∥∥ archimedes q ε ε>0 = ∣ archimedes q ε ε>0 ∣₁
 
   isArchimedean∥∥→isArchimedean : isArchimedean∥∥ → isArchimedean
   isArchimedean∥∥→isArchimedean ∥archimedes∥ q ε ε>0 = case-split (trichotomy q 0r)

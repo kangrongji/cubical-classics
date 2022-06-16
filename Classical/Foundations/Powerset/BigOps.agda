@@ -39,27 +39,27 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   -- Union of arbitrary collection of subsets
 
   union : ℙ (ℙ X) → ℙ X
-  union {X = X} S = specify λ x → ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥ , squash
+  union {X = X} S = specify λ x → ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥₁ , squash₁
 
 
   module _
     {S : ℙ (ℙ X)}{x : X} where
 
-    ∈union→∃ : x ∈ union S → ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥
-    ∈union→∃ = ∈→Inhab (λ x → ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥ , squash)
+    ∈union→∃ : x ∈ union S → ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥₁
+    ∈union→∃ = ∈→Inhab (λ x → ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥₁ , squash₁)
 
-    ∃→∈union : ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥ → x ∈ union S
-    ∃→∈union = Inhab→∈ λ x → ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥ , squash
+    ∃→∈union : ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥₁ → x ∈ union S
+    ∃→∈union = Inhab→∈ λ x → ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥₁ , squash₁
 
     ∉union : ((A : ℙ X) → A ∈ S → x ∉ A) → x ∉ union S
     ∉union p = ¬∈→∉ {A = union S} (¬map ∈union→∃ helper)
       where
-      helper : ¬ ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥
+      helper : ¬ ∥ Σ[ A ∈ ℙ X ] (x ∈ A) × (A ∈ S) ∥₁
       helper = Prop.rec isProp⊥ (λ (A , x∈A , A∈S) → explode∈ {A = A} x∈A (p _ A∈S))
 
 
   ⊆union : {S : ℙ (ℙ X)}{A B : ℙ X} → A ⊆ B → B ∈ S → A ⊆ union S
-  ⊆union A⊆B B∈S x∈A = ∃→∈union ∣ _  , A⊆B x∈A , B∈S ∣
+  ⊆union A⊆B B∈S x∈A = ∃→∈union ∣ _  , A⊆B x∈A , B∈S ∣₁
 
 
   union∅ : union {X = X} ∅ ≡ ∅
@@ -71,7 +71,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   union⊆ : {S : ℙ (ℙ X)}{A : ℙ X} → ((U : ℙ X) → U ∈ S → U ⊆ A) → union S ⊆ A
   union⊆ {X = X} {S = S} {A = A} U∈S→U⊆A {x = x} x∈∪S = helper (∈union→∃ x∈∪S)
     where
-    helper : ∥ Σ[ N ∈ ℙ X ] (x ∈ N) × (N ∈ S) ∥ → x ∈ A
+    helper : ∥ Σ[ N ∈ ℙ X ] (x ∈ N) × (N ∈ S) ∥₁ → x ∈ A
     helper = Prop.rec (isProp∈ A) (λ (_ , x∈N , N∈S) → ∈⊆-trans {B = A} x∈N (U∈S→U⊆A _ N∈S))
 
   union∪ : {S T : ℙ (ℙ X)} → union (S ∪ T) ≡ union S ∪ union T
@@ -82,8 +82,8 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       (Prop.map
       (λ (A , x∈A , A∈S∪T) →
         case ∈A∪B→∈A+∈B S T A∈S∪T of λ
-        { (inl A∈S) → inl (∃→∈union ∣ A , x∈A , A∈S ∣)
-        ; (inr A∈T) → inr (∃→∈union ∣ A , x∈A , A∈T ∣) })
+        { (inl A∈S) → inl (∃→∈union ∣ A , x∈A , A∈S ∣₁)
+        ; (inr A∈T) → inr (∃→∈union ∣ A , x∈A , A∈T ∣₁) })
       (∈union→∃ x∈∪-S∪T))
 
     ∪S-∪-∪T⊆∪-S∪T : union S ∪ union T ⊆ union (S ∪ T)
@@ -111,7 +111,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       (y∈[x]→∥x≡y∥ B∈[A])) (∈union→∃ x∈∪[A])
 
     A⊆∪[A] : A ⊆ union [ A ]
-    A⊆∪[A] x∈A = ∃→∈union ∣ A , x∈A , x∈[x] ∣
+    A⊆∪[A] x∈A = ∃→∈union ∣ A , x∈A , x∈[x] ∣₁
 
   union∪[A] : {S : ℙ (ℙ X)}{A : ℙ X} → union (S ∪ [ A ]) ≡ (union S) ∪ A
   union∪[A] {S = S} {A = A} = union∪ ∙ (λ i → (union S) ∪ union[A] {A = A} i)

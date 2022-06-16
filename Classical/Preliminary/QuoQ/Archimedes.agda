@@ -41,24 +41,24 @@ open import Cubical.HITs.SetQuotients as SetQuot
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 
-open import Classical.Preliminary.QuoInt
-  using    (ℤOrder ; ℕ₊₁→ℤ>0)
+open import Classical.Algebra.OrderedRing.Instances.QuoInt
+  using    (ℤOrderedRing ; ℕ₊₁→ℤ>0)
   renaming (archimedes' to archimedesℤ)
 open import Classical.Preliminary.QuoQ.Order
-  using    (ℚOrder)
+  using    (ℚOrderedRing)
 open import Classical.Preliminary.Nat
 open import Classical.Algebra.OrderedRing
 open import Classical.Algebra.OrderedRing.Archimedes
 
 
-open CommRingStr    (ℚOrder .fst .snd)
-open OrderedRingStr  ℚOrder renaming (_⋆_ to _⋆'_)
-open OrderedRingStr  ℤOrder using    ()
+open CommRingStr    (ℚOrderedRing .fst .snd)
+open OrderedRingStr  ℚOrderedRing renaming (_⋆_ to _⋆'_)
+open OrderedRingStr  ℤOrderedRing using    ()
   renaming (_<_ to _<ℤ_ ; _>_ to _>ℤ_
            ; ·-Pres>0 to ·ℤ-Pres>0)
 
-open Helpers (ℤOrder .fst)
-open Helpers (ℚOrder .fst) using ()
+open Helpers (ℤOrderedRing .fst)
+open Helpers (ℚOrderedRing .fst) using ()
   renaming (helper3 to helper3ℚ)
 
 
@@ -89,9 +89,9 @@ private
             (·ℤ-Pres>0 {x = c} {y = ℕ₊₁→ℤ b} c>0 (ℕ₊₁→ℤ>0 b))
     in  n , subst (λ t → t +ℤ right >ℤ 0) (helper1 (pos n) c (ℕ₊₁→ℤ b)) ->-
 
-∥archimedes∥ : (q ε : ℚ) → ε > 0 → ∥ Σ[ n ∈ ℕ ] n ⋆ ε > q ∥
-∥archimedes∥ = SetQuot.elimProp2 (λ _ _ → isPropΠ (λ _ → squash))
-  (λ x y h → ∣ archimedes-helper x y h ∣)
+∥archimedes∥ : (q ε : ℚ) → ε > 0 → ∥ Σ[ n ∈ ℕ ] n ⋆ ε > q ∥₁
+∥archimedes∥ = SetQuot.elimProp2 (λ _ _ → isPropΠ (λ _ → squash₁))
+  (λ x y h → ∣ archimedes-helper x y h ∣₁)
 
 archimedes : (q ε : ℚ) → ε > 0 → Σ[ n ∈ ℕ ] n ⋆ ε > q
 archimedes q ε ε>0 = case-split (dec< q (zero ⋆ ε))
@@ -103,5 +103,5 @@ archimedes q ε ε>0 = case-split (dec< q (zero ⋆ ε))
 
 -- Archimedean-ness of ℚ
 
-isArchimedeanℚ : isArchimedean ℚOrder
+isArchimedeanℚ : isArchimedean ℚOrderedRing
 isArchimedeanℚ = transport (λ i → (q ε : ℚ) → ε > 0 → Σ[ n ∈ ℕ ] ⋆≡⋆' n ε i > q) archimedes

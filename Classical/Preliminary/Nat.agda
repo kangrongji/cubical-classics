@@ -78,7 +78,7 @@ module _
         ... | inl f = Empty.rec (f _ ≤-refl p₀)
         ... | inr m = m
 
-    findMinProp : ∥ Σ[ n ∈ ℕ ] P n ∥ → InhabMin P
+    findMinProp : ∥ Σ[ n ∈ ℕ ] P n ∥₁ → InhabMin P
     findMinProp = Prop.rec isPropInhabMin (λ (n , p) → find-helper n p)
 
 
@@ -88,20 +88,20 @@ module _
   where
 
   private
-    module _ (¬p₀ : ¬ P zero)(∃p : ∥ Σ[ n ∈ ℕ ] P n ∥) where
+    module _ (¬p₀ : ¬ P zero)(∃p : ∥ Σ[ n ∈ ℕ ] P n ∥₁) where
 
-      dec∥P∥ : (n : ℕ) → Dec ∥ P n ∥
+      dec∥P∥ : (n : ℕ) → Dec ∥ P n ∥₁
       dec∥P∥ n with decP n
-      ... | yes p = yes ∣ p ∣
+      ... | yes p = yes ∣ p ∣₁
       ... | no ¬p = no (Prop.rec isProp⊥ ¬p)
 
-      ¬∣p₀∣ : ¬ ∥ P zero ∥
+      ¬∣p₀∣ : ¬ ∥ P zero ∥₁
       ¬∣p₀∣ = Prop.rec isProp⊥ ¬p₀
 
-      ∃∣p∣ : ∥ Σ[ n ∈ ℕ ] ∥ P n ∥ ∥
-      ∃∣p∣ = Prop.map (λ (n , p) → n , ∣ p ∣) ∃p
+      ∃∣p∣ : ∥ Σ[ n ∈ ℕ ] ∥ P n ∥₁ ∥₁
+      ∃∣p∣ = Prop.map (λ (n , p) → n , ∣ p ∣₁) ∃p
 
-      ∥inhabMin∥ = findMinProp (λ _ → squash) dec∥P∥ ¬∣p₀∣ ∃∣p∣
+      ∥inhabMin∥ = findMinProp (λ _ → squash₁) dec∥P∥ ¬∣p₀∣ ∃∣p∣
 
       n₀ = ∥inhabMin∥ .fst
 
@@ -111,18 +111,18 @@ module _
       ... | no ¬p = Empty.rec (Prop.rec isProp⊥ ¬p (∥inhabMin∥ .snd .fst))
 
       isMin : (m : ℕ) → m ≤ n₀ → ¬ P m
-      isMin m m≤n₀ p = ∥inhabMin∥ .snd .snd m m≤n₀ ∣ p ∣
+      isMin m m≤n₀ p = ∥inhabMin∥ .snd .snd m m≤n₀ ∣ p ∣₁
 
 
-  findMin : ¬ P zero → ∥ Σ[ n ∈ ℕ ] P n ∥ → InhabMin P
+  findMin : ¬ P zero → ∥ Σ[ n ∈ ℕ ] P n ∥₁ → InhabMin P
   findMin ¬p₀ ∃p = n₀ ¬p₀ ∃p , Σp ¬p₀ ∃p , isMin ¬p₀ ∃p
 
-  findInterval : ¬ P zero → ∥ Σ[ n ∈ ℕ ] P n ∥ → Σ[ n ∈ ℕ ] (¬ P n) × P (suc n)
+  findInterval : ¬ P zero → ∥ Σ[ n ∈ ℕ ] P n ∥₁ → Σ[ n ∈ ℕ ] (¬ P n) × P (suc n)
   findInterval ¬p₀ p .fst = findMin ¬p₀ p .fst
   findInterval ¬p₀ p .snd .fst = findMin ¬p₀ p .snd .snd _ ≤-refl
   findInterval ¬p₀ p .snd .snd = findMin ¬p₀ p .snd .fst
 
-  find : ∥ Σ[ n ∈ ℕ ] P n ∥ → Σ[ n ∈ ℕ ] P n
+  find : ∥ Σ[ n ∈ ℕ ] P n ∥₁ → Σ[ n ∈ ℕ ] P n
   find ∃p with decP 0
   ... | yes p = 0 , p
   ... | no ¬p = let (n , p , h) = findMin ¬p ∃p in suc n , p
@@ -143,7 +143,7 @@ module _ ⦃ 🤖 : Oracle ⦄  where
   findByOracle :
     {P : ℕ → Type ℓ}
     (isPropP : (n : ℕ) → isProp (P n))
-    → ∥ Σ[ n ∈ ℕ ] P n ∥ → Σ[ n ∈ ℕ ] P n
+    → ∥ Σ[ n ∈ ℕ ] P n ∥₁ → Σ[ n ∈ ℕ ] P n
   findByOracle isPropP = find (λ n → decide (isPropP n))
 
 
@@ -163,7 +163,7 @@ module LimitedOmniscience ⦃ 🤖 : Oracle ⦄  where
     {P : ℕ → Type ℓ}
     (isPropP : (n : ℕ) → isProp (P n)) where
 
-    ∥LPO∥ : ∥ Σ[ n ∈ ℕ ] P n ∥ ⊎ ((n : ℕ) → ¬ P n)
+    ∥LPO∥ : ∥ Σ[ n ∈ ℕ ] P n ∥₁ ⊎ ((n : ℕ) → ¬ P n)
     ∥LPO∥ with decide (isPropΠ (λ n → isProp¬ (P n)))
     ... | yes ∀¬p = inr ∀¬p
     ... | no ¬∀¬p = inl (¬∀¬→∃ ¬∀¬p)

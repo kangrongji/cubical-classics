@@ -128,11 +128,11 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
 
 
   homPresInv : {x : K'} → (x>0 : x >' 0r') → f-map (inv'₊ x>0) ≡ inv₊ (homPres>0 _ x>0)
-  homPresInv {x = x} x>0 = sym (·Rid _)
+  homPresInv {x = x} x>0 = sym (·IdR _)
     ∙ (λ i → f-map (inv'₊ x>0) · ·-rInv₊ (homPres>0 _ x>0) (~ i))
     ∙ ·Assoc _ _ _
     ∙ (λ i → fx⁻¹fx≡1 i · inv₊ (homPres>0 _ x>0))
-    ∙ ·Lid _
+    ∙ ·IdL _
     where
     fx⁻¹fx≡1 : f-map (inv'₊ x>0) · f-map x ≡ 1r
     fx⁻¹fx≡1 = sym (pres· _ _) ∙ (λ i → f-map (·'-lInv₊ x>0 i)) ∙ pres1
@@ -152,10 +152,10 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
 
 
   isUnbounded : Type _
-  isUnbounded = (x : K) → ∥ Σ[ r ∈ K' ] x < f-map r ∥
+  isUnbounded = (x : K) → ∥ Σ[ r ∈ K' ] x < f-map r ∥₁
 
   isDense : Type _
-  isDense = {x y : K} → x < y → ∥ Σ[ r ∈ K' ] (x < f-map r) × (f-map r < y) ∥
+  isDense = {x y : K} → x < y → ∥ Σ[ r ∈ K' ] (x < f-map r) × (f-map r < y) ∥₁
 
 
   isArchimedean→isUnboundedΣ : isArchimedean (𝒦 .fst) → isUnboundedΣ
@@ -167,13 +167,13 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
 
 
   isArchimedean→isUnbounded : isArchimedean (𝒦 .fst) → isUnbounded
-  isArchimedean→isUnbounded archimedes x = ∣ isArchimedean→isUnboundedΣ archimedes x ∣
+  isArchimedean→isUnbounded archimedes x = ∣ isArchimedean→isUnboundedΣ archimedes x ∣₁
 
 
   -- Unbounded in the other direction but is equivalent by using additive inverse
 
   isLowerUnbounded : Type _
-  isLowerUnbounded = (x : K) → ∥ Σ[ r ∈ K' ] f-map r < x ∥
+  isLowerUnbounded = (x : K) → ∥ Σ[ r ∈ K' ] f-map r < x ∥₁
 
   isUnbounded→isLowerUnbounded : isUnbounded → isLowerUnbounded
   isUnbounded→isLowerUnbounded exceed x = Prop.map
@@ -200,7 +200,7 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
   -- Another version but using smallness
 
   isArbitrarilySmall : Type _
-  isArbitrarilySmall = (x : K) → x > 0r → ∥ Σ[ r ∈ K' ] (0r < f-map r) × (f-map r < x) ∥
+  isArbitrarilySmall = (x : K) → x > 0r → ∥ Σ[ r ∈ K' ] (0r < f-map r) × (f-map r < x) ∥₁
 
   isUnbounded→isArbitrarilySmall : isUnbounded → isArbitrarilySmall
   isUnbounded→isArbitrarilySmall exceed x x>0 =
@@ -261,19 +261,19 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
       ¬P0 = <-asym lower+0·ε<a
         where
         lower+0·ε<a : step 0 < a
-        lower+0·ε<a = subst (_< a) (sym (+Rid (f-map lower))
+        lower+0·ε<a = subst (_< a) (sym (+IdR (f-map lower))
           ∙ (λ i → f-map lower + 0⋆q≡0 (f-map ε) (~ i))) lower<a
 
       open Helpers (𝒦 .fst .fst)
 
-      ∃Pn : ∥ Σ[ n ∈ ℕ ] P n ∥
+      ∃Pn : ∥ Σ[ n ∈ ℕ ] P n ∥₁
       ∃Pn =
         let (n , n·ε>a-lower) =
               archimedes (a - f-map lower) (f-map ε) fε>0
             lower+n·ε>a : step n > a
             lower+n·ε>a = subst (step n >_)
               (helper6 (f-map lower) a) (+-lPres< n·ε>a-lower)
-        in  ∣ n , lower+n·ε>a ∣
+        in  ∣ n , lower+n·ε>a ∣₁
 
       interval : Σ[ n ∈ ℕ ] (¬ P n) × P (suc n)
       interval = findInterval decP ¬P0 ∃Pn
@@ -323,7 +323,7 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
     in among-them archimedes x y ε fε>0 fε<δ lower lower<a
 
   isArchimedean→isDense : isArchimedean (𝒦 .fst) → isDense
-  isArchimedean→isDense archimedes x<y = ∣ isArchimedean→isDenseΣ archimedes x<y ∣
+  isArchimedean→isDense archimedes x<y = ∣ isArchimedean→isDenseΣ archimedes x<y ∣₁
 
 
 {-
@@ -339,22 +339,22 @@ module InclusionFromℚ (𝒦 : OrderedField ℓ ℓ') where
     using    (ℤ)
     renaming (_+_ to _+ℤ_ ; _·_ to _·ℤ_)
   open import Cubical.HITs.Rationals.QuoQ
-    using (ℚ ; ℕ₊₁→ℤ ; _∼_)
+    using    (ℚ ; ℕ₊₁→ℤ ; _∼_)
     renaming (_+_ to _+ℚ_ ; _·_ to _·ℚ_)
 
-  open import Classical.Preliminary.QuoInt
-    using    (ℤOrder)
-  open import Classical.Preliminary.QuoQ
+  open import Classical.Algebra.OrderedRing.Instances.QuoInt
+    using    (ℤOrderedRing)
   open import Classical.Algebra.OrderedRing.Morphism
-  open import Classical.Preliminary.CommRing.Instances.QuoQ
-    renaming (ℚ to ℚRing)
+
+  open import Cubical.Algebra.CommRing.Instances.QuoQ
+  open import Classical.Algebra.OrderedField.Instances.QuoQ
 
 
   open OrderStrOnCommRing
 
   open OrderedFieldStr 𝒦
   open InclusionFromℤ (𝒦 .fst)
-  open OrderedRingStr  ℤOrder using () renaming (_>_ to _>ℤ_ ; >0≡>0r to >0≡>0r-ℤ)
+  open OrderedRingStr  ℤOrderedRing using () renaming (_>_ to _>ℤ_ ; >0≡>0r to >0≡>0r-ℤ)
 
   private
     K = 𝒦 .fst .fst .fst
@@ -402,7 +402,7 @@ module InclusionFromℚ (𝒦 : OrderedField ℓ ℓ') where
       d⁻¹ = inv d≢0
 
       eq-helper : (r : (a , b) ∼ (c , d)) → map-helper (a , b) ≡ map-helper (c , d)
-      eq-helper r = sym (·Rid _)
+      eq-helper r = sym (·IdR _)
         ∙ (λ i → (ℤ→R a · b⁻¹) · ·-rInv d≢0 (~ i))
         ∙ helper4 _ _ _ _
         ∙ (λ i → (ℤ→R-Pres-· a (ℕ₊₁→ℤ d) (~ i) · b⁻¹) · d⁻¹)
@@ -410,7 +410,7 @@ module InclusionFromℚ (𝒦 : OrderedField ℓ ℓ') where
         ∙ (λ i → (ℤ→R-Pres-· c (ℕ₊₁→ℤ b) i · b⁻¹) · d⁻¹)
         ∙ helper5 _ _ _ _
         ∙ (λ i → (ℤ→R c · d⁻¹) · ·-rInv b≢0 i)
-        ∙ ·Rid _
+        ∙ ·IdR _
 
       inv-path : inv (ℕ₊₁→R≢0 (b ·₊₁ d)) ≡ inv (·-≢0 b≢0 d≢0)
       inv-path i = invUniq {x≢0 = ℕ₊₁→R≢0 (b ·₊₁ d)} {y≢0 = ·-≢0 b≢0 d≢0}
@@ -456,10 +456,10 @@ module InclusionFromℚ (𝒦 : OrderedField ℓ ℓ') where
 
   -}
 
-  isRingHomℚ→K : IsRingHom (CommRing→Ring ℚRing .snd) ℚ→K (CommRing→Ring (𝒦 .fst .fst) .snd)
+  isRingHomℚ→K : IsRingHom (CommRing→Ring ℚCommRing .snd) ℚ→K (CommRing→Ring (𝒦 .fst .fst) .snd)
   isRingHomℚ→K = makeIsRingHom ℚ→K-Pres-1 ℚ→K-Pres-+ ℚ→K-Pres-·
 
-  ℚ→KCommRingHom : CommRingHom ℚRing (𝒦 .fst .fst)
+  ℚ→KCommRingHom : CommRingHom ℚCommRing (𝒦 .fst .fst)
   ℚ→KCommRingHom = _ , isRingHomℚ→K
 
   open OrderedRingHom

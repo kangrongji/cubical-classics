@@ -32,19 +32,19 @@ private
 
 
 ∥Π∥→Π∥∥ : {Y : X → Type ℓ'}
-  → ∥ ((x : X) → Y x) ∥ → (x : X) → ∥ Y x ∥
-∥Π∥→Π∥∥ = Prop.rec (isPropΠ (λ _ → squash)) (λ sec → λ x → ∣ sec x ∣)
+  → ∥ ((x : X) → Y x) ∥₁ → (x : X) → ∥ Y x ∥₁
+∥Π∥→Π∥∥ = Prop.rec (isPropΠ (λ _ → squash₁)) (λ sec → λ x → ∣ sec x ∣₁)
 
 ∥Π∥→Π∥∥2 : {Y : X → Type ℓ'}{Z : (x : X) → Y x → Type ℓ''}
-  → ∥ ((x : X) → (y : Y x) → Z x y) ∥ → (x : X) → (y : Y x) → ∥ Z x y ∥
-∥Π∥→Π∥∥2 = Prop.rec (isPropΠ2 (λ _ _ → squash)) (λ sec → λ x y → ∣ sec x y ∣)
+  → ∥ ((x : X) → (y : Y x) → Z x y) ∥₁ → (x : X) → (y : Y x) → ∥ Z x y ∥₁
+∥Π∥→Π∥∥2 = Prop.rec (isPropΠ2 (λ _ _ → squash₁)) (λ sec → λ x y → ∣ sec x y ∣₁)
 
 
 ¬Σ→∀¬ : {P : X → Type ℓ'} → ¬ (Σ[ x ∈ X ] P x) → (x : X) → ¬ P x
 ¬Σ→∀¬ f x p = f (x , p)
 
-¬∃→∀¬ : {P : X → Type ℓ'} → ¬ ∥ Σ[ x ∈ X ] P x ∥ → (x : X) → ¬ P x
-¬∃→∀¬ f = ¬Σ→∀¬ ((¬map ∣_∣) f)
+¬∃→∀¬ : {P : X → Type ℓ'} → ¬ ∥ Σ[ x ∈ X ] P x ∥₁ → (x : X) → ¬ P x
+¬∃→∀¬ f = ¬Σ→∀¬ ((¬map ∣_∣₁) f)
 
 ¬Σ→∀¬2 : {Y : X → Type ℓ'}{Z : (x : X) → Y x → Type ℓ''}
   → ¬ (Σ[ x ∈ X ] Σ[ y ∈ Y x ] Z x y)
@@ -52,13 +52,13 @@ private
 ¬Σ→∀¬2 f x = ¬Σ→∀¬ (¬Σ→∀¬ f x)
 
 ¬∃→∀¬2 : {Y : X → Type ℓ'}{Z : (x : X) → Y x → Type ℓ''}
-  → ¬ ∥ Σ[ x ∈ X ] Σ[ y ∈ Y x ] Z x y ∥
+  → ¬ ∥ Σ[ x ∈ X ] Σ[ y ∈ Y x ] Z x y ∥₁
   → (x : X) → (y : Y x) → ¬ Z x y
-¬∃→∀¬2 f = ¬Σ→∀¬2 ((¬map ∣_∣) f)
+¬∃→∀¬2 f = ¬Σ→∀¬2 ((¬map ∣_∣₁) f)
 
 
-takeOut∥Σ∥ : {P : X → Type ℓ'} → ∥ Σ[ x ∈ X ] ∥ P x ∥ ∥ → ∥ Σ[ x ∈ X ] P x ∥
-takeOut∥Σ∥ = Prop.rec squash (λ (x , ∥p∥) → Prop.map (λ p → x , p) ∥p∥)
+takeOut∥Σ∥ : {P : X → Type ℓ'} → ∥ Σ[ x ∈ X ] ∥ P x ∥₁ ∥₁ → ∥ Σ[ x ∈ X ] P x ∥₁
+takeOut∥Σ∥ = Prop.rec squash₁ (λ (x , ∥p∥) → Prop.map (λ p → x , p) ∥p∥)
 
 
 module _ ⦃ 🤖 : Oracle ⦄ where
@@ -74,15 +74,15 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     {P : X → Type ℓ'}
     where
 
-    ¬∀¬→∃ : ¬ ((x : X) → ¬ P x) → ∥ Σ[ x ∈ X ] P x ∥
-    ¬∀¬→∃ f = ¬¬elim squash (¬map ¬∃→∀¬ f)
+    ¬∀¬→∃ : ¬ ((x : X) → ¬ P x) → ∥ Σ[ x ∈ X ] P x ∥₁
+    ¬∀¬→∃ f = ¬¬elim squash₁ (¬map ¬∃→∀¬ f)
 
 
   module _
     {P : X → Type ℓ'}(isPropP : (x : X) → isProp (P x))
     where
 
-    ¬∀→∃¬ : ¬ ((x : X) → P x) → ∥ Σ[ x ∈ X ] ¬ P x ∥
+    ¬∀→∃¬ : ¬ ((x : X) → P x) → ∥ Σ[ x ∈ X ] ¬ P x ∥₁
     ¬∀→∃¬ f = ¬∀¬→∃ (¬map helper f)
       where
       helper : ((x : X) → ¬ ¬ P x) → (x : X) → P x
@@ -95,10 +95,10 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     (isPropP : (x : X) → (y : Y x) → isProp (P x y))
     where
 
-    ¬∀→∃¬2 : ¬ ((x : X) → (y : Y x) → P x y) → ∥ Σ[ x ∈ X ] Σ[ y ∈ Y x ] ¬ P x y ∥
+    ¬∀→∃¬2 : ¬ ((x : X) → (y : Y x) → P x y) → ∥ Σ[ x ∈ X ] Σ[ y ∈ Y x ] ¬ P x y ∥₁
     ¬∀→∃¬2 f = takeOut∥Σ∥ helper
       where
-      helper : ∥ Σ[ x ∈ X ] ∥ Σ[ y ∈ Y x ] ¬ P x y ∥ ∥
+      helper : ∥ Σ[ x ∈ X ] ∥ Σ[ y ∈ Y x ] ¬ P x y ∥₁ ∥₁
       helper = Prop.map
         (λ (x , ¬p) → x , ¬∀→∃¬ (isPropP _) ¬p)
         (¬∀→∃¬ (λ _ → isPropΠ (λ _ → isPropP _ _)) f)
@@ -128,12 +128,12 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     ... | inr ¬q = ¬q
 
 
-    ¬∃×→∀+¬ : ¬ ∥ Σ[ x ∈ X ] P x × Q x ∥ → (x : X) → ∥ (¬ P x) ⊎ (¬ Q x) ∥
-    ¬∃×→∀+¬ f x = ∣ ¬Σ×→∀⊎¬ (f ∘ ∣_∣) x ∣
+    ¬∃×→∀+¬ : ¬ ∥ Σ[ x ∈ X ] P x × Q x ∥₁ → (x : X) → ∥ (¬ P x) ⊎ (¬ Q x) ∥₁
+    ¬∃×→∀+¬ f x = ∣ ¬Σ×→∀⊎¬ (f ∘ ∣_∣₁) x ∣₁
 
-    ¬∃¬×→∀+¬ : ¬ ∥ Σ[ x ∈ X ] (¬ P x) × Q x ∥ → (x : X) → ∥ (P x) ⊎ (¬ Q x) ∥
-    ¬∃¬×→∀+¬ f x = ∣ ¬Σ¬×→∀⊎¬ (f ∘ ∣_∣) x ∣
+    ¬∃¬×→∀+¬ : ¬ ∥ Σ[ x ∈ X ] (¬ P x) × Q x ∥₁ → (x : X) → ∥ (P x) ⊎ (¬ Q x) ∥₁
+    ¬∃¬×→∀+¬ f x = ∣ ¬Σ¬×→∀⊎¬ (f ∘ ∣_∣₁) x ∣₁
 
 
-    ¬∃×→∀→¬ : ¬ ∥ Σ[ x ∈ X ] P x × Q x ∥ → (x : X) → P x → (¬ Q x)
-    ¬∃×→∀→¬ f x p = ¬Σ×→∀→¬ (f ∘ ∣_∣) x p
+    ¬∃×→∀→¬ : ¬ ∥ Σ[ x ∈ X ] P x × Q x ∥₁ → (x : X) → P x → (¬ Q x)
+    ¬∃×→∀→¬ f x p = ¬Σ×→∀→¬ (f ∘ ∣_∣₁) x p

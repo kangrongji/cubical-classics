@@ -66,8 +66,8 @@ module Algebra ⦃ 🤖 : Oracle ⦄
 
   -}
 
-  +𝕂-Comm : (a b : 𝕂) → a +𝕂 b ≡ b +𝕂 a
-  +𝕂-Comm a b = ≤𝕂-asym (upper⊆ b a) (upper⊆ a b)
+  +𝕂Comm : (a b : 𝕂) → a +𝕂 b ≡ b +𝕂 a
+  +𝕂Comm a b = ≤𝕂-asym (upper⊆ b a) (upper⊆ a b)
     where
     upper⊆ : (a b : 𝕂){q : K} → q ∈ (a +𝕂 b) .upper → q ∈ (b +𝕂 a) .upper
     upper⊆ a b {q = q} q∈upper = Inhab→∈ (+upper b a) (Prop.map
@@ -75,36 +75,36 @@ module Algebra ⦃ 🤖 : Oracle ⦄
       (∈→Inhab (+upper a b) q∈upper))
 
 
-  +𝕂-Assoc : (a b c : 𝕂) → a +𝕂 (b +𝕂 c) ≡ (a +𝕂 b) +𝕂 c
-  +𝕂-Assoc a b c = ≤𝕂-asym upper⊇ upper⊆
+  +𝕂Assoc : (a b c : 𝕂) → a +𝕂 (b +𝕂 c) ≡ (a +𝕂 b) +𝕂 c
+  +𝕂Assoc a b c = ≤𝕂-asym upper⊇ upper⊆
     where
     upper⊆ : {q : K} → q ∈ (a +𝕂 (b +𝕂 c)) .upper → q ∈ ((a +𝕂 b) +𝕂 c) .upper
     upper⊆ {q = q} q∈upper = Inhab→∈ (+upper (a +𝕂 b) c)
-      (Prop.rec squash
+      (Prop.rec squash₁
       (λ (s , t , s∈upper , t∈upper , q≡s+t) →
         Prop.map
         (λ (r , w , r∈upper , w∈upper , t≡r+w) →
           s + r , w ,
-          Inhab→∈ (+upper a b) ∣ s , r , s∈upper , r∈upper , refl ∣ ,
+          Inhab→∈ (+upper a b) ∣ s , r , s∈upper , r∈upper , refl ∣₁ ,
           w∈upper , q≡s+t ∙ (λ i → s + t≡r+w i) ∙ +Assoc s r w)
         (∈→Inhab (+upper b c) t∈upper))
       (∈→Inhab (+upper a (b +𝕂 c)) q∈upper))
 
     upper⊇ : {q : K} → q ∈ ((a +𝕂 b) +𝕂 c) .upper → q ∈ (a +𝕂 (b +𝕂 c)) .upper
     upper⊇ {q = q} q∈upper = Inhab→∈ (+upper a (b +𝕂 c))
-      (Prop.rec squash
+      (Prop.rec squash₁
       (λ (s , t , s∈upper , t∈upper , q≡s+t) →
         Prop.map
         (λ (r , w , r∈upper , w∈upper , s≡r+w) →
           r , w + t ,
-          r∈upper , Inhab→∈ (+upper b c) ∣ w , t , w∈upper , t∈upper , refl ∣ ,
+          r∈upper , Inhab→∈ (+upper b c) ∣ w , t , w∈upper , t∈upper , refl ∣₁ ,
           q≡s+t ∙ (λ i → s≡r+w i + t) ∙ sym (+Assoc r w t))
         (∈→Inhab (+upper a b) s∈upper))
       (∈→Inhab (+upper (a +𝕂 b) c) q∈upper))
 
 
-  +𝕂-rUnit : (a : 𝕂) → a +𝕂 𝟘 ≡ a
-  +𝕂-rUnit a = ≤𝕂-asym upper⊇ upper⊆
+  +𝕂IdR : (a : 𝕂) → a +𝕂 𝟘 ≡ a
+  +𝕂IdR a = ≤𝕂-asym upper⊇ upper⊆
     where
     upper⊆ : {q : K} → q ∈ (a +𝕂 𝟘) .upper → q ∈ a .upper
     upper⊆ {q = q} q∈upper = Prop.rec (isProp∈ (a .upper))
@@ -117,12 +117,12 @@ module Algebra ⦃ 🤖 : Oracle ⦄
     upper⊇ {q = q} q∈upper = Prop.rec (isProp∈ ((a +𝕂 𝟘) .upper))
       (λ (r , r<q , r∈upper) →
         Inhab→∈ (+upper a 𝟘) ∣ r , q - r , r∈upper ,
-        Inhab→∈ (0r <P_) (>→Diff>0 r<q) , helper1 q r ∣)
+        Inhab→∈ (0r <P_) (>→Diff>0 r<q) , helper1 q r ∣₁)
       (a .upper-round q q∈upper)
 
 
-  +𝕂-rInverse : (a : 𝕂) → a +𝕂 (-𝕂 a) ≡ 𝟘
-  +𝕂-rInverse a = ≤𝕂-asym upper⊇ upper⊆
+  +𝕂InvR : (a : 𝕂) → a +𝕂 (-𝕂 a) ≡ 𝟘
+  +𝕂InvR a = ≤𝕂-asym upper⊇ upper⊆
     where
     upper⊆ : {q : K} → q ∈ (a +𝕂 (-𝕂 a)) .upper → q ∈ 𝟘 .upper
     upper⊆ {q = q} q∈upper = Prop.rec (isProp∈ (𝟘 .upper))
@@ -135,7 +135,7 @@ module Algebra ⦃ 🤖 : Oracle ⦄
               s+t>s-s : s + t > s - s
               s+t>s-s = <-trans (+-lPres< {z = s} -p>-s) (+-lPres< {z = s} t>-p)
               s+t>0 : s + t > 0r
-              s+t>0 = subst (s + t >_) (+Rinv s) s+t>s-s
+              s+t>0 = subst (s + t >_) (+InvR s) s+t>s-s
               q>0 : q > 0r
               q>0 = subst (_> 0r) (sym q≡s+t) s+t>0
           in  Inhab→∈ (0r <P_) q>0)
@@ -149,24 +149,24 @@ module Algebra ⦃ 🤖 : Oracle ⦄
       (λ (r , s , s<q∈upper , r<s , r+q∈upper) →
         Inhab→∈ (+upper a (-𝕂 a)) ∣ q + r , - r ,
         subst (_∈ a .upper) (+Comm r q) r+q∈upper ,
-        Inhab→∈ (-upper a) ∣ s , s<q∈upper , -Reverse< r<s ∣ ,
-        helper2 q r ∣)
+        Inhab→∈ (-upper a) ∣ s , s<q∈upper , -Reverse< r<s ∣₁ ,
+        helper2 q r ∣₁)
       (archimedes a q q>0)
 
 
-  +𝕂-lUnit : (a : 𝕂) → 𝟘 +𝕂 a ≡ a
-  +𝕂-lUnit a = +𝕂-Comm 𝟘 a ∙ +𝕂-rUnit a
+  +𝕂IdL : (a : 𝕂) → 𝟘 +𝕂 a ≡ a
+  +𝕂IdL a = +𝕂Comm 𝟘 a ∙ +𝕂IdR a
 
-  +𝕂-lInverse : (a : 𝕂) → (-𝕂 a) +𝕂 a ≡ 𝟘
-  +𝕂-lInverse a = +𝕂-Comm (-𝕂 a) a ∙ +𝕂-rInverse a
+  +𝕂InvL : (a : 𝕂) → (-𝕂 a) +𝕂 a ≡ 𝟘
+  +𝕂InvL a = +𝕂Comm (-𝕂 a) a ∙ +𝕂InvR a
 
-  -𝕂-Involutive : (a : 𝕂) → -𝕂 (-𝕂 a) ≡ a
-  -𝕂-Involutive a =
-      sym (+𝕂-rUnit (-𝕂 (-𝕂 a)))
-    ∙ (λ i → (-𝕂 (-𝕂 a)) +𝕂 (+𝕂-lInverse a (~ i)))
-    ∙ +𝕂-Assoc (-𝕂 (-𝕂 a)) (-𝕂 a) a
-    ∙ (λ i → (+𝕂-lInverse (-𝕂 a) i) +𝕂 a)
-    ∙ +𝕂-lUnit a
+  -𝕂Involutive : (a : 𝕂) → -𝕂 (-𝕂 a) ≡ a
+  -𝕂Involutive a =
+      sym (+𝕂IdR (-𝕂 (-𝕂 a)))
+    ∙ (λ i → (-𝕂 (-𝕂 a)) +𝕂 (+𝕂InvL a (~ i)))
+    ∙ +𝕂Assoc (-𝕂 (-𝕂 a)) (-𝕂 a) a
+    ∙ (λ i → (+𝕂InvL (-𝕂 a) i) +𝕂 a)
+    ∙ +𝕂IdL a
 
   {-
 
@@ -174,8 +174,8 @@ module Algebra ⦃ 🤖 : Oracle ⦄
 
   -}
 
-  ·𝕂₊-Comm : (a b : 𝕂₊) → a ·𝕂₊ b ≡ b ·𝕂₊ a
-  ·𝕂₊-Comm a b = path-𝕂₊ _ _ (≤𝕂-asym (upper⊆ b a) (upper⊆ a b))
+  ·𝕂₊Comm : (a b : 𝕂₊) → a ·𝕂₊ b ≡ b ·𝕂₊ a
+  ·𝕂₊Comm a b = path-𝕂₊ _ _ (≤𝕂-asym (upper⊆ b a) (upper⊆ a b))
     where
     upper⊆ : (a b : 𝕂₊){q : K} → q ∈ (a ·𝕂₊ b) .fst .upper → q ∈ (b ·𝕂₊ a) .fst .upper
     upper⊆ (a , a≥0) (b , b≥0) {q = q} q∈upper = Inhab→∈ (·upper b a) (Prop.map
@@ -183,29 +183,29 @@ module Algebra ⦃ 🤖 : Oracle ⦄
       (∈→Inhab (·upper a b) q∈upper))
 
 
-  ·𝕂₊-Assoc : (a b c : 𝕂₊) → a ·𝕂₊ (b ·𝕂₊ c) ≡ (a ·𝕂₊ b) ·𝕂₊ c
-  ·𝕂₊-Assoc a b c = path-𝕂₊ _ _ (≤𝕂-asym upper⊇ upper⊆)
+  ·𝕂₊Assoc : (a b c : 𝕂₊) → a ·𝕂₊ (b ·𝕂₊ c) ≡ (a ·𝕂₊ b) ·𝕂₊ c
+  ·𝕂₊Assoc a b c = path-𝕂₊ _ _ (≤𝕂-asym upper⊇ upper⊆)
     where
     upper⊆ : {q : K} → q ∈ (a ·𝕂₊ (b ·𝕂₊ c)) .fst .upper → q ∈ ((a ·𝕂₊ b) ·𝕂₊ c) .fst .upper
     upper⊆ {q = q} q∈upper = Inhab→∈ (·upper₊ (a ·𝕂₊ b) c)
-      (Prop.rec squash
+      (Prop.rec squash₁
       (λ (s , t , s∈upper , t∈upper , q≡s·t) →
         Prop.map
         (λ (r , w , r∈upper , w∈upper , t≡r·w) →
           s · r , w ,
-          Inhab→∈ (·upper₊ a b) ∣ s , r , s∈upper , r∈upper , refl ∣ ,
+          Inhab→∈ (·upper₊ a b) ∣ s , r , s∈upper , r∈upper , refl ∣₁ ,
           w∈upper , q≡s·t ∙ (λ i → s · t≡r·w i) ∙ ·Assoc s r w)
         (∈→Inhab (·upper₊ b c) t∈upper))
       (∈→Inhab (·upper₊ a (b ·𝕂₊ c)) q∈upper))
 
     upper⊇ : {q : K} → q ∈ ((a ·𝕂₊ b) ·𝕂₊ c) .fst .upper → q ∈ (a ·𝕂₊ (b ·𝕂₊ c)) .fst .upper
     upper⊇ {q = q} q∈upper = Inhab→∈ (·upper₊ a (b ·𝕂₊ c))
-      (Prop.rec squash
+      (Prop.rec squash₁
       (λ (s , t , s∈upper , t∈upper , q≡s·t) →
         Prop.map
         (λ (r , w , r∈upper , w∈upper , s≡r·w) →
           r , w · t ,
-          r∈upper , Inhab→∈ (·upper₊ b c) ∣ w , t , w∈upper , t∈upper , refl ∣ ,
+          r∈upper , Inhab→∈ (·upper₊ b c) ∣ w , t , w∈upper , t∈upper , refl ∣₁ ,
           q≡s·t ∙ (λ i → s≡r·w i · t) ∙ sym (·Assoc r w t))
         (∈→Inhab (·upper₊ a b) s∈upper))
       (∈→Inhab (·upper₊ (a ·𝕂₊ b) c) q∈upper))
@@ -213,11 +213,11 @@ module Algebra ⦃ 🤖 : Oracle ⦄
 
   private
     alg-helper : (p q : K)(p≢0 : ¬ p ≡ 0r) → q ≡ p · (q · inv p≢0)
-    alg-helper p q p≢0 = sym (·Rid q) ∙ (λ i → q · ·-rInv p≢0 (~ i)) ∙ helper3 p q (inv p≢0)
+    alg-helper p q p≢0 = sym (·IdR q) ∙ (λ i → q · ·-rInv p≢0 (~ i)) ∙ helper3 p q (inv p≢0)
 
 
-  ·𝕂₊-rZero : (a : 𝕂₊) → a ·𝕂₊ 𝟘₊ ≡ 𝟘₊
-  ·𝕂₊-rZero a = path-𝕂₊ _ _ (≤𝕂-asym upper⊇ upper⊆)
+  ·𝕂₊ZeroR : (a : 𝕂₊) → a ·𝕂₊ 𝟘₊ ≡ 𝟘₊
+  ·𝕂₊ZeroR a = path-𝕂₊ _ _ (≤𝕂-asym upper⊇ upper⊆)
     where
     upper⊆ : {q : K} → q ∈ (a ·𝕂₊ 𝟘₊) .fst .upper → q ∈ 𝟘 .upper
     upper⊆ = (a ·𝕂₊ 𝟘₊) .snd
@@ -230,12 +230,12 @@ module Algebra ⦃ 🤖 : Oracle ⦄
             p≢0 = >-arefl p>0
             p⁻¹ = inv p≢0 in
         Inhab→∈ (·upper₊ a 𝟘₊) ∣ p , q · p⁻¹ , p∈upper ,
-        Inhab→∈ (0r <P_) (·-Pres>0 q>0 (p>0→p⁻¹>0 p>0)) , alg-helper p q p≢0 ∣)
+        Inhab→∈ (0r <P_) (·-Pres>0 q>0 (p>0→p⁻¹>0 p>0)) , alg-helper p q p≢0 ∣₁)
       (a .fst .upper-inhab)
 
 
-  ·𝕂₊-rUnit : (a : 𝕂₊) → a ·𝕂₊ 𝟙₊ ≡ a
-  ·𝕂₊-rUnit a = path-𝕂₊ _ _ (≤𝕂-asym upper⊇ upper⊆)
+  ·𝕂₊IdR : (a : 𝕂₊) → a ·𝕂₊ 𝟙₊ ≡ a
+  ·𝕂₊IdR a = path-𝕂₊ _ _ (≤𝕂-asym upper⊇ upper⊆)
     where
     upper⊆ : {q : K} → q ∈ (a ·𝕂₊ 𝟙₊) .fst .upper → q ∈ a .fst .upper
     upper⊆ {q = q} q∈upper = Prop.rec (isProp∈ (a .fst .upper))
@@ -252,19 +252,19 @@ module Algebra ⦃ 🤖 : Oracle ⦄
             r≢0 = >-arefl r>0
             r⁻¹ = inv r≢0 in
         Inhab→∈ (·upper₊ a 𝟙₊) ∣ r , q · r⁻¹ , r∈upper ,
-        Inhab→∈ (1r <P_) (p>q>0→p·q⁻¹>1  r>0 r<q) , alg-helper r q r≢0 ∣)
+        Inhab→∈ (1r <P_) (p>q>0→p·q⁻¹>1  r>0 r<q) , alg-helper r q r≢0 ∣₁)
       (a .fst .upper-round q q∈upper)
 
 
-  ·𝕂₊-lZero : (a : 𝕂₊) → 𝟘₊ ·𝕂₊ a ≡ 𝟘₊
-  ·𝕂₊-lZero a = ·𝕂₊-Comm 𝟘₊ a ∙ ·𝕂₊-rZero a
+  ·𝕂₊ZeroL : (a : 𝕂₊) → 𝟘₊ ·𝕂₊ a ≡ 𝟘₊
+  ·𝕂₊ZeroL a = ·𝕂₊Comm 𝟘₊ a ∙ ·𝕂₊ZeroR a
 
-  ·𝕂₊-lUnit : (a : 𝕂₊) → 𝟙₊ ·𝕂₊ a ≡ a
-  ·𝕂₊-lUnit a = ·𝕂₊-Comm 𝟙₊ a ∙ ·𝕂₊-rUnit a
+  ·𝕂₊IdL : (a : 𝕂₊) → 𝟙₊ ·𝕂₊ a ≡ a
+  ·𝕂₊IdL a = ·𝕂₊Comm 𝟙₊ a ∙ ·𝕂₊IdR a
 
 
   private
-    upper-round2 : (a : 𝕂)(p q : K) → p ∈ a .upper → q ∈ a .upper → ∥ Σ[ r ∈ K ] (r < p) × (r < q) × (r ∈ a .upper) ∥
+    upper-round2 : (a : 𝕂)(p q : K) → p ∈ a .upper → q ∈ a .upper → ∥ Σ[ r ∈ K ] (r < p) × (r < q) × (r ∈ a .upper) ∥₁
     upper-round2 a p q p∈upper q∈upper = Prop.map2
       (λ (r , r<p , r∈upper) (s , s<q , s∈upper) →
         case trichotomy r s of λ
@@ -274,8 +274,8 @@ module Algebra ⦃ 🤖 : Oracle ⦄
       (a .upper-round p p∈upper)
       (a .upper-round q q∈upper)
 
-  ·𝕂₊-lDistrib : (a b c : 𝕂₊) → (a ·𝕂₊ b) +𝕂₊ (a ·𝕂₊ c) ≡ a ·𝕂₊ (b +𝕂₊ c)
-  ·𝕂₊-lDistrib a b c = path-𝕂₊ _ _ (≤𝕂-asym upper⊇ upper⊆)
+  ·𝕂₊DistR : (a b c : 𝕂₊) → (a ·𝕂₊ b) +𝕂₊ (a ·𝕂₊ c) ≡ a ·𝕂₊ (b +𝕂₊ c)
+  ·𝕂₊DistR a b c = path-𝕂₊ _ _ (≤𝕂-asym upper⊇ upper⊆)
     where
     upper⊆ : {q : K} → q ∈ ((a ·𝕂₊ b) +𝕂₊ (a ·𝕂₊ c)) .fst .upper → q ∈ (a ·𝕂₊ (b +𝕂₊ c)) .fst .upper
     upper⊆ {q = q} q∈upper = Prop.rec (isProp∈ ((a ·𝕂₊ (b +𝕂₊ c)) .fst .upper))
@@ -291,11 +291,11 @@ module Algebra ⦃ 🤖 : Oracle ⦄
                 x·w+x·v<r·w+u·v : (x · w) + (x · v) < (r · w) + (u · v)
                 x·w+x·v<r·w+u·v = +-Pres< (·-rPosPres< w>0 x<r) (·-rPosPres< v>0 x<u)
                 x·[w+v]<r·w+u·v : x · (w + v) < (r · w) + (u · v)
-                x·[w+v]<r·w+u·v = subst (_< ((r · w) + (u · v))) (sym (·Rdist+ x w v)) x·w+x·v<r·w+u·v
+                x·[w+v]<r·w+u·v = subst (_< ((r · w) + (u · v))) (sym (·DistR+ x w v)) x·w+x·v<r·w+u·v
                 x·[w+v]∈upper : x · (w + v) ∈ (a ·𝕂₊ (b +𝕂₊ c)) .fst .upper
                 x·[w+v]∈upper = Inhab→∈ (·upper₊ a (b +𝕂₊ c))
                   ∣ x , w + v , x∈upper ,
-                    Inhab→∈ (+upper₊ b c) ∣ w , v , w∈upper , v∈upper , refl ∣ , refl ∣
+                    Inhab→∈ (+upper₊ b c) ∣ w , v , w∈upper , v∈upper , refl ∣₁ , refl ∣₁
                 r·w+u·v≡q : (r · w) + (u · v) ≡ q
                 r·w+u·v≡q = (λ i → s≡r·w (~ i) + t≡u·v (~ i)) ∙ sym q≡s+t
                 x·[w+v]<q : x · (w + v) < q
@@ -308,14 +308,14 @@ module Algebra ⦃ 🤖 : Oracle ⦄
 
     upper⊇ : {q : K} → q ∈ (a ·𝕂₊ (b +𝕂₊ c)) .fst .upper → q ∈ ((a ·𝕂₊ b) +𝕂₊ (a ·𝕂₊ c)) .fst .upper
     upper⊇ {q = q} q∈upper = Inhab→∈ (+upper₊ (a ·𝕂₊ b) (a ·𝕂₊ c))
-      (Prop.rec squash
+      (Prop.rec squash₁
       (λ (s , t , s∈upper , t∈upper , q≡s·t) →
         Prop.map
         (λ (r , w , r∈upper , w∈upper , t≡r+w) →
           s · r , s · w ,
-          Inhab→∈ (·upper₊ a b) ∣ s , r , s∈upper , r∈upper , refl ∣ ,
-          Inhab→∈ (·upper₊ a c) ∣ s , w , s∈upper , w∈upper , refl ∣ ,
-          q≡s·t ∙ cong (s ·_) t≡r+w ∙ ·Rdist+ s r w)
+          Inhab→∈ (·upper₊ a b) ∣ s , r , s∈upper , r∈upper , refl ∣₁ ,
+          Inhab→∈ (·upper₊ a c) ∣ s , w , s∈upper , w∈upper , refl ∣₁ ,
+          q≡s·t ∙ cong (s ·_) t≡r+w ∙ ·DistR+ s r w)
         (∈→Inhab (+upper₊ b c) t∈upper))
       (∈→Inhab (·upper₊ a (b +𝕂₊ c)) q∈upper))
 
@@ -337,8 +337,8 @@ module Algebra ⦃ 🤖 : Oracle ⦄
         where r+·<r+· : r + (q' · (q - 1r)) < r + (r · (q - 1r))
               r+·<r+· = +-lPres< (·-rPosPres< q-1>0 r>q')
 
-    ·𝕂₊-rInv' : a·a⁻¹ ≡ 𝟙
-    ·𝕂₊-rInv' = ≤𝕂-asym upper⊇ upper⊆
+    ·𝕂₊InvR' : a·a⁻¹ ≡ 𝟙
+    ·𝕂₊InvR' = ≤𝕂-asym upper⊇ upper⊆
       where
       upper⊆ : {q : K} → q ∈ a·a⁻¹ .upper → q ∈ 𝟙 .upper
       upper⊆ {q = q} q∈upper = Prop.rec (isProp∈ (𝟙 .upper))
@@ -366,7 +366,7 @@ module Algebra ⦃ 🤖 : Oracle ⦄
       upper⊇ {q = q} q∈upper =
         let q>1 = ∈→Inhab (1r <P_) q∈upper
             q-1>0 : q - 1r > 0r
-            q-1>0 = subst (q - 1r >_) (+Rinv 1r) (+-rPres< {z = - 1r} q>1)
+            q-1>0 = subst (q - 1r >_) (+InvR 1r) (+-rPres< {z = - 1r} q>1)
             q' = middle 0r q₀
             q'>0 : q' > 0r
             q'>0 = middle>l q₀>0
@@ -388,8 +388,8 @@ module Algebra ⦃ 🤖 : Oracle ⦄
                 s>0 = <-trans r>0 r<s
                 r⁻¹∈upper : r⁻¹ ∈ a⁻¹ .fst .upper
                 r⁻¹∈upper = Inhab→∈ (inv-upper a)
-                  ∣ s , s>0 , s<q∈upper , inv-Reverse< s>0 r>0 r<s ∣
+                  ∣ s , s>0 , s<q∈upper , inv-Reverse< s>0 r>0 r<s ∣₁
             in  Inhab→∈ (·upper₊ a₊ a⁻¹)
                   ∣ r · q , r⁻¹ , r·q∈upper , r⁻¹∈upper ,
-                    alg-helper r q (>-arefl r>0) ∙ ·Assoc r q r⁻¹ ∣)
+                    alg-helper r q (>-arefl r>0) ∙ ·Assoc r q r⁻¹ ∣₁)
           (archimedes' a ε ε>0 q' (q₀ , q₀<r∈upper , q'<q₀))

@@ -51,15 +51,15 @@ module FieldStr (𝒦 : Field ℓ) where
 
 
   inv-≢0 : (x≢0 : ¬ x ≡ 0r) → ¬ inv x≢0 ≡ 0r
-  inv-≢0 {x = x} x≢0 x⁻¹≡0 = x≢0 (sym (·Rid _) ∙ (λ i → x · 1≡0 i) ∙ 0RightAnnihilates _)
+  inv-≢0 {x = x} x≢0 x⁻¹≡0 = x≢0 (sym (·IdR _) ∙ (λ i → x · 1≡0 i) ∙ 0RightAnnihilates _)
     where
     1≡0 : 1r ≡ 0r
     1≡0 = sym (·-rInv _) ∙ (λ i → x · x⁻¹≡0 i) ∙ 0RightAnnihilates _
 
   invIdem : (x≢0 : ¬ x ≡ 0r) → inv (inv-≢0 x≢0) ≡ x
-  invIdem {x = x} x≢0 = sym (·Lid _)
+  invIdem {x = x} x≢0 = sym (·IdL _)
     ∙ (λ i → ·-rInv x≢0 (~ i) · inv (inv-≢0 x≢0))
-    ∙ sym (·Assoc _ _ _) ∙ (λ i →  x · ·-rInv (inv-≢0 x≢0) i) ∙ ·Rid _
+    ∙ sym (·Assoc _ _ _) ∙ (λ i →  x · ·-rInv (inv-≢0 x≢0) i) ∙ ·IdR _
 
 
   invUniq : {x≢0 : ¬ x ≡ 0r}{y≢0 : ¬ y ≡ 0r} → x ≡ y → inv x≢0 ≡ inv y≢0
@@ -73,17 +73,17 @@ module FieldStr (𝒦 : Field ℓ) where
   ·-≢0 {y = y} x≢0 y≢0 xy≡0 = y≢0 y≡0
     where
     y≡0 : y ≡ 0r
-    y≡0 = sym (·Lid _)
+    y≡0 = sym (·IdL _)
       ∙ (λ i → ·-lInv x≢0 (~ i) · y)
       ∙ sym (·Assoc _ _ _)
       ∙ (λ i → inv x≢0 · xy≡0 i)
       ∙ 0RightAnnihilates _
 
   ·-Inv : (x≢0 : ¬ x ≡ 0r)(y≢0 : ¬ y ≡ 0r) → inv x≢0 · inv y≢0 ≡ inv (·-≢0 x≢0 y≢0)
-  ·-Inv {x = x} {y = y} x≢0 y≢0 = sym (·Rid _)
+  ·-Inv {x = x} {y = y} x≢0 y≢0 = sym (·IdR _)
     ∙ (λ i → (inv x≢0 · inv y≢0) · ·-rInv (·-≢0 x≢0 y≢0) (~ i))
-    ∙ ·Assoc _ _ _ ∙ (λ i → x⁻¹y⁻¹xy≡1 i · inv (·-≢0 x≢0 y≢0)) ∙ ·Lid _
+    ∙ ·Assoc _ _ _ ∙ (λ i → x⁻¹y⁻¹xy≡1 i · inv (·-≢0 x≢0 y≢0)) ∙ ·IdL _
     where
     x⁻¹y⁻¹xy≡1 : (inv x≢0 · inv y≢0) · (x · y) ≡ 1r
     x⁻¹y⁻¹xy≡1 = helper1 (inv x≢0) (inv y≢0) x y
-      ∙ (λ i → ·-lInv x≢0 i · ·-lInv y≢0 i) ∙ ·Lid _
+      ∙ (λ i → ·-lInv x≢0 i · ·-lInv y≢0 i) ∙ ·IdL _

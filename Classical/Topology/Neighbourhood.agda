@@ -80,10 +80,10 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     -- or "x is an interior point of U".
 
     _∈∘_ : (x : X) → (U : ℙ X) → Type _
-    x ∈∘ U = ∥ x Σ∈∘ U ∥
+    x ∈∘ U = ∥ x Σ∈∘ U ∥₁
 
     ∈→∈∘ : {x : X}{U : ℙ X} → U ∈ Open → x ∈ U → x ∈∘ U
-    ∈→∈∘ {U = U} U∈Open x∈U = ∣ _ , makeℕbh x∈U U∈Open , ⊆-refl {A = U} ∣
+    ∈→∈∘ {U = U} U∈Open x∈U = ∣ _ , makeℕbh x∈U U∈Open , ⊆-refl {A = U} ∣₁
 
 
     -- A subset U is open,
@@ -93,12 +93,12 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     ℕbhCriterionOfOpenness {U = U} p = U∈Open
       where
       P : ℙ X → hProp _
-      P N = ∥ Σ[ x ∈ X ] (N ∈ ℕbh x) × N ⊆ U ∥ , squash
+      P N = ∥ Σ[ x ∈ X ] (N ∈ ℕbh x) × N ⊆ U ∥₁ , squash₁
 
       𝒰 : ℙ ℙ X
       𝒰 = specify P
 
-      rec-helper1 : {N : ℙ X} → ∥ Σ[ x ∈ X ] (N ∈ ℕbh x) × N ⊆ U ∥ → N ∈ Open
+      rec-helper1 : {N : ℙ X} → ∥ Σ[ x ∈ X ] (N ∈ ℕbh x) × N ⊆ U ∥₁ → N ∈ Open
       rec-helper1 = Prop.rec (isProp∈ Open) λ (_ , p , _) → N∈ℕbhx→N∈Open p
 
       𝒰⊆Open : 𝒰 ⊆ Open
@@ -110,7 +110,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       𝕌∈Open : 𝕌 ∈ Open
       𝕌∈Open = 𝒯 .∪-close 𝒰⊆Open
 
-      rec-helper2 : {N : ℙ X} → ∥ Σ[ x ∈ X ] (N ∈ ℕbh x) × N ⊆ U ∥ → N ⊆ U
+      rec-helper2 : {N : ℙ X} → ∥ Σ[ x ∈ X ] (N ∈ ℕbh x) × N ⊆ U ∥₁ → N ⊆ U
       rec-helper2 = Prop.rec isProp⊆ λ (_ , _ , p) → p
 
       N∈𝒰→N⊆U : (N : ℙ X) → N ∈ 𝒰 → N ⊆ U
@@ -121,7 +121,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
 
       U⊆𝕌 : U ⊆ 𝕌
       U⊆𝕌 x∈U = ∃→∈union
-        (Prop.map (λ (N , N∈ℕx , N⊆U) → N , N∈ℕbhx→x∈N N∈ℕx , Inhab→∈ P ∣ _ , N∈ℕx , N⊆U ∣) (p _ x∈U))
+        (Prop.map (λ (N , N∈ℕx , N⊆U) → N , N∈ℕbhx→x∈N N∈ℕx , Inhab→∈ P ∣ _ , N∈ℕx , N⊆U ∣₁) (p _ x∈U))
 
       𝕌≡U : 𝕌 ≡ U
       𝕌≡U = bi⊆→≡ 𝕌⊆U U⊆𝕌
@@ -148,7 +148,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     -- It reads as "there merely exists a neighbourhood of x that is separated from A".
 
     Sep : (x : X) → ℙ X → Type _
-    Sep x A = ∥ ΣSep x A ∥
+    Sep x A = ∥ ΣSep x A ∥₁
 
     Sep⊆ : {x : X}{A B : ℙ X} → A ⊆ B → Sep x B → Sep x A
     Sep⊆ A⊆B = Prop.map (ΣSep⊆ A⊆B)
@@ -161,7 +161,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     -- or "point x and subset A are separating by open sets"
 
     SepOpen : (x : X) → ℙ X → Type _
-    SepOpen x A = ∥ Σ[ U ∈ ℙ X ] Σ[ V ∈ ℙ X ] (U ∈ Open) × A ⊆ U × (V ∈ ℕbh x) × (A ∩ V ≡ ∅) ∥
+    SepOpen x A = ∥ Σ[ U ∈ ℙ X ] Σ[ V ∈ ℙ X ] (U ∈ Open) × A ⊆ U × (V ∈ ℕbh x) × (A ∩ V ≡ ∅) ∥₁
 
     SepOpen⊆ : {x : X}{A U : ℙ X} → U ∈ Open → A ⊆ U → Sep x U → SepOpen x A
     SepOpen⊆ {U = U} U∈Open A⊆U =
@@ -188,8 +188,8 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       (𝒰 : ℙ ℙ X)(𝒰⊆Open : 𝒰 ⊆ Open)
       (sep : (U : ℙ X) → U ∈ 𝒰 → Sep x U)
       → isFinSub 𝒰 → Sep x (union 𝒰)
-    unionSep _ _ 𝒰⊆Open sep (fin-squash p q i) = squash (unionSep _ _ 𝒰⊆Open sep p) (unionSep _ _ 𝒰⊆Open sep q) i
-    unionSep x 𝒰 _ _ isfin∅ = ∣ total , total∈ℕbh {x = x} , ∩-rUnit (union 𝒰) ∙ union∅ ∣
+    unionSep _ _ 𝒰⊆Open sep (fin-squash p q i) = squash₁ (unionSep _ _ 𝒰⊆Open sep p) (unionSep _ _ 𝒰⊆Open sep q) i
+    unionSep x 𝒰 _ _ isfin∅ = ∣ total , total∈ℕbh {x = x} , ∩-rUnit (union 𝒰) ∙ union∅ ∣₁
     unionSep x 𝒰 𝒰⊆Open sep (isfinsuc {A = 𝒰₀} fin𝒰₀ U) = subst (Sep x) (sym union∪[A]) sep𝕌₀∪U
       where
       𝕌₀ : ℙ X
