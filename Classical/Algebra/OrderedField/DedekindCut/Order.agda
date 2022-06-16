@@ -50,19 +50,19 @@ module Order ⦃ 🤖 : Oracle ⦄
   -}
 
   _<𝕂_ : 𝕂 → 𝕂 → Type (ℓ-max ℓ ℓ')
-  a <𝕂 b = ∥ Σ[ q ∈ K ] ((r : K) → r ∈ b .upper → q < r) × q ∈ a .upper ∥
+  a <𝕂 b = ∥ Σ[ q ∈ K ] ((r : K) → r ∈ b .upper → q < r) × q ∈ a .upper ∥₁
 
   _>𝕂_ : 𝕂 → 𝕂 → Type (ℓ-max ℓ ℓ')
   a >𝕂 b = b <𝕂 a
 
   isProp<𝕂 : {a b : 𝕂} → isProp (a <𝕂 b)
-  isProp<𝕂 = squash
+  isProp<𝕂 = squash₁
 
 
   K→𝕂-Pres> : (x y : K) → x < y → (K→𝕂 x) <𝕂 (K→𝕂 y)
   K→𝕂-Pres> x y x<y = ∣ middle x y ,
     (λ q q∈y → <-trans (middle<r x<y) (∈→Inhab (y <P_) q∈y)) ,
-    Inhab→∈ (x <P_) (middle>l x<y) ∣
+    Inhab→∈ (x <P_) (middle>l x<y) ∣₁
 
   1>𝕂0 : 𝟙 >𝕂 𝟘
   1>𝕂0 = K→𝕂-Pres> 0r 1r 1>0
@@ -148,14 +148,14 @@ module Order ⦃ 🤖 : Oracle ⦄
         (λ (s , t , s∈b , t∈d , x≡s+t) →
           subst (q + p <_) (sym x≡s+t) (+-Pres< (q<b∈upper s s∈b) (p<d∈upper t t∈d)))
         (∈→Inhab (+upper b d) x∈b+d)) ,
-      Inhab→∈ (+upper a c) ∣ q , p , q∈aupper , p∈cupper , refl ∣ )
+      Inhab→∈ (+upper a c) ∣ q , p , q∈aupper , p∈cupper , refl ∣₁ )
     a<b b<c
 
   +𝕂-Pres≤ : (a b c d : 𝕂) → a ≤𝕂 b → c ≤𝕂 d → (a +𝕂 c) ≤𝕂 (b +𝕂 d)
   +𝕂-Pres≤ a b c d a≤b c≤d x∈b+d =
     Prop.rec (isProp∈ ((a +𝕂 c) .upper))
     (λ (s , t , s∈b , t∈d , x≡s+t) →
-      Inhab→∈ (+upper a c) ∣ s , t , a≤b s∈b , c≤d t∈d , x≡s+t ∣)
+      Inhab→∈ (+upper a c) ∣ s , t , a≤b s∈b , c≤d t∈d , x≡s+t ∣₁)
     (∈→Inhab (+upper b d) x∈b+d)
 
   +𝕂-rPres≤ : (a b c : 𝕂) → a ≤𝕂 b → (a +𝕂 c) ≤𝕂 (b +𝕂 c)
@@ -163,10 +163,10 @@ module Order ⦃ 🤖 : Oracle ⦄
 
   private
     alg-helper'' : (a c : 𝕂) → (a +𝕂 c) +𝕂 (-𝕂 c) ≡ a
-    alg-helper'' a c = sym (+𝕂-Assoc _ _ _) ∙ (λ i → a +𝕂 +𝕂-rInverse c i) ∙ +𝕂-rUnit a
+    alg-helper'' a c = sym (+𝕂Assoc _ _ _) ∙ (λ i → a +𝕂 +𝕂InvR c i) ∙ +𝕂IdR a
 
     alg-helper''' : (a b c : 𝕂) → (a +𝕂 b) +𝕂 c ≡ (a +𝕂 c) +𝕂 b
-    alg-helper''' a b c = sym (+𝕂-Assoc _ _ _) ∙ (λ i → a +𝕂 +𝕂-Comm b c i) ∙ +𝕂-Assoc _ _ _
+    alg-helper''' a b c = sym (+𝕂Assoc _ _ _) ∙ (λ i → a +𝕂 +𝕂Comm b c i) ∙ +𝕂Assoc _ _ _
 
   +𝕂-rPres≤- : (a b c : 𝕂) → (a +𝕂 c) ≤𝕂 (b +𝕂 c) → a ≤𝕂 b
   +𝕂-rPres≤- a b c a+c≤b+c = transport (λ i → alg-helper'' a c i ≤𝕂 alg-helper'' b c i)
@@ -181,15 +181,15 @@ module Order ⦃ 🤖 : Oracle ⦄
     (+𝕂-rPres< (a +𝕂 (-𝕂 a)) (b +𝕂 (-𝕂 a)) (-𝕂 b) (+𝕂-rPres< a b (-𝕂 a) a<b))
     where
     path1 : (a +𝕂 (-𝕂 a)) +𝕂 (-𝕂 b) ≡ (-𝕂 b)
-    path1 = (λ i → +𝕂-rInverse a i +𝕂 (-𝕂 b)) ∙ +𝕂-lUnit (-𝕂 b)
+    path1 = (λ i → +𝕂InvR a i +𝕂 (-𝕂 b)) ∙ +𝕂IdL (-𝕂 b)
     path2 : (b +𝕂 (-𝕂 a)) +𝕂 (-𝕂 b) ≡ (-𝕂 a)
-    path2 = alg-helper''' _ _ _ ∙ (λ i → +𝕂-rInverse b i +𝕂 (-𝕂 a)) ∙ +𝕂-lUnit (-𝕂 a)
+    path2 = alg-helper''' _ _ _ ∙ (λ i → +𝕂InvR b i +𝕂 (-𝕂 a)) ∙ +𝕂IdL (-𝕂 a)
 
   <𝕂-reverse : (a b : 𝕂) → a <𝕂 b → (-𝕂 b) ≤𝕂 (-𝕂 a)
   <𝕂-reverse a b a<b = <𝕂→≤𝕂 {a = (-𝕂 b)} {b = (-𝕂 a)} (<𝕂-reverse' a b a<b)
 
   -0≡0 : -𝕂 𝟘 ≡ 𝟘
-  -0≡0 = sym (+𝕂-rUnit (-𝕂 𝟘)) ∙ +𝕂-lInverse 𝟘
+  -0≡0 = sym (+𝕂IdR (-𝕂 𝟘)) ∙ +𝕂InvL 𝟘
 
   -reverse>0 : (a : 𝕂) → a >𝕂 𝟘 → (-𝕂 a) <𝕂 𝟘
   -reverse>0 a a>0 = subst ((-𝕂 a) <𝕂_) -0≡0 (<𝕂-reverse' 𝟘 a a>0)
@@ -202,13 +202,13 @@ module Order ⦃ 🤖 : Oracle ⦄
 
 
   +𝕂-Pres<0 : (a b : 𝕂) → a <𝕂 𝟘 → b <𝕂 𝟘 → (a +𝕂 b) <𝕂 𝟘
-  +𝕂-Pres<0 a b a<0 b<0 = subst ((a +𝕂 b) <𝕂_) (+𝕂-rUnit 𝟘) (+𝕂-Pres< a 𝟘 b 𝟘 a<0 b<0)
+  +𝕂-Pres<0 a b a<0 b<0 = subst ((a +𝕂 b) <𝕂_) (+𝕂IdR 𝟘) (+𝕂-Pres< a 𝟘 b 𝟘 a<0 b<0)
 
   +𝕂-Pres≥0 : (a b : 𝕂) → a ≥𝕂 𝟘 → b ≥𝕂 𝟘 → (a +𝕂 b) ≥𝕂 𝟘
-  +𝕂-Pres≥0 a b a≥0 b≥0 = subst ((a +𝕂 b) ≥𝕂_) (+𝕂-rUnit 𝟘) (+𝕂-Pres≤ 𝟘 a 𝟘 b a≥0 b≥0)
+  +𝕂-Pres≥0 a b a≥0 b≥0 = subst ((a +𝕂 b) ≥𝕂_) (+𝕂IdR 𝟘) (+𝕂-Pres≤ 𝟘 a 𝟘 b a≥0 b≥0)
 
   +𝕂-Pres>0 : (a b : 𝕂) → a >𝕂 𝟘 → b >𝕂 𝟘 → (a +𝕂 b) >𝕂 𝟘
-  +𝕂-Pres>0 a b a>0 b>0 = subst ((a +𝕂 b) >𝕂_) (+𝕂-rUnit 𝟘) (+𝕂-Pres< 𝟘 a 𝟘 b a>0 b>0)
+  +𝕂-Pres>0 a b a>0 b>0 = subst ((a +𝕂 b) >𝕂_) (+𝕂IdR 𝟘) (+𝕂-Pres< 𝟘 a 𝟘 b a>0 b>0)
 
 
   ·𝕂-Pres>0 : (a b : 𝕂₊) → a .fst >𝕂 𝟘 → b .fst >𝕂 𝟘 → (a ·𝕂₊ b) .fst >𝕂 𝟘
@@ -262,12 +262,12 @@ module Order ⦃ 🤖 : Oracle ⦄
   ... | eq a≡0 | eq -a≡0 = refl
   ... | eq a≡0 | lt -a<0 = path-𝕂₊ _ _ -a≡0
     where -a≡0 : -𝕂 (-𝕂 a) ≡ 𝟘
-          -a≡0 = (λ i → -𝕂 (-𝕂 (a≡0 i))) ∙ -𝕂-Involutive 𝟘
+          -a≡0 = (λ i → -𝕂 (-𝕂 (a≡0 i))) ∙ -𝕂Involutive 𝟘
   ... | gt a>0 | eq -a≡0 = path-𝕂₊ _ _ (sym a≡0)
     where a≡0 : a ≡ 𝟘
-          a≡0 = sym (-𝕂-Involutive a) ∙ (λ i → -𝕂 (-a≡0 i)) ∙ -0≡0
+          a≡0 = sym (-𝕂Involutive a) ∙ (λ i → -𝕂 (-a≡0 i)) ∙ -0≡0
   ... | lt a<0 | eq -a≡0 = path-𝕂₊ _ _ (sym -a≡0)
-  ... | gt a>0 | lt -a<0 = path-𝕂₊ _ _ (-𝕂-Involutive a)
+  ... | gt a>0 | lt -a<0 = path-𝕂₊ _ _ (-𝕂Involutive a)
   ... | lt a<0 | gt -a>0 = path-𝕂₊ _ _ refl
 
 
@@ -335,7 +335,7 @@ module Order ⦃ 🤖 : Oracle ⦄
   signed- : (s : Sign)(a : 𝕂₊) → signed (-s s) a ≡ -𝕂 (signed s a)
   signed- pos a = refl
   signed- nul a = sym -0≡0
-  signed- neg a = sym (-𝕂-Involutive _)
+  signed- neg a = sym (-𝕂Involutive _)
 
 
   abs>0 : (a : 𝕂) → a >𝕂 𝟘 → abs𝕂 a .fst >𝕂 𝟘
@@ -371,7 +371,7 @@ module Order ⦃ 🤖 : Oracle ⦄
   sign-abs-≡ a with trichotomy𝕂 a 𝟘
   ... | gt a>0 = refl
   ... | eq a≡0 = sym a≡0
-  ... | lt a<0 = -𝕂-Involutive a
+  ... | lt a<0 = -𝕂Involutive a
 
 
   abs-signed : (s : Sign)(a : 𝕂₊) → ¬ s ≡ nul → abs𝕂 (signed s a) ≡ a

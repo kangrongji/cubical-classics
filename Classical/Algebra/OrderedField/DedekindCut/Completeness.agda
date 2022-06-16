@@ -53,19 +53,19 @@ module CompletenessOfCuts ⦃ 🤖 : Oracle ⦄
     (s : K)(bound : (x : 𝕂) → x ∈ A → s ∈ x .upper) where
 
     sup-upper : K → hProp (ℓ-max ℓ ℓ')
-    sup-upper a = ∥ Σ[ q ∈ K ] ((x : 𝕂) → x ∈ A → q ∈ x .upper) × (q < a) ∥ , squash
+    sup-upper a = ∥ Σ[ q ∈ K ] ((x : 𝕂) → x ∈ A → q ∈ x .upper) × (q < a) ∥₁ , squash₁
 
     sup𝕂 : 𝕂
     sup𝕂 .upper = specify sup-upper
-    sup𝕂 .upper-inhab = ∣ s + 1r , Inhab→∈ sup-upper ∣ s , bound , q+1>q ∣ ∣
+    sup𝕂 .upper-inhab = ∣ s + 1r , Inhab→∈ sup-upper ∣ s , bound , q+1>q ∣₁ ∣₁
     sup𝕂 .upper-close r q q∈sup q<r = Prop.rec (isProp∈ (sup𝕂 .upper))
       (λ (p , p∈x∈A , p<q) →
-        Inhab→∈ sup-upper ∣ p , p∈x∈A , <-trans p<q q<r ∣)
+        Inhab→∈ sup-upper ∣ p , p∈x∈A , <-trans p<q q<r ∣₁)
       (∈→Inhab sup-upper q∈sup)
     sup𝕂 .upper-round q q∈sup = Prop.map
       (λ (p , p∈x∈A , p<q) →
         middle p q , middle<r p<q ,
-        Inhab→∈ sup-upper ∣ p , p∈x∈A , middle>l p<q ∣)
+        Inhab→∈ sup-upper ∣ p , p∈x∈A , middle>l p<q ∣₁)
       (∈→Inhab sup-upper q∈sup)
     sup𝕂 .lower-inhab = Prop.map
       (λ (p , p<r∈upper) → p ,
@@ -83,7 +83,7 @@ module CompletenessOfCuts ⦃ 🤖 : Oracle ⦄
     leastSup𝕂 : (y : 𝕂) → ((x : 𝕂) → x ∈ A → x ≤𝕂 y) → y ≥𝕂 sup𝕂
     leastSup𝕂 y x∈A→x≤y {x = q} q∈y = Prop.rec (isProp∈ (sup𝕂 .upper))
       (λ (r , r<q , r∈y) →
-        Inhab→∈ sup-upper ∣ r , (λ x x∈A → x∈A→x≤y x x∈A r∈y) , r<q ∣)
+        Inhab→∈ sup-upper ∣ r , (λ x x∈A → x∈A→x≤y x x∈A r∈y) , r<q ∣₁)
       (y .upper-round q q∈y)
 
     boundSup𝕂' : (x : 𝕂) → x ∈ A → x ≤𝕂' sup𝕂
@@ -96,7 +96,7 @@ module CompletenessOfCuts ⦃ 🤖 : Oracle ⦄
   private
     findBound : (A : ℙ 𝕂)
       → (b : 𝕂)(bound : (x : 𝕂) → x ∈ A → x ≤𝕂' b)
-      → ∥ Σ[ s ∈ K ] ((x : 𝕂) → x ∈ A → s ∈ x .upper) ∥
+      → ∥ Σ[ s ∈ K ] ((x : 𝕂) → x ∈ A → s ∈ x .upper) ∥₁
     findBound A b bound = Prop.map
       (λ (s , s∈b) → s , λ x x∈A → ≤𝕂'→≤𝕂 _ _ (bound x x∈A) s∈b)
       (b .upper-inhab)

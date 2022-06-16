@@ -19,14 +19,14 @@ AC : Typeω
 AC = {ℓ ℓ' : Level}{X : Type ℓ}{Y : X → Type ℓ'}
   → isSet X
   → ((x : X) → isSet (Y x))
-  → ((x : X) → ∥ Y x ∥) → ∥ ((x : X) → Y x) ∥
+  → ((x : X) → ∥ Y x ∥₁) → ∥ ((x : X) → Y x) ∥₁
 
 AC2 : Typeω
 AC2 = {ℓ ℓ' ℓ'' : Level}{X : Type ℓ}{Y : X → Type ℓ'}{Z : (x : X) → Y x → Type ℓ''}
   → isSet X
   → ((x : X) → isSet (Y x))
   → ((x : X) → (y : Y x) → isSet (Z x y))
-  → ((x : X) → (y : Y x) → ∥ Z x y ∥) → ∥ ((x : X) → (y : Y x) → Z x y) ∥
+  → ((x : X) → (y : Y x) → ∥ Z x y ∥₁) → ∥ ((x : X) → (y : Y x) → Z x y) ∥₁
 
 
 module AxiomOfChoices (choose : AC) where

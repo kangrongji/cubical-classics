@@ -77,7 +77,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   isIncreasing seq = (m n : ℕ) → m ≥ℕ n → seq m ≥ seq n
 
   isUpperBoundedSequence : (ℕ → ℝ) → Type
-  isUpperBoundedSequence seq = ∥ Σ[ b ∈ ℝ ] ((n : ℕ) → seq n ≤ b) ∥
+  isUpperBoundedSequence seq = ∥ Σ[ b ∈ ℝ ] ((n : ℕ) → seq n ≤ b) ∥₁
 
 
   -- A weaker formulation of incresing, and their equivalence
@@ -99,11 +99,11 @@ module _ ⦃ 🤖 : Oracle ⦄ where
 
   isMonoBounded→Limit : {seq : ℕ → ℝ} → isIncreasing seq → isUpperBoundedSequence seq → Limit seq
   isMonoBounded→Limit {seq = seq} incr boundSeq =
-    record { lim = limit ; conv = λ ε ε>0 → ∣ n₀ ε ε>0 , converge ε ε>0 ∣ }
+    record { lim = limit ; conv = λ ε ε>0 → ∣ n₀ ε ε>0 , converge ε ε>0 ∣₁ }
     where
 
     seq-prop : ℝ → hProp _
-    seq-prop x = ∥ Σ[ n ∈ ℕ ] seq n ≡ x ∥ , squash
+    seq-prop x = ∥ Σ[ n ∈ ℕ ] seq n ≡ x ∥₁ , squash₁
 
     seq-sub : ℙ ℝ
     seq-sub = specify seq-prop
@@ -118,18 +118,18 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       boundSeq
 
     seq-sup : Supremum seq-sub
-    seq-sup = getSup ∣ _ , Inhab→∈ seq-prop ∣ 0 , refl ∣ ∣ boundSub
+    seq-sup = getSup ∣ _ , Inhab→∈ seq-prop ∣ 0 , refl ∣₁ ∣₁ boundSub
 
     limit : ℝ
     limit = seq-sup .sup
 
     lim-seqn≥0 : (n : ℕ) → limit - seq n ≥ 0
-    lim-seqn≥0 n = ≥→Diff≥0 (seq-sup .bound _ (Inhab→∈ seq-prop ∣ _ , refl ∣))
+    lim-seqn≥0 n = ≥→Diff≥0 (seq-sup .bound _ (Inhab→∈ seq-prop ∣ _ , refl ∣₁))
 
     module _ (ε : ℝ)(ε>0 : ε > 0) where
 
-      ∃p : ∥ Σ[ n ∈ ℕ ] (limit - seq n < ε) ∥
-      ∃p = Prop.rec squash
+      ∃p : ∥ Σ[ n ∈ ℕ ] (limit - seq n < ε) ∥₁
+      ∃p = Prop.rec squash₁
         (λ (x , lim-ε<x , x∈sub) → Prop.map
           (λ (n , seqn≡x) →
             let lim-ε<seqn : limit - ε < seq n
@@ -161,7 +161,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   -- Bounded sequence
 
   isBoundedSequence : (ℕ → ℝ) → Type
-  isBoundedSequence seq = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] ((n : ℕ) → (a ≤ seq n) × (seq n ≤ b)) ∥
+  isBoundedSequence seq = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] ((n : ℕ) → (a ≤ seq n) × (seq n ≤ b)) ∥₁
 
 
   -- Sequence of real numbers admits cluster point when it is bounded.
@@ -171,8 +171,8 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     where
 
     accum-prop : ℝ → hProp _
-    accum-prop x = ((n : ℕ) → ∥ Σ[ n' ∈ ℕ ] (n ≤ℕ n') × (x ≤ seq n') ∥) ,
-      isPropΠ (λ _ → squash)
+    accum-prop x = ((n : ℕ) → ∥ Σ[ n' ∈ ℕ ] (n ≤ℕ n') × (x ≤ seq n') ∥₁) ,
+      isPropΠ (λ _ → squash₁)
 
     accum-sub = specify accum-prop
 
@@ -181,7 +181,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       where
 
       a∈accum : a ∈ accum-sub
-      a∈accum = Inhab→∈ accum-prop (λ n → ∣ n , ≤ℕ-refl , bound n .fst ∣)
+      a∈accum = Inhab→∈ accum-prop (λ n → ∣ n , ≤ℕ-refl , bound n .fst ∣₁)
 
       x∈accum→x≤b : (x : ℝ) → x ∈ accum-sub → x ≤ b
       x∈accum→x≤b x x∈accum = ¬<→≥ ¬x>b
@@ -193,25 +193,25 @@ module _ ⦃ 🤖 : Oracle ⦄ where
           (∈→Inhab accum-prop x∈accum 0)
 
       inhabSub : isInhabited  accum-sub
-      inhabSub = ∣ a , a∈accum ∣
+      inhabSub = ∣ a , a∈accum ∣₁
 
       boundSub : isUpperBounded  accum-sub
-      boundSub = ∣ b , x∈accum→x≤b ∣
+      boundSub = ∣ b , x∈accum→x≤b ∣₁
 
     accum-sup : Supremum accum-sub
-    accum-sup = getSup (Prop.rec squash inhabSub bSeq) (Prop.rec squash boundSub bSeq)
+    accum-sup = getSup (Prop.rec squash₁ inhabSub bSeq) (Prop.rec squash₁ boundSub bSeq)
 
     x₀ = accum-sup .sup
 
-    ∃fin>x₀ : (ε : ℝ) → ε > 0 → ∥ Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n₀ ≤ℕ n → seq n < x₀ + ε) ∥
+    ∃fin>x₀ : (ε : ℝ) → ε > 0 → ∥ Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n₀ ≤ℕ n → seq n < x₀ + ε) ∥₁
     ∃fin>x₀  ε ε>0 = Prop.map
       (λ (n₀ , ¬p) →
         n₀ , λ n n₀≤n → ¬≤→> (¬∃→∀¬2 ¬p n n₀≤n))
-      (¬∀→∃¬ (λ _ → squash) (∉→Empty accum-prop
+      (¬∀→∃¬ (λ _ → squash₁) (∉→Empty accum-prop
         (¬∈→∉ {A = accum-sub} (>sup→¬∈ _ accum-sup (+-rPos→> ε>0)))))
 
     ∃cluster : isClusteringAt seq x₀
-    ∃cluster n₀ ε ε>0 = Prop.rec2 squash
+    ∃cluster n₀ ε ε>0 = Prop.rec2 squash₁
       (λ (m₀ , fin>x₀) (x , x₀-ε<x , x∈sub) →
       let m = sucmax n₀ m₀ in Prop.map
       (λ (n , n≥m , x≤seqn) →
@@ -293,8 +293,8 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       ε/2 = middle 0 ε
       ε/2>0 = middle>l ε>0
 
-      converge : ∥ Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n >ℕ n₀ → abs (cluster .point - seq n) < ε) ∥
-      converge = Prop.rec squash
+      converge : ∥ Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n >ℕ n₀ → abs (cluster .point - seq n) < ε) ∥₁
+      converge = Prop.rec squash₁
         (λ (n₀ , ∀abs<) → Prop.map
         (λ (n₁ , n₁>n₀ , abs<) →
           n₁ , λ n n>n₁ → subst (abs (cluster .point - seq n) <_) (x/2+x/2≡x ε)

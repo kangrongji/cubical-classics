@@ -163,7 +163,7 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   trichotomy : (x y : R) → Trichotomy x y
   trichotomy x y with trichotomy>0 (y - x)
   ... | lt x<y = gt (subst (_>0) (sym (helper2 x y)) x<y)
-  ... | eq x≡y = eq (sym (+Lid _) ∙ (λ i → x≡y (~ i) + x) ∙ helper4 x y)
+  ... | eq x≡y = eq (sym (+IdL _) ∙ (λ i → x≡y (~ i) + x) ∙ helper4 x y)
   ... | gt x>y = lt x>y
 
   dec< : (x y : R) → Dec (x < y)
@@ -207,10 +207,10 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
 
 
   +-rPos→> : x > 0r → y + x > y
-  +-rPos→> {x = x} {y = y} x>0 = subst (y + x >_) (+Rid y) (+-lPres< {z = y} x>0)
+  +-rPos→> {x = x} {y = y} x>0 = subst (y + x >_) (+IdR y) (+-lPres< {z = y} x>0)
 
   +-rNeg→< : x < 0r → y + x < y
-  +-rNeg→< {x = x} {y = y} x<0 = subst (_> y + x) (+Rid y) (+-lPres< {z = y} x<0)
+  +-rNeg→< {x = x} {y = y} x<0 = subst (_> y + x) (+IdR y) (+-lPres< {z = y} x<0)
 
   -rPos→< : x > 0r → y - x < y
   -rPos→< x>0 = +-rNeg→< (-Reverse>0 x>0)
@@ -230,10 +230,10 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
 
 
   +-Pres>0 : x > 0r → y > 0r → x + y > 0r
-  +-Pres>0 {x = x} {y = y} x>0 y>0 = subst (x + y >_) (+Rid _) (+-Pres< x>0 y>0)
+  +-Pres>0 {x = x} {y = y} x>0 y>0 = subst (x + y >_) (+IdR _) (+-Pres< x>0 y>0)
 
   +-Pres<0 : x < 0r → y < 0r → x + y < 0r
-  +-Pres<0 {x = x} {y = y} x<0 y<0 = subst (x + y <_) (+Rid _) (+-Pres< x<0 y<0)
+  +-Pres<0 {x = x} {y = y} x<0 y<0 = subst (x + y <_) (+IdR _) (+-Pres< x<0 y<0)
 
   ·-Pres>0 : x > 0r → y > 0r → x · y > 0r
   ·-Pres>0 {x = x} {y = y} = transport (λ i → >0≡>0r x i → >0≡>0r y i → >0≡>0r (x · y) i) (>0-· x y)
@@ -368,10 +368,10 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   +-Pres≥0 {x = x} {y = y} (inl x>0) (inl y>0) = inl (+-Pres>0 {x = x} {y = y} x>0 y>0)
   +-Pres≥0 {x = x} {y = y} (inr 0≡x) y≥0 = subst (_≥ 0r) y≡x+y y≥0
     where y≡x+y : y ≡ x + y
-          y≡x+y = sym (+Lid _) ∙ (λ i → 0≡x i + y)
+          y≡x+y = sym (+IdL _) ∙ (λ i → 0≡x i + y)
   +-Pres≥0 {x = x} {y = y} x≥0 (inr 0≡y) = subst (_≥ 0r) x≡x+y x≥0
     where x≡x+y : x ≡ x + y
-          x≡x+y = sym (+Rid _) ∙ (λ i → x + 0≡y i)
+          x≡x+y = sym (+IdR _) ∙ (λ i → x + 0≡y i)
 
   ·-Pres≥0 : x ≥ 0r → y ≥ 0r → (x · y) ≥ 0r
   ·-Pres≥0 {x = x} {y = y} (inl x>0) (inl y>0) = inl (·-Pres>0 {x = x} {y = y} x>0 y>0)
@@ -385,24 +385,24 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
 
   +-rPos→≥ : x ≥ 0r → y + x ≥ y
   +-rPos→≥ (inl x>0) = inl (+-rPos→> x>0)
-  +-rPos→≥ {y = y} (inr 0≡x) = inr (sym (+Rid y) ∙ (λ i → y + 0≡x i))
+  +-rPos→≥ {y = y} (inr 0≡x) = inr (sym (+IdR y) ∙ (λ i → y + 0≡x i))
 
   +-rNeg→≤ : x ≤ 0r → y + x ≤ y
   +-rNeg→≤ (inl x<0) = inl (+-rNeg→< x<0)
-  +-rNeg→≤ {y = y} (inr x≡0) = inr ((λ i → y + x≡0 i) ∙ +Rid y)
+  +-rNeg→≤ {y = y} (inr x≡0) = inr ((λ i → y + x≡0 i) ∙ +IdR y)
 
 
   ≥→Diff≥0 : x ≥ y → x - y ≥ 0r
   ≥→Diff≥0 (inl x>y) = inl (>→Diff>0 x>y)
-  ≥→Diff≥0 {y = y} (inr x≡y) = inr (sym (+Rinv y) ∙ (λ i → x≡y i - y))
+  ≥→Diff≥0 {y = y} (inr x≡y) = inr (sym (+InvR y) ∙ (λ i → x≡y i - y))
 
   ≤→Diff≤0 : x ≤ y → x - y ≤ 0r
   ≤→Diff≤0 (inl x<y) = inl (<→Diff<0 x<y)
-  ≤→Diff≤0 {y = y} (inr y≡x) = inr ((λ i → y≡x i - y) ∙ +Rinv y)
+  ≤→Diff≤0 {y = y} (inr y≡x) = inr ((λ i → y≡x i - y) ∙ +InvR y)
 
   Diff≥0→≥ : x - y ≥ 0r → x ≥ y
   Diff≥0→≥ (inl x-y>0) = inl (Diff>0→> x-y>0)
-  Diff≥0→≥ {x = x} {y = y} (inr x-y≡0) = inr (sym (+Lid y) ∙ (λ i → x-y≡0 i + y) ∙ helper19 x y)
+  Diff≥0→≥ {x = x} {y = y} (inr x-y≡0) = inr (sym (+IdL y) ∙ (λ i → x-y≡0 i + y) ∙ helper19 x y)
 
 
   +-Pres≤ : x ≤ y → z ≤ w → x + z ≤ y + w
@@ -536,7 +536,7 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   ℕ→R-Neg n = - ℕ→R-Pos n
 
   ℕ→R-PosSuc : (n : ℕ) → ℕ→R-Pos (suc n) ≡ 1r + ℕ→R-Pos n
-  ℕ→R-PosSuc zero = sym (+Rid 1r)
+  ℕ→R-PosSuc zero = sym (+IdR 1r)
   ℕ→R-PosSuc (suc n) = refl
 
   ℕ→R-NegSuc : (n : ℕ) → ℕ→R-Neg (suc n) ≡ - 1r + ℕ→R-Neg n
@@ -594,7 +594,7 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   0⋆q≡0 q = 0LeftAnnihilates q
 
   1⋆q≡q : (q : R) → 1 ⋆ q ≡ q
-  1⋆q≡q q = ·Lid q
+  1⋆q≡q q = ·IdL q
 
   sucn⋆q≡n⋆q+q : (n : ℕ)(q : R) → (suc n) ⋆ q ≡ (n ⋆ q) + q
   sucn⋆q≡n⋆q+q n q = (λ i → ℕ→R-PosSuc n i · q) ∙ helper17 (ℕ→R-Pos n) q
@@ -616,10 +616,10 @@ module OrderedRingStr (𝓡 : OrderedRing ℓ ℓ') where
   -}
 
   diff≡0→x≡y : x - y ≡ 0r → x ≡ y
-  diff≡0→x≡y {y = y} x-y≡0 = sym (helper19 _ _) ∙ (λ i → x-y≡0 i + y) ∙ +Lid _
+  diff≡0→x≡y {y = y} x-y≡0 = sym (helper19 _ _) ∙ (λ i → x-y≡0 i + y) ∙ +IdL _
 
   x≡y→diff≡0 : x ≡ y → x - y ≡ 0r
-  x≡y→diff≡0 {y = y} x≡y = (λ i → x≡y i - y) ∙ +Rinv _
+  x≡y→diff≡0 {y = y} x≡y = (λ i → x≡y i - y) ∙ +InvR _
 
   x-y≡-[y-x] : x - y ≡ - (y - x)
   x-y≡-[y-x] = helper2 _ _

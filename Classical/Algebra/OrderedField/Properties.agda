@@ -80,7 +80,7 @@ module OrderedFieldStr (𝒦 : OrderedField ℓ ℓ') where
   q / n = q · 1/ n
 
   ·-/-rInv : (q : K)(n : ℕ₊₁) → (q / n) · (ℕ→R-Pos (ℕ₊₁→ℕ n)) ≡ q
-  ·-/-rInv q n = sym (·Assoc q _ _) ∙ (λ i → q · 1/n·n≡1 n i) ∙ ·Rid q
+  ·-/-rInv q n = sym (·Assoc q _ _) ∙ (λ i → q · 1/n·n≡1 n i) ∙ ·IdR q
 
   ·-/-lInv : (q : K)(n : ℕ₊₁) → (ℕ→R-Pos (ℕ₊₁→ℕ n)) · (q / n) ≡ q
   ·-/-lInv q n = ·Comm _ (q / n) ∙ ·-/-rInv q n
@@ -105,11 +105,11 @@ module OrderedFieldStr (𝒦 : OrderedField ℓ ℓ') where
   2·middle p q = ·-/-lInv (p + q) 2
 
   x/2+x/2≡x : (x : K) → middle 0r x + middle 0r x ≡ x
-  x/2+x/2≡x x = helper6 _ ∙ 2·middle 0r x ∙ +Lid x
+  x/2+x/2≡x x = helper6 _ ∙ 2·middle 0r x ∙ +IdL x
 
 
   middle-l : (p q : K) → 2r · (middle p q - p) ≡ q - p
-  middle-l p q = ·Rdist+ 2r (middle p q) _ ∙ (λ i → 2·middle p q i + 2r · (- p)) ∙ helper1 p q
+  middle-l p q = ·DistR+ 2r (middle p q) _ ∙ (λ i → 2·middle p q i + 2r · (- p)) ∙ helper1 p q
 
   middle-r : (p q : K) → 2r · (middle p q - q) ≡ p - q
   middle-r p q = (λ i → 2r · (middle-sym p q i - q)) ∙ middle-l q p
@@ -169,17 +169,17 @@ module OrderedFieldStr (𝒦 : OrderedField ℓ ℓ') where
           1·q⁻¹>1·p⁻¹ : 1r · q⁻¹ > 1r · p⁻¹
           1·q⁻¹>1·p⁻¹ = transport (λ i → ·-rInv₊ p>0 i · q⁻¹ > ·-rInv₊ q>0 i · p⁻¹) p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹
           q⁻¹>p⁻¹ : q⁻¹ > p⁻¹
-          q⁻¹>p⁻¹ = transport (λ i → ·Lid q⁻¹ i > ·Lid p⁻¹ i) 1·q⁻¹>1·p⁻¹
+          q⁻¹>p⁻¹ = transport (λ i → ·IdL q⁻¹ i > ·IdL p⁻¹ i) 1·q⁻¹>1·p⁻¹
 
   inv₊Idem : (q>0 : q > 0r) → inv₊ (p>0→p⁻¹>0 q>0) ≡ q
-  inv₊Idem {q = q} q>0 = sym (·Lid _)
+  inv₊Idem {q = q} q>0 = sym (·IdL _)
     ∙ (λ i → ·-rInv₊ q>0 (~ i) · inv₊ (p>0→p⁻¹>0 q>0))
-    ∙ sym (·Assoc _ _ _) ∙ (λ i →  q · ·-rInv₊ (p>0→p⁻¹>0 q>0) i) ∙ ·Rid _
+    ∙ sym (·Assoc _ _ _) ∙ (λ i →  q · ·-rInv₊ (p>0→p⁻¹>0 q>0) i) ∙ ·IdR _
 
 
   private
     ·inv-helper : (y>0 : y > 0r) → (x · y) · inv₊ y>0 ≡ x
-    ·inv-helper {x = x} y>0 = sym (·Assoc _ _ _) ∙ (λ i → x · ·-rInv₊ y>0 i) ∙ ·Rid _
+    ·inv-helper {x = x} y>0 = sym (·Assoc _ _ _) ∙ (λ i → x · ·-rInv₊ y>0 i) ∙ ·IdR _
 
   ·-MoveLToR< : (y>0 : y > 0r) → x · y < z → x < z · inv₊ y>0
   ·-MoveLToR< {y = y} {x = x} {z = z} y>0 xy<z =
@@ -285,7 +285,7 @@ module _ (𝒦 : OrderedField ℓ ℓ')(archimedes : isArchimedean (𝒦 .fst)) 
     (isPropP : (x : K) → isProp (P x))
     (decP : (x : K) → Dec (P x))
     (<-close : (x y : K) → x > 0r → x < y → P y → P x)
-    (∃ε : ∥ Σ[ ε ∈ K ] (ε > 0r) × P ε ∥) where
+    (∃ε : ∥ Σ[ ε ∈ K ] (ε > 0r) × P ε ∥₁) where
 
     private
       P' : ℕ → Type ℓ''
@@ -294,7 +294,7 @@ module _ (𝒦 : OrderedField ℓ ℓ')(archimedes : isArchimedean (𝒦 .fst)) 
       1r/n>0 : (n : ℕ₊₁) → 1r / n > 0r
       1r/n>0 n = ·-Pres>0 1>0 (1/n>0 n)
 
-      ∃P'n : ∥ Σ[ n ∈ ℕ ] P' n ∥
+      ∃P'n : ∥ Σ[ n ∈ ℕ ] P' n ∥₁
       ∃P'n = Prop.map
         (λ (ε , ε>0 , pε) →
           let (1+ n , 1/n<ε) =

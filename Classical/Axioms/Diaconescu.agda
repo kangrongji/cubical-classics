@@ -88,11 +88,11 @@ module _ {P : Type ℓ}(h : isProp P) where
   isSetFiberCover : (x : Susp P) → isSet (fiber cover x)
   isSetFiberCover _ = isSetΣ isSetBool (λ _ → isProp→isSet (isSetΣP _ _))
 
-  ∥cover∥Sec : (x : Susp P) → ∥ fiber cover x ∥
-  ∥cover∥Sec north = ∣ true  , refl ∣
-  ∥cover∥Sec south = ∣ false , refl ∣
+  ∥cover∥Sec : (x : Susp P) → ∥ fiber cover x ∥₁
+  ∥cover∥Sec north = ∣ true  , refl ∣₁
+  ∥cover∥Sec south = ∣ false , refl ∣₁
   ∥cover∥Sec (merid p i) =
-    isProp→PathP (λ i → squash {A = fiber cover (merid p i)}) (∥cover∥Sec north) (∥cover∥Sec south) i
+    isProp→PathP (λ i → squash₁ {A = fiber cover (merid p i)}) (∥cover∥Sec north) (∥cover∥Sec south) i
 
   coverSec→DecP : ((x : Susp P) → fiber cover x) → Dec P
   coverSec→DecP sec with dichotomyBool (sec north .fst) | dichotomyBool (sec south .fst)
@@ -106,7 +106,7 @@ module _ {P : Type ℓ}(h : isProp P) where
     where func : north ≡ south → true ≡ false
           func r = (sym p) ∙ (λ i → sec (r i) .fst) ∙ q
 
-  ∥coverSec∥→DecP : ∥ ((x : Susp P) → fiber cover x) ∥ → Dec P
+  ∥coverSec∥→DecP : ∥ ((x : Susp P) → fiber cover x) ∥₁ → Dec P
   ∥coverSec∥→DecP = Prop.rec (isPropDec h) coverSec→DecP
 
 

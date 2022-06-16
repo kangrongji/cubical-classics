@@ -73,8 +73,8 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
       renaming ( _+_ to _+'_ ; -_ to -'_ ; _-_ to _-'_
                ; 0r to 0r' ; 1r to 1r'
                ; _·_ to _·'_
-               ; +Lid to +Lid' ; +Rid to +Rid'
-               ; +Linv to +Linv'
+               ; +IdL to +IdL' ; +IdR to +IdR'
+               ; +InvL to +InvL'
                ; +Assoc to +Assoc'
                ; 0LeftAnnihilates  to 0LeftAnnihilates'
                ; 0RightAnnihilates to 0RightAnnihilates'
@@ -141,9 +141,9 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
       map-helper = map-sup .sup
 
 
-      >sup-helper : (x : K') → ¬ x ∈ map-sub → ∥ Σ[ q ∈ K ] q ∈ a .upper × (f-map q <' x) ∥
+      >sup-helper : (x : K') → ¬ x ∈ map-sub → ∥ Σ[ q ∈ K ] q ∈ a .upper × (f-map q <' x) ∥₁
       >sup-helper x ¬∈sub =
-        Prop.rec squash
+        Prop.rec squash₁
           (λ (q , q∈a , ¬sup<fq) →
             Prop.map
             (λ (r , r<q , r∈upper) →
@@ -152,7 +152,7 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
           (¬∀→∃¬2 (λ _ _ → isProp<')
             (¬map (Inhab→∈ map-prop) ¬∈sub))
 
-      >map-helper : (x : K') → x >' map-helper → ∥ Σ[ q ∈ K ] q ∈ a .upper × (f-map q <' x) ∥
+      >map-helper : (x : K') → x >' map-helper → ∥ Σ[ q ∈ K ] q ∈ a .upper × (f-map q <' x) ∥₁
       >map-helper x x>sup = >sup-helper x (>sup→¬∈ x map-sup x>sup)
 
 
@@ -265,7 +265,7 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
               let fp+q<fa+b : f-map (p + q) <' map-helper (a +𝕂 b)
                   fp+q<fa+b = transport (λ i → pres+ p q (~ i) <' fa+b≡s+t (~ i)) (+-Pres<' fp<s fq<t)
                   p+q∈a+b : (p + q) ∈ (a +𝕂 b) .upper
-                  p+q∈a+b = Inhab→∈ (+upper a b) ∣ p , q , p∈a , q∈b , refl ∣
+                  p+q∈a+b = Inhab→∈ (+upper a b) ∣ p , q , p∈a , q∈b , refl ∣₁
               in  <'-asym fp+q<fa+b (map-helper< (a +𝕂 b) _ p+q∈a+b))
             (>map-helper a s fa<s) (>map-helper b t fb<t)
 
@@ -285,12 +285,12 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
     map-pres1 = map-comp 1r ∙ pres1
 
     map-pres- : (a : 𝕂) → map-helper (-𝕂 a) ≡ -' map-helper a
-    map-pres- a = sym (+Lid' _)
-      ∙ (λ i → +Linv' (map-helper a) (~ i) +' map-helper (-𝕂 a))
-      ∙ sym (+Assoc' _ _ _) ∙ (λ i → (-' map-helper a) +' fa+f-a≡0 i) ∙ +Rid' _
+    map-pres- a = sym (+IdL' _)
+      ∙ (λ i → +InvL' (map-helper a) (~ i) +' map-helper (-𝕂 a))
+      ∙ sym (+Assoc' _ _ _) ∙ (λ i → (-' map-helper a) +' fa+f-a≡0 i) ∙ +IdR' _
       where
       fa+f-a≡0 : map-helper a +' map-helper (-𝕂 a) ≡ 0r'
-      fa+f-a≡0 = sym (map-pres+ a (-𝕂 a)) ∙ (λ i → map-helper (+𝕂-rInverse a i)) ∙ map-pres0
+      fa+f-a≡0 = sym (map-pres+ a (-𝕂 a)) ∙ (λ i → map-helper (+𝕂InvR a i)) ∙ map-pres0
 
 
     map-helper-pres≥0 : (a : 𝕂) → a ≥𝕂 𝟘 → map-helper a ≥' 0r'
@@ -341,7 +341,7 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
                       (·-PosPres>' (homPres>0 _ (≥𝕂0+q∈upper→q>0 a a≥0 p∈a))
                         (homPres>0 _ (≥𝕂0+q∈upper→q>0 b b≥0 q∈b)) fp<s fq<t)
                   p·q∈a·b : (p · q) ∈ (a₊ ·𝕂₊ b₊) .fst .upper
-                  p·q∈a·b = Inhab→∈ (·upper₊ a₊ b₊) ∣ p , q , p∈a , q∈b , refl ∣
+                  p·q∈a·b = Inhab→∈ (·upper₊ a₊ b₊) ∣ p , q , p∈a , q∈b , refl ∣₁
               in  <'-asym fp·q<fa·b (map-helper<  ((a₊ ·𝕂₊ b₊) .fst) _ p·q∈a·b))
             (>map-helper a s fa<s) (>map-helper b t fb<t)
 
@@ -366,17 +366,17 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
       case-split : Trichotomy𝕂 b 𝟘 → _
       case-split (gt b>0) = map-pres·PosPos a b a>0 b>0
       case-split (eq b≡0) = (λ i → map-helper (a ·𝕂 b≡0 i))
-        ∙ (λ i → map-helper (·𝕂-rZero a i))
+        ∙ (λ i → map-helper (·𝕂ZeroR a i))
         ∙ map-pres0 ∙ sym (0RightAnnihilates' _)
         ∙ (λ i → map-helper a ·' map-pres0 (~ i))
         ∙ (λ i → map-helper a ·' map-helper (b≡0 (~ i)))
-      case-split (lt b<0) = (λ i → map-helper (a ·𝕂 -𝕂-Involutive b (~ i)))
+      case-split (lt b<0) = (λ i → map-helper (a ·𝕂 -𝕂Involutive b (~ i)))
         ∙ (λ i → map-helper (helper𝕂1 a (-𝕂 b) i))
         ∙ map-pres- (a ·𝕂 (-𝕂 b))
         ∙ (λ i → -' map-pres·PosPos a (-𝕂 b) a>0 (-reverse<0 b b<0) i)
         ∙ sym (helper1 _ _)
         ∙ (λ i → map-helper a ·' map-pres- (-𝕂 b) (~ i))
-        ∙ (λ i → map-helper a ·' map-helper (-𝕂-Involutive b i))
+        ∙ (λ i → map-helper a ·' map-helper (-𝕂Involutive b i))
 
     map-pres· : (a b : 𝕂) → map-helper (a ·𝕂 b) ≡ map-helper a ·' map-helper b
     map-pres· a b = case-split (trichotomy𝕂 a 𝟘)
@@ -384,17 +384,17 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
       case-split : Trichotomy𝕂 a 𝟘 → _
       case-split (gt a>0) = map-pres·Pos a b a>0
       case-split (eq a≡0) = (λ i → map-helper (a≡0 i ·𝕂 b))
-        ∙ (λ i → map-helper (·𝕂-lZero b i))
+        ∙ (λ i → map-helper (·𝕂ZeroL b i))
         ∙ map-pres0 ∙ sym (0LeftAnnihilates' _)
         ∙ (λ i → map-pres0 (~ i) ·' map-helper b)
         ∙ (λ i → map-helper (a≡0 (~ i)) ·' map-helper b)
-      case-split (lt a<0) = (λ i → map-helper (-𝕂-Involutive a (~ i) ·𝕂 b))
+      case-split (lt a<0) = (λ i → map-helper (-𝕂Involutive a (~ i) ·𝕂 b))
         ∙ (λ i → map-helper (helper𝕂2 (-𝕂 a) b i))
         ∙ map-pres- ((-𝕂 a) ·𝕂 b)
         ∙ (λ i → -' map-pres·Pos (-𝕂 a) b (-reverse<0 a a<0) i)
         ∙ sym (helper2 _ _)
         ∙ (λ i → map-pres- (-𝕂 a) (~ i) ·' map-helper b)
-        ∙ (λ i → map-helper (-𝕂-Involutive a i) ·' map-helper b)
+        ∙ (λ i → map-helper (-𝕂Involutive a i) ·' map-helper b)
 
 
     {-

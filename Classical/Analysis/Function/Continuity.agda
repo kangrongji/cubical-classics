@@ -59,7 +59,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     field
       fun : (x : ℝ) ⦃ _ : x ∈ domain ⦄ → ℝ
       cont : (x : ℝ) ⦃ _ : x ∈ domain ⦄ → (ε : ℝ) → ε > 0
-        → ∥ Σ[ δ ∈ ℝ ] (δ > 0) × ((y : ℝ) ⦃ _ : y ∈ domain ⦄ → abs (x - y) < δ → abs (fun x - fun y) < ε) ∥
+        → ∥ Σ[ δ ∈ ℝ ] (δ > 0) × ((y : ℝ) ⦃ _ : y ∈ domain ⦄ → abs (x - y) < δ → abs (fun x - fun y) < ε) ∥₁
 
   open ContinuousFunction
 
@@ -165,7 +165,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     1≥x∈sub x x∈sub = ∈→Inhab 𝐈-prop (∈→Inhab f<0-prop x∈sub .fst) .snd
 
     f<0-sup : Supremum f<0-sub
-    f<0-sup = getSup ∣ 0 , 0∈sub ∣ ∣ 1 , 1≥x∈sub ∣
+    f<0-sup = getSup ∣ 0 , 0∈sub ∣₁ ∣ 1 , 1≥x∈sub ∣₁
       where
       0∈sub : 0 ∈ f<0-sub
       0∈sub = Inhab→∈ f<0-prop (0∈𝐈 , f0<0)
@@ -265,7 +265,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       abs<δ₀ : abs (x₀ - (x₀ - δ)) < δ₀
       abs<δ₀ = subst (_< δ₀) (sym (x>0→abs≡x δ>0) ∙ (λ i → abs (helper3 x₀ δ (~ i)))) (δ-tetrad .snd .snd .snd)
 
-      ∃between : ∥ Σ[ x ∈ ℝ ] (x₀ - δ < x) × (x ∈ f<0-sub) ∥
+      ∃between : ∥ Σ[ x ∈ ℝ ] (x₀ - δ < x) × (x ∈ f<0-sub) ∥₁
       ∃between = <sup→∃∈ _ f<0-sup x₀-δ<x₀
 
       ¬fx₀>0 : ⊥

@@ -23,9 +23,9 @@ open import Cubical.Algebra.CommRing
 open import Cubical.Algebra.CommRingSolver.Reflection
 open import Cubical.Relation.Nullary
 
-open import Classical.Preliminary.CommRing.Instances.QuoInt
-  renaming (ℤ to ℤRing)
-open import Classical.Preliminary.QuoInt using (ℤOrder)
+open import Cubical.Algebra.CommRing.Instances.QuoInt
+open import Classical.Algebra.OrderedRing.Instances.QuoInt
+  using    (ℤOrderedRing)
   renaming (_>0 to _>ℤ0)
 open import Classical.Algebra.OrderedRing
 
@@ -168,7 +168,7 @@ module InclusionFromℤ (𝓡 : OrderedRing ℓ ℓ') where
   open CommRingStr   (𝓡 .fst .snd)
   open OrderedRingStr 𝓡
 
-  open OrderedRingStr ℤOrder using () renaming (_>_ to _>ℤ_ ; >0≡>0r to >0≡>0r-ℤ)
+  open OrderedRingStr ℤOrderedRing using () renaming (_>_ to _>ℤ_ ; >0≡>0r to >0≡>0r-ℤ)
 
   open Helpers (𝓡 .fst)
 
@@ -204,10 +204,10 @@ module InclusionFromℤ (𝓡 : OrderedRing ℓ ℓ') where
     ∙ (λ i → - (1r + ℤ→R-Negate n i)) ∙ helper3 _
 
   ℤ→R-Pres-+ : (m n : ℤ) → ℤ→R (m +ℤ n) ≡ ℤ→R m + ℤ→R n
-  ℤ→R-Pres-+ (signed spos zero) n = sym (+Lid (ℤ→R n))
+  ℤ→R-Pres-+ (signed spos zero) n = sym (+IdL (ℤ→R n))
   ℤ→R-Pres-+ (signed sneg zero) n = helper4 _
   ℤ→R-Pres-+ (posneg i) n = isSet→SquareP (λ _ _ → isSetR)
-    (sym (+Lid (ℤ→R n))) (helper4 _) _ (λ i → ℤ→R (posneg i) + ℤ→R n) i
+    (sym (+IdL (ℤ→R n))) (helper4 _) _ (λ i → ℤ→R (posneg i) + ℤ→R n) i
   ℤ→R-Pres-+ (pos (suc m)) n = ℤ→R-Suc (pos m +ℤ n)
     ∙ (λ i → 1r + ℤ→R-Pres-+ (pos m) n i)
     ∙ +Assoc _ _ _ ∙ (λ i → ℕ→R-PosSuc m (~ i) + ℤ→R n)
@@ -252,14 +252,14 @@ module InclusionFromℤ (𝓡 : OrderedRing ℓ ℓ') where
 
   -}
 
-  isRingHomℤ→R : IsRingHom (CommRing→Ring ℤRing .snd) ℤ→R (CommRing→Ring (𝓡 .fst) .snd)
+  isRingHomℤ→R : IsRingHom (CommRing→Ring ℤCommRing .snd) ℤ→R (CommRing→Ring (𝓡 .fst) .snd)
   isRingHomℤ→R = makeIsRingHom ℤ→R-Pres-1 ℤ→R-Pres-+ ℤ→R-Pres-·
 
-  ℤ→RCommRingHom : CommRingHom ℤRing (𝓡 .fst)
+  ℤ→RCommRingHom : CommRingHom ℤCommRing (𝓡 .fst)
   ℤ→RCommRingHom = _ , isRingHomℤ→R
 
   open OrderedRingHom
 
-  ℤ→ROrderedRingHom : OrderedRingHom ℤOrder 𝓡
+  ℤ→ROrderedRingHom : OrderedRingHom ℤOrderedRing 𝓡
   ℤ→ROrderedRingHom .ring-hom = ℤ→RCommRingHom
   ℤ→ROrderedRingHom .pres->0  = ℤ→R-Pres>0

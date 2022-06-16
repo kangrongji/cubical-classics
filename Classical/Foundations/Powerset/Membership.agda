@@ -110,7 +110,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   ...   | nope q = (p ∙ sym q) i
 
 
-  ∀∈+¬∈→⊆ : {A B : ℙ X} → ((x : X) → ∥ (x ∈ B) ⊎ (¬ x ∈ A) ∥) → A ⊆ B
+  ∀∈+¬∈→⊆ : {A B : ℙ X} → ((x : X) → ∥ (x ∈ B) ⊎ (¬ x ∈ A) ∥₁) → A ⊆ B
   ∀∈+¬∈→⊆ {B = B} ∀∈+¬∈ {x = x} x∈A = Prop.rec (isProp∈ B)
     (λ { (inl x∈B) → x∈B ; (inr ¬x∈A) → Empty.rec (¬x∈A x∈A) }) (∀∈+¬∈ x)
 
@@ -120,11 +120,11 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   module _ {A B : ℙ X}(¬A⊆B : ¬ A ⊆ B) where
 
     private
-      P = ∥ Σ[ x ∈ X ] (¬ x ∈ B) × (x ∈ A) ∥
-      isPropP : isProp ∥ Σ[ x ∈ X ] (¬ x ∈ B) × (x ∈ A) ∥
-      isPropP = squash
+      P = ∥ Σ[ x ∈ X ] (¬ x ∈ B) × (x ∈ A) ∥₁
+      isPropP : isProp ∥ Σ[ x ∈ X ] (¬ x ∈ B) × (x ∈ A) ∥₁
+      isPropP = squash₁
 
-    ⊈→∃ : ∥ Σ[ x ∈ X ] (¬ x ∈ B) × (x ∈ A) ∥
+    ⊈→∃ : ∥ Σ[ x ∈ X ] (¬ x ∈ B) × (x ∈ A) ∥₁
     ⊈→∃ with decide isPropP
     ... | yes p = p
     ... | no ¬p = Empty.rec (¬A⊆B (∀∈+¬∈→⊆
@@ -140,10 +140,10 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   -- Inhabitedness, namely, not being empty
 
   isInhabited : {X : Type ℓ} → ℙ X → Type ℓ
-  isInhabited {X = X} A = ∥ Σ[ x ∈ X ] x ∈ A ∥
+  isInhabited {X = X} A = ∥ Σ[ x ∈ X ] x ∈ A ∥₁
 
   isPropIsInhabited : (A : ℙ X) → isProp (isInhabited A)
-  isPropIsInhabited _ = squash
+  isPropIsInhabited _ = squash₁
 
   ¬isInhabited→¬x∈A : {A : ℙ X} → ¬ isInhabited A → (x : X) → x ∈ A → ⊥
   ¬isInhabited→¬x∈A ¬∈ = ¬∃→∀¬ ¬∈

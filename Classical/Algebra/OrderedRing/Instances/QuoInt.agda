@@ -4,7 +4,7 @@ Facts about Integers
 
 -}
 {-# OPTIONS --safe #-}
-module Classical.Preliminary.QuoInt where
+module Classical.Algebra.OrderedRing.Instances.QuoInt where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Algebra.CommRing
@@ -35,13 +35,12 @@ open import Cubical.Data.NatPlusOne
 open import Cubical.Data.Int.MoreInts.QuoInt
   hiding   (_+_ ; _·_ ; -_)
 open import Cubical.HITs.Rationals.QuoQ.Base using (ℕ₊₁→ℤ)
+open import Cubical.Algebra.CommRing.Instances.QuoInt
 
 open import Cubical.Data.Unit
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
 
-open import Classical.Preliminary.CommRing.Instances.QuoInt
-  renaming (ℤ to ℤRing)
 open import Classical.Algebra.OrderedRing
 
 private
@@ -50,9 +49,8 @@ private
     m n k : ℤ
 
 
-open Helpers ℤRing
-
-open CommRingStr (ℤRing .snd)
+open Helpers ℤCommRing
+open CommRingStr (ℤCommRing .snd)
 
 
 -- Strictly larger thay zero
@@ -77,7 +75,7 @@ isProp>0 (pos (suc y)) = isPropUnit
 >0-· (pos (suc x)) (pos (suc y)) _ _ =
   subst (_>0) (sym (·-signed-pos {s = spos} (suc x) (suc y))) _
 
-trichotomy>0 : (x : ℤ) → Trichotomy>0 ℤRing _>0 x
+trichotomy>0 : (x : ℤ) → Trichotomy>0 ℤCommRing _>0 x
 trichotomy>0 (neg (suc _)) = lt _
 trichotomy>0 (signed spos zero) = eq refl
 trichotomy>0 (signed sneg zero) = eq (sym posneg)
@@ -91,10 +89,10 @@ trichotomy>0 (pos (suc _)) = gt _
 
 -}
 
-ℤOrder : OrderedRing _ _
-ℤOrder = ℤRing , orderstr _>0 isProp>0 _ >0-asym >0-+ >0-· trichotomy>0
+ℤOrderedRing : OrderedRing _ _
+ℤOrderedRing = ℤCommRing , orderstr _>0 isProp>0 _ >0-asym >0-+ >0-· trichotomy>0
 
-open OrderedRingStr ℤOrder
+open OrderedRingStr ℤOrderedRing
 
 ℕ₊₁→ℤ>0 : (n : ℕ₊₁) → ℕ₊₁→ℤ n > 0
 ℕ₊₁→ℤ>0 n = transport (>0≡>0r (ℕ₊₁→ℤ n)) (helper n)
@@ -102,7 +100,7 @@ open OrderedRingStr ℤOrder
         helper (1+ n) = _
 
 -1·n≡-n : (n : ℤ) → -1 · n ≡ - n
--1·n≡-n n = helper1 1 n ∙ (λ i → - (·Lid n i))
+-1·n≡-n n = helper1 1 n ∙ (λ i → - (·IdL n i))
 
 
 possucn-1≡1 : (n : ℕ) → pos (suc n) - 1 ≡ pos n
@@ -132,9 +130,9 @@ n>0→posm≡n (neg n) n>0 = Empty.rec (transport (sym (>0≡>0r (neg n))) n>0)
 archimedes : (a b : ℤ) → b > 0 → Σ[ n ∈ ℕ ] pos n · b > a
 archimedes a (neg b) b>0 = Empty.rec (transport (sym (>0≡>0r (neg b))) b>0)
 archimedes a (pos b) b>0 with trichotomy a 0
-... | lt a<0 = 1 , <-trans {x = a} {y = 0} {z = 1 · pos b} a<0 (subst (_> 0) (sym (·Lid (pos b))) b>0)
-... | eq a≡0 = 1 , subst (1 · pos b >_) (sym a≡0) (subst (_> 0) (sym (·Lid (pos b))) b>0)
-... | gt a>0 = suc an , subst (pos (suc an) · (pos b) >_) (·Rid a) posn·b>a·1
+... | lt a<0 = 1 , <-trans {x = a} {y = 0} {z = 1 · pos b} a<0 (subst (_> 0) (sym (·IdL (pos b))) b>0)
+... | eq a≡0 = 1 , subst (1 · pos b >_) (sym a≡0) (subst (_> 0) (sym (·IdL (pos b))) b>0)
+... | gt a>0 = suc an , subst (pos (suc an) · (pos b) >_) (·IdR a) posn·b>a·1
   where an = n>0→posm≡n a a>0 .fst
         p = n>0→posm≡n a a>0 .snd
         possucm>a : pos (suc an) > a
@@ -147,4 +145,4 @@ archimedes' a b b>0 =
   let (n , posn·b>-a) = archimedes (- a) b b>0
       posn·b+a>-a+a : pos n · b + a > - a + a
       posn·b+a>-a+a = +-rPres< {x = - a} {y = pos n · b} {z = a} posn·b>-a
-  in  n , subst (pos n · b + a >_) (+Linv a) posn·b+a>-a+a
+  in  n , subst (pos n · b + a >_) (+InvL a) posn·b+a>-a+a

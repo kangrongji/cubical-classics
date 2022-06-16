@@ -77,9 +77,9 @@ module Archimedes ⦃ 🤖 : Oracle ⦄
         decP n = decide (isPropP n)
 
         ¬P0 : ¬ P zero
-        ¬P0 p0 = ¬p∈upper (subst (_∈ a .upper) ((λ i → p + 0⋆q≡0 ε i) ∙ +Rid p) p0)
+        ¬P0 p0 = ¬p∈upper (subst (_∈ a .upper) ((λ i → p + 0⋆q≡0 ε i) ∙ +IdR p) p0)
 
-        ∃Pn : ∥ Σ[ n ∈ ℕ ] P n ∥
+        ∃Pn : ∥ Σ[ n ∈ ℕ ] P n ∥₁
         ∃Pn = Prop.map
           (λ (q , q∈upper) →
             let (n , n·ε>q-p) = archimedesK (q - p) ε ε>0
@@ -109,7 +109,7 @@ module Archimedes ⦃ 🤖 : Oracle ⦄
           transport (λ i → helper3 a b c i > helper4 b c i) (+-rPres< {z = b - c} a-b>c)
 
       archimedes''' :
-        ∥ Σ[ r ∈ K ] Σ[ s ∈ K ] (¬ s ∈ a .upper) × (q < r) × (r < s) × (r + ε) ∈ a .upper ∥
+        ∥ Σ[ r ∈ K ] Σ[ s ∈ K ] (¬ s ∈ a .upper) × (q < r) × (r < s) × (r + ε) ∈ a .upper ∥₁
       archimedes''' =
         let (r , ¬r∈upper , p≤r , r+ε∈upper) = archimedes'' p ¬p∈upper in
         Prop.map
@@ -136,7 +136,7 @@ module Archimedes ⦃ 🤖 : Oracle ⦄
 
   archimedes' : (a : 𝕂)(ε : K)(ε>0 : ε > 0r)
     → (p : K)  → Σ[ s ∈ K ] ((q : K) → q ∈ a .upper → s < q) × (p < s)
-    → ∥ Σ[ r ∈ K ] Σ[ s ∈ K ] ((q : K) → q ∈ a .upper → s < q) × (p < r) × (r < s) × (r + ε) ∈ a .upper ∥
+    → ∥ Σ[ r ∈ K ] Σ[ s ∈ K ] ((q : K) → q ∈ a .upper → s < q) × (p < r) × (r < s) × (r + ε) ∈ a .upper ∥₁
   archimedes' a ε ε>0 p (s , s<q∈upper , p<s) =
     Prop.map
     (λ (r , s , ¬s∈upper , q<r , r<s , r+ε∈upper) →
@@ -144,8 +144,8 @@ module Archimedes ⦃ 🤖 : Oracle ⦄
     (archimedes''' a ε ε>0 s (<upper→¬∈upper a _ s<q∈upper) p p<s)
 
   archimedes : (a : 𝕂)(ε : K)(ε>0 : ε > 0r)
-    → ∥ Σ[ r ∈ K ] Σ[ s ∈ K ] ((q : K) → q ∈ a .upper → s < q) × (r < s) × (r + ε) ∈ a .upper ∥
-  archimedes a ε ε>0 = Prop.rec squash
+    → ∥ Σ[ r ∈ K ] Σ[ s ∈ K ] ((q : K) → q ∈ a .upper → s < q) × (r < s) × (r + ε) ∈ a .upper ∥₁
+  archimedes a ε ε>0 = Prop.rec squash₁
     (λ (q , q<r∈upper) → Prop.map
       (λ (r , s , s<t∈upper , p<r , r<s , r+ε∈upper) →
           r , s , s<t∈upper , r<s , r+ε∈upper)

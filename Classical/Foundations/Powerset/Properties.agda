@@ -37,13 +37,13 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   -- Subset with one-element
 
   [_] : X → ℙ X
-  [_] x = specify λ y → ∥ x ≡ y ∥ , squash
+  [_] x = specify λ y → ∥ x ≡ y ∥₁ , squash₁
 
   x∈[x] : {x : X} → x ∈ [ x ]
-  x∈[x] {x = x} = Inhab→∈ (λ y → ∥ x ≡ y ∥ , squash) ∣ refl ∣
+  x∈[x] {x = x} = Inhab→∈ (λ y → ∥ x ≡ y ∥₁ , squash₁) ∣ refl ∣₁
 
-  y∈[x]→∥x≡y∥ : {x y : X} → y ∈ [ x ] → ∥ x ≡ y ∥
-  y∈[x]→∥x≡y∥ {x = x} = ∈→Inhab (λ y → ∥ x ≡ y ∥ , squash)
+  y∈[x]→∥x≡y∥ : {x y : X} → y ∈ [ x ] → ∥ x ≡ y ∥₁
+  y∈[x]→∥x≡y∥ {x = x} = ∈→Inhab (λ y → ∥ x ≡ y ∥₁ , squash₁)
 
   A⊆[x]→A≡∅/[x] : {A : ℙ X}{x : X} → A ⊆ [ x ] → (A ≡ ∅) ⊎ (A ≡ [ x ])
   A⊆[x]→A≡∅/[x] {X = X} {A = A} {x = x} A⊆[x] = case-split (dichotomy∈ x A)
@@ -77,7 +77,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   -}
 
   image : (Y → X) → ℙ Y → ℙ X
-  image {Y = Y} f A = specify λ x → ∥ Σ[ y ∈ Y ] (y ∈ A) × (f y ≡ x) ∥ , squash
+  image {Y = Y} f A = specify λ x → ∥ Σ[ y ∈ Y ] (y ∈ A) × (f y ≡ x) ∥₁ , squash₁
 
   preimage : (Y → X) → ℙ X → ℙ Y
   preimage f A y = A (f y)

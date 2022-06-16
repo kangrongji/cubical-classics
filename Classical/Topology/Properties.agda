@@ -72,7 +72,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     union∈Open : {𝒰 : ℙ ℙ X} → 𝒰 ⊆ Open → union 𝒰 ∈ Open
     union∈Open = 𝒯 .∪-close
 
-    ∈cover : {x : X}{A : ℙ X}{𝒰 : ℙ ℙ X} → x ∈ A → 𝒰 covers A → ∥ Σ[ U ∈ ℙ X ] x ∈ U × U ∈ 𝒰 ∥
+    ∈cover : {x : X}{A : ℙ X}{𝒰 : ℙ ℙ X} → x ∈ A → 𝒰 covers A → ∥ Σ[ U ∈ ℙ X ] x ∈ U × U ∈ 𝒰 ∥₁
     ∈cover x∈A 𝒰covA = ∈union→∃ (𝒰covA .fst x∈A)
 
 
@@ -88,13 +88,13 @@ module _ ⦃ 🤖 : Oracle ⦄ where
 
     isCompactSub : ℙ X → Type _
     isCompactSub K =
-      {𝒰 : ℙ ℙ X} → 𝒰 covers K → ∥ Σ[ 𝒰₀ ∈ ℙ ℙ X ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers K ∥
+      {𝒰 : ℙ ℙ X} → 𝒰 covers K → ∥ Σ[ 𝒰₀ ∈ ℙ ℙ X ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers K ∥₁
 
     isCompact : Type _
     isCompact = isCompactSub total
 
     isPropIsCompactSub : {A : ℙ X} → isProp (isCompactSub A)
-    isPropIsCompactSub = isPropImplicitΠ (λ _ → isPropΠ (λ _ → squash))
+    isPropIsCompactSub = isPropImplicitΠ (λ _ → isPropΠ (λ _ → squash₁))
 
 
     -- A closed subset that is contained in certain compact subset is itself compact.
@@ -134,7 +134,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       module _ (𝒰' : ℙ ℙ X)(𝒰'⊆𝒰+∁A : 𝒰' ⊆ 𝒰+∁A)(fin𝒰' : isFinSub 𝒰')(𝒰'covK : 𝒰' covers K) where
 
         cov-prop : ℙ X → hProp _
-        cov-prop U = ∥ Σ[ x ∈ X ] (x ∈ A) × (x ∈ U) × (U ∈ 𝒰') ∥ , squash
+        cov-prop U = ∥ Σ[ x ∈ X ] (x ∈ A) × (x ∈ U) × (U ∈ 𝒰') ∥₁ , squash₁
 
         𝒰₀ = specify cov-prop
 
@@ -155,17 +155,17 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         𝒰₀covA : 𝒰₀ covers A
         𝒰₀covA .fst {x = x} x∈A = ∃→∈union ∃U
           where
-          ∃U : ∥ Σ[ U ∈ ℙ X ] (x ∈ U) × (U ∈ 𝒰₀) ∥
+          ∃U : ∥ Σ[ U ∈ ℙ X ] (x ∈ U) × (U ∈ 𝒰₀) ∥₁
           ∃U = Prop.map
             (λ (U , x∈U , U∈𝒰') →
-              U , x∈U , Inhab→∈ cov-prop ∣ x , x∈A , x∈U , U∈𝒰' ∣)
+              U , x∈U , Inhab→∈ cov-prop ∣ x , x∈A , x∈U , U∈𝒰' ∣₁)
             (∈union→∃ (𝒰'covK .fst (A⊆K x∈A)))
         𝒰₀covA .snd U∈𝒰₀ = 𝒰covA .snd (𝒰₀⊆𝒰 U∈𝒰₀)
 
         Σ𝒰₀ : Σ[ 𝒰₀ ∈ ℙ ℙ X ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers A
         Σ𝒰₀ = 𝒰₀ , 𝒰₀⊆𝒰 , fin𝒰₀ , 𝒰₀covA
 
-      ∃𝒰₀ : ∥ Σ[ 𝒰₀ ∈ ℙ ℙ X ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers A ∥
+      ∃𝒰₀ : ∥ Σ[ 𝒰₀ ∈ ℙ ℙ X ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers A ∥₁
       ∃𝒰₀ = Prop.map
         (λ (𝒰' , 𝒰'⊆𝒰+∁A , fin𝒰' , 𝒰'covK) →
           Σ𝒰₀ 𝒰' 𝒰'⊆𝒰+∁A fin𝒰' 𝒰'covK)
