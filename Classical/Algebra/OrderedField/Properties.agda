@@ -16,7 +16,7 @@ open import Cubical.Data.NatPlusOne
 open import Cubical.HITs.PropositionalTruncation as Prop
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
-open import Cubical.Algebra.CommRingSolver.Reflection
+open import Cubical.Tactics.CommRingSolver.Reflection
 
 open import Classical.Algebra.Field
 open import Classical.Algebra.OrderedRing

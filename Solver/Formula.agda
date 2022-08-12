@@ -16,10 +16,10 @@ open import Cubical.Data.Sum
   using (_⊎_; inl; inr)
   renaming (rec to rec⊎; map to map⊎)
 open import Cubical.HITs.PropositionalTruncation
-  using (∣_∣; squash; isPropPropTrunc)
+  using (∥_∥₁; ∣_∣₁; squash₁; isPropPropTrunc)
   renaming (map to map∥∥)
 open import Cubical.Relation.Nullary.Base
-  using (Dec; yes; no; ¬_; ∥_∥)
+  using (Dec; yes; no; ¬_)
 open import Cubical.Relation.Nullary.Properties
   using (isProp¬; Dec∥∥)
 open import Cubical.Relation.Nullary.DecidablePropositions
@@ -57,13 +57,13 @@ module _ where -- Stuff that should be in other modules
   Dec→ (yes p) (no ¬q) = no λ z → ¬q (z p)
   Dec→ (no ¬p) (no ¬q) = yes λ p → rec⊥ (¬p p)
 
-  Bool→Type∥⊎∥' : (a b : Bool) → ∥ Bool→Type a ⊎ Bool→Type b ∥ → Bool→Type (a or b)
-  Bool→Type∥⊎∥' true  false ∣ _ ∣ = tt
-  Bool→Type∥⊎∥' true  true  ∣ _ ∣ = tt
-  Bool→Type∥⊎∥' false true  ∣ _ ∣ = tt
-  Bool→Type∥⊎∥' false false ∣ inl () ∣
-  Bool→Type∥⊎∥' false false ∣ inr () ∣
-  Bool→Type∥⊎∥' a b (squash r₁ r₂ i)
+  Bool→Type∥⊎∥' : (a b : Bool) → ∥ Bool→Type a ⊎ Bool→Type b ∥₁ → Bool→Type (a or b)
+  Bool→Type∥⊎∥' true  false ∣ _ ∣₁ = tt
+  Bool→Type∥⊎∥' true  true  ∣ _ ∣₁ = tt
+  Bool→Type∥⊎∥' false true  ∣ _ ∣₁ = tt
+  Bool→Type∥⊎∥' false false ∣ inl () ∣₁
+  Bool→Type∥⊎∥' false false ∣ inr () ∣₁
+  Bool→Type∥⊎∥' a b (squash₁ r₁ r₂ i)
     = isPropBool→Type (Bool→Type∥⊎∥' a b r₁) (Bool→Type∥⊎∥' a b r₂) i
 
 infixr 35 ¬ᶠ_
@@ -85,7 +85,7 @@ module Models {a : Type} where
   Γ ⊢ ⊥ᶠ = ⊥*
   Γ ⊢ (¬ᶠ F) = ¬ Γ ⊢ F
   Γ ⊢ (F ∧ᶠ G) = Γ ⊢ F × Γ ⊢ G
-  Γ ⊢ (F ∨ᶠ G) = ∥ Γ ⊢ F ⊎ Γ ⊢ G ∥
+  Γ ⊢ (F ∨ᶠ G) = ∥ Γ ⊢ F ⊎ Γ ⊢ G ∥₁
   Γ ⊢ (F →ᶠ G) = Γ ⊢ F → Γ ⊢ G
   Γ ⊢ (F ↔ᶠ G) = (Γ ⊢ F → Γ ⊢ G) × (Γ ⊢ G → Γ ⊢ F)
 
@@ -140,9 +140,9 @@ module Models {a : Type} where
     ... | false | false | _ | _ = Cubical.Data.Empty.rec t
       -- ^ This case is needed to hint Agda's case splitting system
     Sound Γ (F ∨ᶠ G) t with Γ ⊨ F | Γ ⊨ G | Sound Γ F | Sound Γ G
-    ... | true | true | f | g = ∣ inl (f tt) ∣
-    ... | false | true | f | g = ∣ inr (g tt) ∣
-    ... | true | false | f | g = ∣ inl (f tt) ∣
+    ... | true | true | f | g = ∣ inl (f tt) ∣₁
+    ... | false | true | f | g = ∣ inr (g tt) ∣₁
+    ... | true | false | f | g = ∣ inl (f tt) ∣₁
     Sound Γ (F →ᶠ G) t u with Γ ⊨ F | Γ ⊨ G | Complete Γ F | Sound Γ G
     ... | false | false | f | g = g (f u)
     ... | false | true  | f | g = g tt

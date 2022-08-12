@@ -36,15 +36,17 @@ private module test (P Q R : Type) (pP : isProp P) (pQ : isProp Q) (pR : isProp 
     using (_×_)
   open import Cubical.Data.Sum
     using (_⊎_)
+  open import Cubical.HITs.PropositionalTruncation
+    using (∥_∥₁)
   open import Cubical.Relation.Nullary.Base
-    using (¬_; ∥_∥)
+    using (¬_)
 
   _↔_ : Type → Type → Type
   P ↔ Q = (P → Q) × (Q → P)
 
   infix 0 _∥⊎∥_
   _∥⊎∥_ : Type → Type → Type
-  P ∥⊎∥ Q = ∥ P ⊎ Q ∥
+  P ∥⊎∥ Q = ∥ P ⊎ Q ∥₁
 
   test : (P × Q → R) ↔ (P → ¬ Q ∥⊎∥ R)
   test = Solve (0 ∧ᶠ 1 →ᶠ 2) ↔ᶠ (0 →ᶠ ¬ᶠ 1 ∨ᶠ 2)

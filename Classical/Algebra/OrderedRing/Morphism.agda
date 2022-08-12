@@ -20,7 +20,7 @@ open import Cubical.Data.Int.MoreInts.QuoInt
 
 open import Cubical.Algebra.Ring
 open import Cubical.Algebra.CommRing
-open import Cubical.Algebra.CommRingSolver.Reflection
+open import Cubical.Tactics.CommRingSolver.Reflection
 open import Cubical.Relation.Nullary
 
 open import Cubical.Algebra.CommRing.Instances.QuoInt
