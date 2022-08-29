@@ -15,6 +15,7 @@ open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 
 open import Classical.Axioms
 
@@ -127,9 +128,9 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         case-split (inr U∈[∁A]) = Empty.rec (∉→¬∈ {A = A} (∈∁→∉ {A = A} x∈∁A) x∈A)
           where
           x∈∁A : x ∈ ∁ A
-          x∈∁A = Prop.rec (isProp∈ (∁ A))
-            (λ ∁A≡U → subst (x ∈_) (sym ∁A≡U) x∈U)
-            (y∈[x]→∥x≡y∥ U∈[∁A])
+          x∈∁A = proof _ , isProp∈ (∁ A) by do
+            ∁A≡U ← y∈[x]→∥x≡y∥ U∈[∁A]
+            return (subst (x ∈_) (sym ∁A≡U) x∈U)
 
       module _ (𝒰' : ℙ ℙ X)(𝒰'⊆𝒰+∁A : 𝒰' ⊆ 𝒰+∁A)(fin𝒰' : isFinSub 𝒰')(𝒰'covK : 𝒰' covers K) where
 
@@ -139,15 +140,16 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         𝒰₀ = specify cov-prop
 
         𝒰₀⊆𝒰' : 𝒰₀ ⊆ 𝒰'
-        𝒰₀⊆𝒰' U∈𝒰₀ = Prop.rec (isProp∈ 𝒰')
-          (λ (x , x∈A , x∈U , U∈𝒰') → U∈𝒰')
-          (∈→Inhab cov-prop U∈𝒰₀)
+        𝒰₀⊆𝒰' U∈𝒰₀ =
+          proof _ , isProp∈ 𝒰' by do
+          (x , x∈A , x∈U , U∈𝒰') ← ∈→Inhab cov-prop U∈𝒰₀
+          return U∈𝒰'
 
         𝒰₀⊆𝒰 : 𝒰₀ ⊆ 𝒰
-        𝒰₀⊆𝒰 U∈𝒰₀ = Prop.rec (isProp∈ 𝒰)
-          (λ (x , x∈A , x∈U , U∈𝒰') →
-            a∈U+U∈𝒰+∁A→U∈𝒰 x∈A x∈U (𝒰'⊆𝒰+∁A U∈𝒰'))
-          (∈→Inhab cov-prop U∈𝒰₀)
+        𝒰₀⊆𝒰 U∈𝒰₀ =
+          proof _ , isProp∈ 𝒰 by do
+          (x , x∈A , x∈U , U∈𝒰') ← ∈→Inhab cov-prop U∈𝒰₀
+          return (a∈U+U∈𝒰+∁A→U∈𝒰 x∈A x∈U (𝒰'⊆𝒰+∁A U∈𝒰'))
 
         fin𝒰₀ : isFinSub 𝒰₀
         fin𝒰₀ = isFinSub⊆ 𝒰₀⊆𝒰' fin𝒰'
@@ -156,17 +158,16 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         𝒰₀covA .fst {x = x} x∈A = ∃→∈union ∃U
           where
           ∃U : ∥ Σ[ U ∈ ℙ X ] (x ∈ U) × (U ∈ 𝒰₀) ∥₁
-          ∃U = Prop.map
-            (λ (U , x∈U , U∈𝒰') →
-              U , x∈U , Inhab→∈ cov-prop ∣ x , x∈A , x∈U , U∈𝒰' ∣₁)
-            (∈union→∃ (𝒰'covK .fst (A⊆K x∈A)))
+          ∃U = do
+            (U , x∈U , U∈𝒰') ← ∈union→∃ (𝒰'covK .fst (A⊆K x∈A))
+            return (U , x∈U , Inhab→∈ cov-prop ∣ x , x∈A , x∈U , U∈𝒰' ∣₁)
+
         𝒰₀covA .snd U∈𝒰₀ = 𝒰covA .snd (𝒰₀⊆𝒰 U∈𝒰₀)
 
         Σ𝒰₀ : Σ[ 𝒰₀ ∈ ℙ ℙ X ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers A
         Σ𝒰₀ = 𝒰₀ , 𝒰₀⊆𝒰 , fin𝒰₀ , 𝒰₀covA
 
       ∃𝒰₀ : ∥ Σ[ 𝒰₀ ∈ ℙ ℙ X ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers A ∥₁
-      ∃𝒰₀ = Prop.map
-        (λ (𝒰' , 𝒰'⊆𝒰+∁A , fin𝒰' , 𝒰'covK) →
-          Σ𝒰₀ 𝒰' 𝒰'⊆𝒰+∁A fin𝒰' 𝒰'covK)
-        (takefinK 𝒰+∁A-covK)
+      ∃𝒰₀ = do
+        (𝒰' , 𝒰'⊆𝒰+∁A , fin𝒰' , 𝒰'covK) ← takefinK 𝒰+∁A-covK
+        return (Σ𝒰₀ 𝒰' 𝒰'⊆𝒰+∁A fin𝒰' 𝒰'covK)

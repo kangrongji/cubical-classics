@@ -30,6 +30,7 @@ open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 
 open import Classical.Axioms
@@ -109,13 +110,12 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     seq-sub = specify seq-prop
 
     boundSub : isUpperBounded seq-sub
-    boundSub = Prop.map
-      (λ (b , seqn≤b) → b ,
-        λ r r∈sub → Prop.rec isProp≤
-        (λ (n , seqn≡r) →
-          subst (_≤ b) seqn≡r (seqn≤b n))
-        (∈→Inhab seq-prop r∈sub))
-      boundSeq
+    boundSub = do
+      (b , seqn≤b) ← boundSeq
+      return (b , λ r r∈sub →
+        proof _ , isProp≤ by do
+        (n , seqn≡r) ← ∈→Inhab seq-prop r∈sub
+        return (subst (_≤ b) seqn≡r (seqn≤b n)))
 
     seq-sup : Supremum seq-sub
     seq-sup = getSup ∣ _ , Inhab→∈ seq-prop ∣ 0 , refl ∣₁ ∣₁ boundSub
@@ -129,16 +129,14 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     module _ (ε : ℝ)(ε>0 : ε > 0) where
 
       ∃p : ∥ Σ[ n ∈ ℕ ] (limit - seq n < ε) ∥₁
-      ∃p = Prop.rec squash₁
-        (λ (x , lim-ε<x , x∈sub) → Prop.map
-          (λ (n , seqn≡x) →
-            let lim-ε<seqn : limit - ε < seq n
-                lim-ε<seqn = subst (limit - ε <_) (sym seqn≡x) lim-ε<x
-                lim-seqn<ε : limit - seq n < ε
-                lim-seqn<ε = +-MoveRToL<' (-MoveLToR< lim-ε<seqn)
-            in  n , lim-seqn<ε)
-          (∈→Inhab seq-prop x∈sub))
-        (<sup→∃∈ _ seq-sup (-rPos→< ε>0))
+      ∃p = do
+        (x , lim-ε<x , x∈sub) ← <sup→∃∈ _ seq-sup (-rPos→< ε>0)
+        (n , seqn≡x) ← ∈→Inhab seq-prop x∈sub
+        let lim-ε<seqn : limit - ε < seq n
+            lim-ε<seqn = subst (limit - ε <_) (sym seqn≡x) lim-ε<x
+            lim-seqn<ε : limit - seq n < ε
+            lim-seqn<ε = +-MoveRToL<' (-MoveLToR< lim-ε<seqn)
+        return (n , lim-seqn<ε)
 
       Σp : Σ[ n ∈ ℕ ] limit - seq n < ε
       Σp = findByOracle (λ _ → isProp<) ∃p
@@ -146,7 +144,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       n₀ = Σp .fst
 
       converge : (n : ℕ) → n >ℕ n₀ → abs (limit - seq n) < ε
-      converge n n>n₀ = --let (k , p) = <-weaken n>n₀ in
+      converge n n>n₀ =
         subst (_< ε) (sym (x≥0→abs≡x (lim-seqn≥0 n))) lim-seqn<ε
         where
         lim-seqn<ε : limit - seq n < ε
@@ -188,10 +186,10 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       x∈accum→x≤b x x∈accum = ¬<→≥ ¬x>b
         where
         ¬x>b : ¬ x > b
-        ¬x>b x>b = Prop.rec isProp⊥
-          (λ (n , _ , x≤seqn) →
-            <≤-asym x>b (≤-trans x≤seqn (bound n .snd)))
-          (∈→Inhab accum-prop x∈accum 0)
+        ¬x>b x>b =
+          proof _ , isProp⊥ by do
+          (n , _ , x≤seqn) ← ∈→Inhab accum-prop x∈accum 0
+          return (<≤-asym x>b (≤-trans x≤seqn (bound n .snd)))
 
       inhabSub : isInhabited  accum-sub
       inhabSub = ∣ a , a∈accum ∣₁
@@ -205,25 +203,24 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     x₀ = accum-sup .sup
 
     ∃fin>x₀ : (ε : ℝ) → ε > 0 → ∥ Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n₀ ≤ℕ n → seq n < x₀ + ε) ∥₁
-    ∃fin>x₀  ε ε>0 = Prop.map
-      (λ (n₀ , ¬p) →
-        n₀ , λ n n₀≤n → ¬≤→> (¬∃→∀¬2 ¬p n n₀≤n))
-      (¬∀→∃¬ (λ _ → squash₁) (∉→Empty accum-prop
-        (¬∈→∉ {A = accum-sub} (>sup→¬∈ _ accum-sup (+-rPos→> ε>0)))))
+    ∃fin>x₀  ε ε>0 = do
+      (n₀ , ¬p) ←
+        ¬∀→∃¬ (λ _ → squash₁) (∉→Empty accum-prop
+          (¬∈→∉ {A = accum-sub} (>sup→¬∈ _ accum-sup (+-rPos→> ε>0))))
+      return (n₀ , λ n n₀≤n → ¬≤→> (¬∃→∀¬2 ¬p n n₀≤n))
 
     ∃cluster : isClusteringAt seq x₀
-    ∃cluster n₀ ε ε>0 = Prop.rec2 squash₁
-      (λ (m₀ , fin>x₀) (x , x₀-ε<x , x∈sub) →
-      let m = sucmax n₀ m₀ in Prop.map
-      (λ (n , n≥m , x≤seqn) →
-        let x₀-ε<seqn : x₀ - ε < seq n
-            x₀-ε<seqn = <≤-trans x₀-ε<x x≤seqn
-            seqn<x₀+ε : seq n < x₀ + ε
-            seqn<x₀+ε = fin>x₀ n (<-weaken (<≤ℕ-trans sucmax>right n≥m))
-        in  n , <≤ℕ-trans sucmax>left n≥m ,
-            absInOpenInterval ε>0 x₀-ε<seqn seqn<x₀+ε)
-      (∈→Inhab accum-prop x∈sub m)) (∃fin>x₀ ε ε>0)
-      (<sup→∃∈ _ accum-sup (-rPos→< ε>0))
+    ∃cluster n₀ ε ε>0 = do
+      (m₀ , fin>x₀) ← ∃fin>x₀ ε ε>0
+      (x , x₀-ε<x , x∈sub) ← <sup→∃∈ _ accum-sup (-rPos→< ε>0)
+      let m = sucmax n₀ m₀
+      (n , n≥m , x≤seqn) ← ∈→Inhab accum-prop x∈sub m
+      let x₀-ε<seqn : x₀ - ε < seq n
+          x₀-ε<seqn = <≤-trans x₀-ε<x x≤seqn
+          seqn<x₀+ε : seq n < x₀ + ε
+          seqn<x₀+ε = fin>x₀ n (<-weaken (<≤ℕ-trans sucmax>right n≥m))
+      return (n , <≤ℕ-trans sucmax>left n≥m ,
+        absInOpenInterval ε>0 x₀-ε<seqn seqn<x₀+ε)
 
 
   {-
@@ -274,11 +271,10 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       ΣbSeq = a - ε , b + ε , λ n → case-split n (<≤-split n₀ n)
 
     bSeq : isBoundedSequence seq
-    bSeq = Prop.map
-      (λ (n₀ , abs<') → ΣbSeq 1 1>0 (suc n₀)
-        (λ n n>sn₀ →
-          abs<' (suc n₀) n ≤ℕ-refl (<ℕ-trans ≤ℕ-refl n>sn₀)))
-      (cauchy 1 1>0)
+    bSeq = do
+      (n₀ , abs<') ← cauchy 1 1>0
+      return (ΣbSeq 1 1>0 (suc n₀) (λ n n>sn₀ →
+        abs<' (suc n₀) n ≤ℕ-refl (<ℕ-trans ≤ℕ-refl n>sn₀)))
 
 
   -- Real Number is Cauchy Complete
@@ -295,10 +291,9 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       ε/2>0 = middle>l ε>0
 
       converge : ∥ Σ[ n₀ ∈ ℕ ] ((n : ℕ) → n >ℕ n₀ → abs (cluster .point - seq n) < ε) ∥₁
-      converge = Prop.rec squash₁
-        (λ (n₀ , ∀abs<) → Prop.map
-        (λ (n₁ , n₁>n₀ , abs<) →
+      converge = do
+        (n₀ , ∀abs<) ← cauchy ε/2 ε/2>0
+        (n₁ , n₁>n₀ , abs<) ← cluster .accum n₀ ε/2 ε/2>0
+        return (
           n₁ , λ n n>n₁ → subst (abs (cluster .point - seq n) <_) (x/2+x/2≡x ε)
             (≤<-trans (dist-Δ _ _ _) (+-Pres< abs< (∀abs< n₁ n n₁>n₀ (<ℕ-trans n₁>n₀ n>n₁)))))
-        (cluster .accum n₀ ε/2 ε/2>0))
-        (cauchy ε/2 ε/2>0)

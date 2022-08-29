@@ -10,6 +10,7 @@ open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 
 open import Classical.Axioms
 open import Classical.Foundations.Powerset
@@ -58,33 +59,35 @@ module CompletenessOfCuts ⦃ 🤖 : Oracle ⦄
     sup𝕂 : 𝕂
     sup𝕂 .upper = specify sup-upper
     sup𝕂 .upper-inhab = ∣ s + 1r , Inhab→∈ sup-upper ∣ s , bound , q+1>q ∣₁ ∣₁
-    sup𝕂 .upper-close r q q∈sup q<r = Prop.rec (isProp∈ (sup𝕂 .upper))
-      (λ (p , p∈x∈A , p<q) →
-        Inhab→∈ sup-upper ∣ p , p∈x∈A , <-trans p<q q<r ∣₁)
-      (∈→Inhab sup-upper q∈sup)
-    sup𝕂 .upper-round q q∈sup = Prop.map
-      (λ (p , p∈x∈A , p<q) →
+    sup𝕂 .upper-close r q q∈sup q<r =
+      proof _ , isProp∈ (sup𝕂 .upper) by do
+      (p , p∈x∈A , p<q) ← ∈→Inhab sup-upper q∈sup
+      return (Inhab→∈ sup-upper ∣ p , p∈x∈A , <-trans p<q q<r ∣₁)
+
+    sup𝕂 .upper-round q q∈sup = do
+      (p , p∈x∈A , p<q) ← ∈→Inhab sup-upper q∈sup
+      return (
         middle p q , middle<r p<q ,
         Inhab→∈ sup-upper ∣ p , p∈x∈A , middle>l p<q ∣₁)
-      (∈→Inhab sup-upper q∈sup)
-    sup𝕂 .lower-inhab = Prop.map
-      (λ (p , p<r∈upper) → p ,
-        λ q q∈sup → Prop.rec isProp<
-        (λ (r , r∈x∈A , r<q) →
-          <-trans (p<r∈upper r (r∈x∈A a₀ a₀∈A)) r<q)
-        (∈→Inhab sup-upper q∈sup))
-      (a₀ .lower-inhab)
+
+    sup𝕂 .lower-inhab = do
+      (p , p<r∈upper) ← a₀ .lower-inhab
+      return (p , λ q q∈sup →
+        proof _ , isProp< by do
+        (r , r∈x∈A , r<q) ← ∈→Inhab sup-upper q∈sup
+        return (<-trans (p<r∈upper r (r∈x∈A a₀ a₀∈A)) r<q))
 
     boundSup𝕂 : (x : 𝕂) → x ∈ A → x ≤𝕂 sup𝕂
-    boundSup𝕂 x x∈A {x = q} q∈sup = Prop.rec (isProp∈ (x .upper))
-      (λ (p , p∈x∈A , p<q) → x .upper-close q p (p∈x∈A x x∈A) p<q)
-      (∈→Inhab sup-upper q∈sup)
+    boundSup𝕂 x x∈A {x = q} q∈sup =
+      proof _ , isProp∈ (x .upper) by do
+      (p , p∈x∈A , p<q) ← ∈→Inhab sup-upper q∈sup
+      return (x .upper-close q p (p∈x∈A x x∈A) p<q)
 
     leastSup𝕂 : (y : 𝕂) → ((x : 𝕂) → x ∈ A → x ≤𝕂 y) → y ≥𝕂 sup𝕂
-    leastSup𝕂 y x∈A→x≤y {x = q} q∈y = Prop.rec (isProp∈ (sup𝕂 .upper))
-      (λ (r , r<q , r∈y) →
-        Inhab→∈ sup-upper ∣ r , (λ x x∈A → x∈A→x≤y x x∈A r∈y) , r<q ∣₁)
-      (y .upper-round q q∈y)
+    leastSup𝕂 y x∈A→x≤y {x = q} q∈y =
+      proof _ , isProp∈ (sup𝕂 .upper) by do
+      (r , r<q , r∈y) ← y .upper-round q q∈y
+      return (Inhab→∈ sup-upper ∣ r , (λ x x∈A → x∈A→x≤y x x∈A r∈y) , r<q ∣₁)
 
     boundSup𝕂' : (x : 𝕂) → x ∈ A → x ≤𝕂' sup𝕂
     boundSup𝕂' x h = ≤𝕂→≤𝕂' _ _ (boundSup𝕂 x h)
@@ -97,9 +100,9 @@ module CompletenessOfCuts ⦃ 🤖 : Oracle ⦄
     findBound : (A : ℙ 𝕂)
       → (b : 𝕂)(bound : (x : 𝕂) → x ∈ A → x ≤𝕂' b)
       → ∥ Σ[ s ∈ K ] ((x : 𝕂) → x ∈ A → s ∈ x .upper) ∥₁
-    findBound A b bound = Prop.map
-      (λ (s , s∈b) → s , λ x x∈A → ≤𝕂'→≤𝕂 _ _ (bound x x∈A) s∈b)
-      (b .upper-inhab)
+    findBound A b bound = do
+      (s , s∈b) ← b .upper-inhab
+      return (s , λ x x∈A → ≤𝕂'→≤𝕂 _ _ (bound x x∈A) s∈b)
 
 
   {-
@@ -109,15 +112,15 @@ module CompletenessOfCuts ⦃ 🤖 : Oracle ⦄
   -}
 
   isComplete𝕂 : isComplete 𝕂OrderedField
-  isComplete𝕂 {A = A} = Prop.rec2 (isPropSupremum A)
+  isComplete𝕂 {A = A} =
+    Prop.rec2 (isPropSupremum A)
     (λ (a₀ , a₀∈A) (b , bound) →
-      Prop.rec (isPropSupremum A)
-      (λ (s , s∈x∈A) →
-        record
+      proof _ , isPropSupremum A by do
+      (s , s∈x∈A) ← findBound A b bound
+      return record
         { sup = sup𝕂 A a₀ a₀∈A s s∈x∈A
         ; bound = boundSup𝕂' A a₀ a₀∈A s s∈x∈A
         ; least = leastSup𝕂' A a₀ a₀∈A s s∈x∈A })
-      (findBound A b bound))
 
   𝕂CompleteOrderedField : CompleteOrderedField (ℓ-max ℓ ℓ') (ℓ-max ℓ ℓ')
   𝕂CompleteOrderedField = 𝕂OrderedField , isComplete𝕂

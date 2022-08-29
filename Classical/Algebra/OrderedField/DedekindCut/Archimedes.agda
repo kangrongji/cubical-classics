@@ -10,6 +10,7 @@ open import Cubical.Foundations.Prelude
 open import Cubical.Data.Sigma
 open import Cubical.Data.Nat using (ℕ ; zero ; suc)
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
 open import Cubical.Tactics.CommRingSolver.Reflection
@@ -80,13 +81,12 @@ module Archimedes ⦃ 🤖 : Oracle ⦄
         ¬P0 p0 = ¬p∈upper (subst (_∈ a .upper) ((λ i → p + 0⋆q≡0 ε i) ∙ +IdR p) p0)
 
         ∃Pn : ∥ Σ[ n ∈ ℕ ] P n ∥₁
-        ∃Pn = Prop.map
-          (λ (q , q∈upper) →
-            let (n , n·ε>q-p) = archimedesK (q - p) ε ε>0
-                p+n·ε>q : p + n ⋆ ε > q
-                p+n·ε>q = subst (p + n ⋆ ε >_) (helper1 p q) (+-lPres< {z = p} n·ε>q-p)
-            in  n , a .upper-close _ _ q∈upper p+n·ε>q)
-          (a .upper-inhab)
+        ∃Pn = do
+          (q , q∈upper) ← a .upper-inhab
+          let (n , n·ε>q-p) = archimedesK (q - p) ε ε>0
+              p+n·ε>q : p + n ⋆ ε > q
+              p+n·ε>q = subst (p + n ⋆ ε >_) (helper1 p q) (+-lPres< {z = p} n·ε>q-p)
+          return (n , a .upper-close _ _ q∈upper p+n·ε>q)
 
         interval : Σ[ n ∈ ℕ ] (¬ P n) × P (suc n)
         interval = findInterval decP ¬P0 ∃Pn
@@ -110,44 +110,38 @@ module Archimedes ⦃ 🤖 : Oracle ⦄
 
       archimedes''' :
         ∥ Σ[ r ∈ K ] Σ[ s ∈ K ] (¬ s ∈ a .upper) × (q < r) × (r < s) × (r + ε) ∈ a .upper ∥₁
-      archimedes''' =
-        let (r , ¬r∈upper , p≤r , r+ε∈upper) = archimedes'' p ¬p∈upper in
-        Prop.map
-        (λ (t , t<r+ε , t∈upper) →
-          let r-q = r - q
-              r+ε-t = (r + ε) - t
-              r-q>0 : r-q > 0r
-              r-q>0 = >→Diff>0 (<≤-trans q<p p≤r)
-              r+ε-t>0 : r+ε-t > 0r
-              r+ε-t>0 = >→Diff>0 t<r+ε
-              (u , u>0 , u<r-q , u<r+ε-t) = min2 r-q>0 r+ε-t>0
-              r+ε-u = (r + ε) - u
-              r-u = r - u
-              r-u+ε = (r - u) + ε
-              r-u<r : r-u < r
-              r-u<r = -rPos→< u>0
-              r-u>q : r-u > q
-              r-u>q = >-exchange u<r-q
-              r-u+ε>t : r-u+ε > t
-              r-u+ε>t = subst (_> t) (helper2 r u ε) (>-exchange u<r+ε-t)
-          in  r-u , r , ¬r∈upper , r-u>q , r-u<r , a .upper-close _ _ t∈upper r-u+ε>t)
-        (a .upper-round _ r+ε∈upper)
+      archimedes''' = do
+        let (r , ¬r∈upper , p≤r , r+ε∈upper) = archimedes'' p ¬p∈upper
+        (t , t<r+ε , t∈upper) ← a .upper-round _ r+ε∈upper
+        let r-q = r - q
+            r+ε-t = (r + ε) - t
+            r-q>0 : r-q > 0r
+            r-q>0 = >→Diff>0 (<≤-trans q<p p≤r)
+            r+ε-t>0 : r+ε-t > 0r
+            r+ε-t>0 = >→Diff>0 t<r+ε
+            (u , u>0 , u<r-q , u<r+ε-t) = min2 r-q>0 r+ε-t>0
+            r+ε-u = (r + ε) - u
+            r-u = r - u
+            r-u+ε = (r - u) + ε
+            r-u<r : r-u < r
+            r-u<r = -rPos→< u>0
+            r-u>q : r-u > q
+            r-u>q = >-exchange u<r-q
+            r-u+ε>t : r-u+ε > t
+            r-u+ε>t = subst (_> t) (helper2 r u ε) (>-exchange u<r+ε-t)
+        return (r-u , r , ¬r∈upper , r-u>q , r-u<r , a .upper-close _ _ t∈upper r-u+ε>t)
 
 
   archimedes' : (a : 𝕂)(ε : K)(ε>0 : ε > 0r)
     → (p : K)  → Σ[ s ∈ K ] ((q : K) → q ∈ a .upper → s < q) × (p < s)
     → ∥ Σ[ r ∈ K ] Σ[ s ∈ K ] ((q : K) → q ∈ a .upper → s < q) × (p < r) × (r < s) × (r + ε) ∈ a .upper ∥₁
-  archimedes' a ε ε>0 p (s , s<q∈upper , p<s) =
-    Prop.map
-    (λ (r , s , ¬s∈upper , q<r , r<s , r+ε∈upper) →
-        r , s , ¬∈upper→<upper a _ ¬s∈upper , q<r , r<s , r+ε∈upper)
-    (archimedes''' a ε ε>0 s (<upper→¬∈upper a _ s<q∈upper) p p<s)
+  archimedes' a ε ε>0 p (s , s<q∈upper , p<s) = do
+    (r , s , ¬s∈upper , q<r , r<s , r+ε∈upper) ← archimedes''' a ε ε>0 s (<upper→¬∈upper a _ s<q∈upper) p p<s
+    return (r , s , ¬∈upper→<upper a _ ¬s∈upper , q<r , r<s , r+ε∈upper)
 
   archimedes : (a : 𝕂)(ε : K)(ε>0 : ε > 0r)
     → ∥ Σ[ r ∈ K ] Σ[ s ∈ K ] ((q : K) → q ∈ a .upper → s < q) × (r < s) × (r + ε) ∈ a .upper ∥₁
-  archimedes a ε ε>0 = Prop.rec squash₁
-    (λ (q , q<r∈upper) → Prop.map
-      (λ (r , s , s<t∈upper , p<r , r<s , r+ε∈upper) →
-          r , s , s<t∈upper , r<s , r+ε∈upper)
-      (archimedes' a ε ε>0 (q - 1r) (q , q<r∈upper , q-1<q)))
-    (a .lower-inhab)
+  archimedes a ε ε>0 = do
+    (q , q<r∈upper) ← a .lower-inhab
+    (r , s , s<t∈upper , p<r , r<s , r+ε∈upper) ← archimedes' a ε ε>0 (q - 1r) (q , q<r∈upper , q-1<q)
+    return (r , s , s<t∈upper , r<s , r+ε∈upper)

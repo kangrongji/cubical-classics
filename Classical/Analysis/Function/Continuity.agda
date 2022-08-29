@@ -16,6 +16,7 @@ open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
 open import Cubical.Tactics.CommRingSolver.Reflection
@@ -269,22 +270,22 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       ∃between = <sup→∃∈ _ f<0-sup x₀-δ<x₀
 
       ¬fx₀>0 : ⊥
-      ¬fx₀>0 = Prop.rec isProp⊥
-        (λ (x , x₀-δ<x , x∈sub) →
-          let x≤x₀ : x ≤ x₀
-              x≤x₀ = f<0-sup .bound _ x∈sub
-              ∣x-x₀∣<δ₀ : abs (x₀ - x) < δ₀
-              ∣x-x₀∣<δ₀ = ≤<-trans (absInBetween δ>0 (inl x₀-δ<x) x≤x₀) (δ-tetrad .snd .snd .snd)
-              x-pair = ∈→Inhab f<0-prop x∈sub
-              instance
-                x∈𝐈 : x ∈ 𝐈
-                x∈𝐈 = x-pair .fst
-              fx<0 : f .fun x < 0
-              fx<0 = x-pair .snd
-              fx>0 : f .fun x > 0
-              fx>0 = δ₀-triple .snd .snd x ∣x-x₀∣<δ₀
-          in  <-asym fx<0 fx>0)
-        ∃between
+      ¬fx₀>0 =
+        proof _ , isProp⊥ by do
+        (x , x₀-δ<x , x∈sub) ← ∃between
+        let x≤x₀ : x ≤ x₀
+            x≤x₀ = f<0-sup .bound _ x∈sub
+            ∣x-x₀∣<δ₀ : abs (x₀ - x) < δ₀
+            ∣x-x₀∣<δ₀ = ≤<-trans (absInBetween δ>0 (inl x₀-δ<x) x≤x₀) (δ-tetrad .snd .snd .snd)
+            x-pair = ∈→Inhab f<0-prop x∈sub
+            instance
+              x∈𝐈 : x ∈ 𝐈
+              x∈𝐈 = x-pair .fst
+            fx<0 : f .fun x < 0
+            fx<0 = x-pair .snd
+            fx>0 : f .fun x > 0
+            fx>0 = δ₀-triple .snd .snd x ∣x-x₀∣<δ₀
+        return (<-asym fx<0 fx>0)
 
     fx₀≡0 : f .fun x₀ ≡ 0
     fx₀≡0 = case-split (trichotomy (f .fun x₀) 0)

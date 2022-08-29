@@ -15,6 +15,7 @@ open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.HLevels
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 
 open import Classical.Axioms
 open import Classical.Foundations.Powerset
@@ -120,8 +121,9 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       𝕌⊆U = union⊆ N∈𝒰→N⊆U
 
       U⊆𝕌 : U ⊆ 𝕌
-      U⊆𝕌 x∈U = ∃→∈union
-        (Prop.map (λ (N , N∈ℕx , N⊆U) → N , N∈ℕbhx→x∈N N∈ℕx , Inhab→∈ P ∣ _ , N∈ℕx , N⊆U ∣₁) (p _ x∈U))
+      U⊆𝕌 x∈U = ∃→∈union do
+        (N , N∈ℕx , N⊆U) ← p _ x∈U
+        return (N , N∈ℕbhx→x∈N N∈ℕx , Inhab→∈ P ∣ _ , N∈ℕx , N⊆U ∣₁)
 
       𝕌≡U : 𝕌 ≡ U
       𝕌≡U = bi⊆→≡ 𝕌⊆U U⊆𝕌

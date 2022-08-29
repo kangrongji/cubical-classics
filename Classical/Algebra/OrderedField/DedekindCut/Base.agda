@@ -12,6 +12,7 @@ open import Cubical.Foundations.HLevels
 open import Cubical.Data.Sigma
 open import Cubical.Data.Empty as Empty
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
 open import Cubical.Tactics.CommRingSolver.Reflection
@@ -215,25 +216,26 @@ module Basics ⦃ 🤖 : Oracle ⦄
 
   -𝕂_ : 𝕂 → 𝕂
   (-𝕂 a) .upper = specify (-upper a)
-  (-𝕂 a) .upper-inhab = Prop.map
-    (λ (q , q<r∈upper) →
-      (- q) + 1r , Inhab→∈ (-upper a) ∣ q , q<r∈upper , q+1>q ∣₁ )
-    (a .lower-inhab)
-  (-𝕂 a) .upper-close r q q∈upper q<r = Prop.rec (isProp∈ ((-𝕂 a) .upper))
-    (λ (p , p<r∈upper , q>-p) →
-      Inhab→∈ (-upper a) ∣ p , p<r∈upper , <-trans q>-p q<r ∣₁)
-    (∈→Inhab (-upper a) q∈upper)
-  (-𝕂 a) .upper-round q q∈upper = Prop.map
-    (λ (p , p<r∈upper , q>-p) →
-      middle (- p) q , middle<r q>-p  , Inhab→∈ (-upper a) ∣ p , p<r∈upper , middle>l q>-p ∣₁)
-    (∈→Inhab (-upper a) q∈upper)
-  (-𝕂 a) .lower-inhab = Prop.map
-    (λ (q , q∈upper) →
-      - q , λ r r∈upper → Prop.rec isProp<
-        (λ (p , p<s∈upper , r>-p) →
-          <-trans (-Reverse< (p<s∈upper q q∈upper)) r>-p)
-        (∈→Inhab (-upper a) r∈upper))
-    (a .upper-inhab)
+  (-𝕂 a) .upper-inhab = do
+    (q , q<r∈upper) ← a .lower-inhab
+    return ((- q) + 1r , Inhab→∈ (-upper a) ∣ q , q<r∈upper , q+1>q ∣₁)
+
+  (-𝕂 a) .upper-close r q q∈upper q<r =
+    proof _ , isProp∈ ((-𝕂 a) .upper) by do
+    (p , p<r∈upper , q>-p) ← ∈→Inhab (-upper a) q∈upper
+    return
+      (Inhab→∈ (-upper a) ∣ p , p<r∈upper , <-trans q>-p q<r ∣₁)
+
+  (-𝕂 a) .upper-round q q∈upper = do
+    (p , p<r∈upper , q>-p) ← ∈→Inhab (-upper a) q∈upper
+    return
+      (middle (- p) q , middle<r q>-p  , Inhab→∈ (-upper a) ∣ p , p<r∈upper , middle>l q>-p ∣₁)
+
+  (-𝕂 a) .lower-inhab = do
+    (q , q∈upper) ← a .upper-inhab
+    return (- q , λ r r∈upper → proof _ , isProp< by do
+      (p , p<s∈upper , r>-p) ← ∈→Inhab (-upper a) r∈upper
+      return (<-trans (-Reverse< (p<s∈upper q q∈upper)) r>-p))
 
 
   -- Addition
@@ -247,33 +249,37 @@ module Basics ⦃ 🤖 : Oracle ⦄
 
   _+𝕂_ : 𝕂 → 𝕂 → 𝕂
   (a +𝕂 b) .upper = specify (+upper a b)
-  (a +𝕂 b) .upper-inhab = Prop.map2
-    (λ (p , p∈upper) (q , q∈upper) →
-      p + q , Inhab→∈ (+upper a b) ∣ p , q , p∈upper , q∈upper , refl ∣₁)
-    (a .upper-inhab) (b .upper-inhab)
-  (a +𝕂 b) .upper-close r q q∈upper q<r = Prop.rec (isProp∈ ((a +𝕂 b) .upper))
-    (λ (s , t , s∈upper , t∈upper , q≡s+t) →
-      let t+r-q∈upper : (t + (r - q)) ∈ b .upper
-          t+r-q∈upper = b .upper-close _ _ t∈upper (+-rPos→> (>→Diff>0 q<r))
-          r≡s+t+r-q : r ≡ s + (t + (r - q))
-          r≡s+t+r-q = alg-helper s t r q q≡s+t
-      in  Inhab→∈ (+upper a b) ∣ s , t + (r - q) , s∈upper , t+r-q∈upper , r≡s+t+r-q ∣₁)
-    (∈→Inhab (+upper a b) q∈upper)
-  (a +𝕂 b) .upper-round q q∈upper = Prop.rec squash₁
-    (λ (s , t , s∈upper , t∈upper , q≡s+t) → Prop.map2
-      (λ (s' , s'<s , s'∈upper) (t' , t'<t , t'∈upper) →
-        s' + t' , subst (s' + t' <_) (sym q≡s+t) (+-Pres< s'<s t'<t) ,
-        Inhab→∈ (+upper a b) ∣ s' , t' , s'∈upper , t'∈upper , refl ∣₁)
-      (a .upper-round s s∈upper) (b .upper-round t t∈upper))
-    (∈→Inhab (+upper a b) q∈upper)
-  (a +𝕂 b) .lower-inhab = Prop.map2
-    (λ (p , p<r∈upper) (q , q<r∈upper) →
-        p + q , λ r r∈upper → Prop.rec isProp<
-          (λ (s , t , s∈upper , t∈upper , r≡s+t) →
-            subst (p + q <_) (sym r≡s+t)
-            (+-Pres< (p<r∈upper s s∈upper) (q<r∈upper t t∈upper)))
-          (∈→Inhab (+upper a b) r∈upper))
-    (a .lower-inhab) (b .lower-inhab)
+
+  (a +𝕂 b) .upper-inhab = do
+    (p , p∈upper) ← a .upper-inhab
+    (q , q∈upper) ← b .upper-inhab
+    return
+     (p + q , Inhab→∈ (+upper a b) ∣ p , q , p∈upper , q∈upper , refl ∣₁)
+
+  (a +𝕂 b) .upper-close r q q∈upper q<r =
+    proof _ , isProp∈ ((a +𝕂 b) .upper) by do
+    (s , t , s∈upper , t∈upper , q≡s+t) ← ∈→Inhab (+upper a b) q∈upper
+    let t+r-q∈upper : (t + (r - q)) ∈ b .upper
+        t+r-q∈upper = b .upper-close _ _ t∈upper (+-rPos→> (>→Diff>0 q<r))
+        r≡s+t+r-q : r ≡ s + (t + (r - q))
+        r≡s+t+r-q = alg-helper s t r q q≡s+t
+    return
+      (Inhab→∈ (+upper a b) ∣ s , t + (r - q) , s∈upper , t+r-q∈upper , r≡s+t+r-q ∣₁)
+
+  (a +𝕂 b) .upper-round q q∈upper = do
+    (s , t , s∈upper , t∈upper , q≡s+t) ← ∈→Inhab (+upper a b) q∈upper
+    (s' , s'<s , s'∈upper) ← a .upper-round s s∈upper
+    (t' , t'<t , t'∈upper) ← b .upper-round t t∈upper
+    return (s' + t' , subst (s' + t' <_) (sym q≡s+t) (+-Pres< s'<s t'<t) ,
+     Inhab→∈ (+upper a b) ∣ s' , t' , s'∈upper , t'∈upper , refl ∣₁)
+
+  (a +𝕂 b) .lower-inhab = do
+    (p , p<r∈upper) ← a .lower-inhab
+    (q , q<r∈upper) ← b .lower-inhab
+    return (p + q , λ r r∈upper → proof _ , isProp< by do
+      (s , t , s∈upper , t∈upper , r≡s+t) ← ∈→Inhab (+upper a b) r∈upper
+      return (subst (p + q <_) (sym r≡s+t)
+        (+-Pres< (p<r∈upper s s∈upper) (q<r∈upper t t∈upper))))
 
 
   {-
@@ -310,12 +316,12 @@ module Basics ⦃ 🤖 : Oracle ⦄
   _+𝕂₊_ : (a b : 𝕂₊) → 𝕂₊
   ((a , a≥0) +𝕂₊ (b , b≥0)) .fst = a +𝕂 b
   ((a , a≥0) +𝕂₊ (b , b≥0)) .snd q∈upper =
-    Prop.rec (isProp∈ (𝟘 .upper))
-    (λ (s , t , s∈upper , t∈upper , q≡s+t) →
-      let s>0 = ∈→Inhab (0r <P_) (a≥0 s∈upper)
-          t>0 = ∈→Inhab (0r <P_) (b≥0 t∈upper)
-      in  Inhab→∈ (0r <P_) (subst (_> 0r) (sym q≡s+t) (+-Pres>0 s>0 t>0)))
-    (∈→Inhab (+upper a b) q∈upper)
+    proof _ , isProp∈ (𝟘 .upper) by do
+    (s , t , s∈upper , t∈upper , q≡s+t) ← ∈→Inhab (+upper a b) q∈upper
+    let s>0 = ∈→Inhab (0r <P_) (a≥0 s∈upper)
+        t>0 = ∈→Inhab (0r <P_) (b≥0 t∈upper)
+    return
+      (Inhab→∈ (0r <P_) (subst (_> 0r) (sym q≡s+t) (+-Pres>0 s>0 t>0)))
 
 
   -- Multiplication
@@ -331,11 +337,12 @@ module Basics ⦃ 🤖 : Oracle ⦄
   ≥𝕂0+q∈upper→q>0 a {q = q} a≥0 q∈upper = ∈→Inhab (0r <P_) (a≥0 q∈upper)
 
   q∈·upper→q>0 : (a b : 𝕂) → a ≥𝕂 𝟘 → b ≥𝕂 𝟘 → (q : K) → q ∈ specify (·upper a b) → q > 0r
-  q∈·upper→q>0 a b a≥0 b≥0 q q∈upper = Prop.rec isProp<
-    (λ (s , t , s∈upper , t∈upper , q≡s·t) →
-      subst (_> 0r) (sym q≡s·t)
-        (·-Pres>0 (≥𝕂0+q∈upper→q>0 a a≥0 s∈upper) (≥𝕂0+q∈upper→q>0 b b≥0 t∈upper)))
-    (∈→Inhab (·upper a b) q∈upper)
+  q∈·upper→q>0 a b a≥0 b≥0 q q∈upper =
+    proof _ , isProp< by do
+    (s , t , s∈upper , t∈upper , q≡s·t) ← ∈→Inhab (·upper a b) q∈upper
+    return (subst (_> 0r) (sym q≡s·t)
+      (·-Pres>0 (≥𝕂0+q∈upper→q>0 a a≥0 s∈upper) (≥𝕂0+q∈upper→q>0 b b≥0 t∈upper)))
+
 
   private
     alg-helper' : (a b c d : K)(d≢0 : ¬ d ≡ 0r) → d ≡ a · b → c ≡ a · (b · (c · inv d≢0))
@@ -345,42 +352,47 @@ module Basics ⦃ 🤖 : Oracle ⦄
 
   _·𝕂₊_ : (a b : 𝕂₊) → 𝕂₊
   ((a , a≥0) ·𝕂₊ (b , b≥0)) .fst .upper = specify (·upper a b)
-  ((a , a≥0) ·𝕂₊ (b , b≥0)) .fst .upper-inhab = Prop.map2
-    (λ (p , p∈upper) (q , q∈upper) →
-      p · q , Inhab→∈ (·upper a b) ∣ p , q , p∈upper , q∈upper , refl ∣₁)
-    (a .upper-inhab) (b .upper-inhab)
+  ((a , a≥0) ·𝕂₊ (b , b≥0)) .fst .upper-inhab = do
+    (p , p∈upper) ← a .upper-inhab
+    (q , q∈upper) ← b .upper-inhab
+    return
+      (p · q , Inhab→∈ (·upper a b) ∣ p , q , p∈upper , q∈upper , refl ∣₁)
+
   ((a , a≥0) ·𝕂₊ (b , b≥0)) .fst .upper-close r q q∈upper q<r =
-    Prop.rec (isProp∈ (((a , a≥0) ·𝕂₊ (b , b≥0)) .fst .upper))
-    (λ (s , t , s∈upper , t∈upper , q≡s·t) →
-      let q>0 : q > 0r
-          q>0 = q∈·upper→q>0 a b a≥0 b≥0 q q∈upper
-          q≢0 : ¬ q ≡ 0r
-          q≢0 = >-arefl q>0
-          q⁻¹ = inv q≢0
-          t·r·q⁻¹∈upper : (t · (r · q⁻¹)) ∈ b .upper
-          t·r·q⁻¹∈upper = b .upper-close _ _ t∈upper
-            (·-Pos·>1→> (≥𝕂0+q∈upper→q>0 b b≥0 t∈upper) (p>q>0→p·q⁻¹>1 q>0 q<r))
-          r≡s·t·r·q⁻¹ : r ≡ s · (t · (r · q⁻¹))
-          r≡s·t·r·q⁻¹ = alg-helper' s t r q q≢0 q≡s·t
-      in  Inhab→∈ (·upper a b) ∣ s , t · (r · q⁻¹) , s∈upper , t·r·q⁻¹∈upper , r≡s·t·r·q⁻¹ ∣₁)
-    (∈→Inhab (·upper a b) q∈upper)
-  ((a , a≥0) ·𝕂₊ (b , b≥0)) .fst .upper-round q q∈upper = Prop.rec squash₁
-    (λ (s , t , s∈upper , t∈upper , q≡s·t) → Prop.map2
-      (λ (s' , s'<s , s'∈upper) (t' , t'<t , t'∈upper) →
-        s' · t' , subst (s' · t' <_) (sym q≡s·t)
-          (·-PosPres> (≥𝕂0+q∈upper→q>0 a a≥0 s'∈upper) (≥𝕂0+q∈upper→q>0 b b≥0 t'∈upper) s'<s t'<t) ,
-        Inhab→∈ (·upper a b) ∣ s' , t' , s'∈upper , t'∈upper , refl ∣₁ )
-      (a .upper-round s s∈upper) (b .upper-round t t∈upper))
-    (∈→Inhab (·upper a b) q∈upper)
+    proof _ , isProp∈ (((a , a≥0) ·𝕂₊ (b , b≥0)) .fst .upper) by do
+    (s , t , s∈upper , t∈upper , q≡s·t) ← ∈→Inhab (·upper a b) q∈upper
+    let q>0 : q > 0r
+        q>0 = q∈·upper→q>0 a b a≥0 b≥0 q q∈upper
+        q≢0 : ¬ q ≡ 0r
+        q≢0 = >-arefl q>0
+        q⁻¹ = inv q≢0
+        t·r·q⁻¹∈upper : (t · (r · q⁻¹)) ∈ b .upper
+        t·r·q⁻¹∈upper = b .upper-close _ _ t∈upper
+          (·-Pos·>1→> (≥𝕂0+q∈upper→q>0 b b≥0 t∈upper) (p>q>0→p·q⁻¹>1 q>0 q<r))
+        r≡s·t·r·q⁻¹ : r ≡ s · (t · (r · q⁻¹))
+        r≡s·t·r·q⁻¹ = alg-helper' s t r q q≢0 q≡s·t
+    return
+      (Inhab→∈ (·upper a b) ∣ s , t · (r · q⁻¹) , s∈upper , t·r·q⁻¹∈upper , r≡s·t·r·q⁻¹ ∣₁)
+
+  ((a , a≥0) ·𝕂₊ (b , b≥0)) .fst .upper-round q q∈upper = do
+    (s , t , s∈upper , t∈upper , q≡s·t) ← ∈→Inhab (·upper a b) q∈upper
+    (s' , s'<s , s'∈upper) ← a .upper-round s s∈upper
+    (t' , t'<t , t'∈upper) ← b .upper-round t t∈upper
+    return
+      (s' · t' , subst (s' · t' <_) (sym q≡s·t)
+        (·-PosPres> (≥𝕂0+q∈upper→q>0 a a≥0 s'∈upper) (≥𝕂0+q∈upper→q>0 b b≥0 t'∈upper) s'<s t'<t) ,
+       Inhab→∈ (·upper a b) ∣ s' , t' , s'∈upper , t'∈upper , refl ∣₁)
+
   ((a , a≥0) ·𝕂₊ (b , b≥0)) .fst .lower-inhab =
     ∣ - 1r , (λ r r∈upper → <-trans -1<0 (q∈·upper→q>0 a b a≥0 b≥0 r r∈upper)) ∣₁
+
   ((a , a≥0) ·𝕂₊ (b , b≥0)) .snd q∈upper =
-    Prop.rec (isProp∈ (𝟘 .upper))
-    (λ (s , t , s∈upper , t∈upper , q≡s·t) →
-      let s>0 = ∈→Inhab (0r <P_) (a≥0 s∈upper)
-          t>0 = ∈→Inhab (0r <P_) (b≥0 t∈upper)
-      in  Inhab→∈ (0r <P_) (subst (_> 0r) (sym q≡s·t) (·-Pres>0 s>0 t>0)))
-    (∈→Inhab (·upper a b) q∈upper)
+    proof _ , isProp∈ (𝟘 .upper) by do
+    (s , t , s∈upper , t∈upper , q≡s·t) ← ∈→Inhab (·upper a b) q∈upper
+    let s>0 = ∈→Inhab (0r <P_) (a≥0 s∈upper)
+        t>0 = ∈→Inhab (0r <P_) (b≥0 t∈upper)
+    return
+      (Inhab→∈ (0r <P_) (subst (_> 0r) (sym q≡s·t) (·-Pres>0 s>0 t>0)))
 
 
   -- Multiplicative Inverse
@@ -393,27 +405,29 @@ module Basics ⦃ 🤖 : Oracle ⦄
   inv𝕂₊ a q₀ q₀>0 q₀<r∈upper .fst .upper-inhab =
     let q₀⁻¹ = inv (>-arefl q₀>0) in
     ∣ q₀⁻¹ + 1r , Inhab→∈ (inv-upper a) ∣ q₀ , q₀>0 , q₀<r∈upper , q+1>q {q = q₀⁻¹} ∣₁ ∣₁
+
   inv𝕂₊ a q₀ q₀>0 q₀<r∈upper .fst .upper-close r q q∈upper q<r =
-    Prop.rec (isProp∈ (inv𝕂₊ a q₀ q₀>0 q₀<r∈upper .fst .upper))
-    (λ (p , p>0 , p<r∈upper , q>p⁻¹) →
-      Inhab→∈ (inv-upper a) ∣ p , p>0 , p<r∈upper , <-trans q>p⁻¹ q<r ∣₁)
-    (∈→Inhab (inv-upper a) q∈upper)
-  inv𝕂₊ a _ _ _ .fst .upper-round q q∈upper = Prop.map
-    (λ (p , p>0 , p<r∈upper , q>p⁻¹) →
-      let p⁻¹ = inv (>-arefl p>0) in
-      middle p⁻¹ q , middle<r q>p⁻¹  , Inhab→∈ (inv-upper a) ∣ p , p>0 , p<r∈upper , middle>l q>p⁻¹ ∣₁)
-    (∈→Inhab (inv-upper a) q∈upper)
-  inv𝕂₊ a q₀ q₀>0 q₀<r∈upper .fst .lower-inhab = Prop.map
-    (λ (q , q∈upper) →
-      let q>0 = <-trans q₀>0 (q₀<r∈upper q q∈upper)
-          q⁻¹ = inv (>-arefl q>0) in
-      q⁻¹ , λ r r∈upper → Prop.rec isProp<
-        (λ (p , p>0 , p<s∈upper , r>p⁻¹) →
-          <-trans (inv-Reverse< _ _ (p<s∈upper q q∈upper)) r>p⁻¹)
-        (∈→Inhab (inv-upper a) r∈upper))
-    (a .upper-inhab)
+    proof _ , isProp∈ (inv𝕂₊ a q₀ q₀>0 q₀<r∈upper .fst .upper) by do
+    (p , p>0 , p<r∈upper , q>p⁻¹) ← ∈→Inhab (inv-upper a) q∈upper
+    return
+      (Inhab→∈ (inv-upper a) ∣ p , p>0 , p<r∈upper , <-trans q>p⁻¹ q<r ∣₁)
+
+  inv𝕂₊ a _ _ _ .fst .upper-round q q∈upper = do
+    (p , p>0 , p<r∈upper , q>p⁻¹) ← ∈→Inhab (inv-upper a) q∈upper
+    let p⁻¹ = inv (>-arefl p>0)
+    return
+      (middle p⁻¹ q , middle<r q>p⁻¹  , Inhab→∈ (inv-upper a) ∣ p , p>0 , p<r∈upper , middle>l q>p⁻¹ ∣₁)
+
+  inv𝕂₊ a q₀ q₀>0 q₀<r∈upper .fst .lower-inhab = do
+    (q , q∈upper) ← a .upper-inhab
+    let q>0 = <-trans q₀>0 (q₀<r∈upper q q∈upper)
+        q⁻¹ = inv (>-arefl q>0)
+    return (q⁻¹ , λ r r∈upper → proof _ , isProp< by do
+      (p , p>0 , p<s∈upper , r>p⁻¹) ← ∈→Inhab (inv-upper a) r∈upper
+      return (<-trans (inv-Reverse< _ _ (p<s∈upper q q∈upper)) r>p⁻¹))
+
   inv𝕂₊ a _ _ _ .snd q∈upper =
-    Prop.rec (isProp∈ (𝟘 .upper))
-    (λ (p , p>0 , p<r∈upper , q>p⁻¹) →
-      Inhab→∈ (0r <P_) (<-trans (p>0→p⁻¹>0 p>0) q>p⁻¹))
-    (∈→Inhab (inv-upper a) q∈upper)
+    proof _ , isProp∈ (𝟘 .upper) by do
+    (p , p>0 , p<r∈upper , q>p⁻¹) ← ∈→Inhab (inv-upper a) q∈upper
+    return
+      (Inhab→∈ (0r <P_) (<-trans (p>0→p⁻¹>0 p>0) q>p⁻¹))

@@ -25,6 +25,7 @@ open import Cubical.Data.Nat using (ℕ ; zero ; suc)
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
@@ -125,9 +126,10 @@ module CompleteOrderedField ⦃ 🤖 : Oracle ⦄ (𝒦 : OrderedField ℓ ℓ')
       0∈bounded = Inhab→∈ P ∣ 1 , subst (_> 0r) (sym (1⋆q≡q _)) ε>0 ∣₁
 
       q-bound : (x : K) → x ∈ bounded → x < q
-      q-bound x x∈b = Prop.rec isProp<
-        (λ (n , nε>q) → <≤-trans nε>q (insurmountable n))
-        (∈→Inhab P x∈b)
+      q-bound x x∈b =
+        proof _ , isProp< by do
+        (n , nε>q) ← ∈→Inhab P x∈b
+        return (<≤-trans nε>q (insurmountable n))
 
       q-bound' : (x : K) → x ∈ bounded → x ≤ q
       q-bound' x x∈b = inl (q-bound x x∈b)
@@ -138,10 +140,10 @@ module CompleteOrderedField ⦃ 🤖 : Oracle ⦄ (𝒦 : OrderedField ℓ ℓ')
       module _ (p : K)(p>q-ε : boundary .sup - ε < p)(p∈A : p ∈ bounded) where
 
         ∥n⋆ε>p+ε∥ : ∥ Σ[ n ∈ ℕ ] n ⋆ ε > p + ε ∥₁
-        ∥n⋆ε>p+ε∥ = Prop.map
-          (λ (n , n⋆ε>p) → suc n ,
+        ∥n⋆ε>p+ε∥ = do
+          (n , n⋆ε>p) ← ∈→Inhab P p∈A
+          return (suc n ,
             subst (_> p + ε) (sym (sucn⋆q≡n⋆q+q n _)) (+-rPres< {z = ε} n⋆ε>p))
-          (∈→Inhab P p∈A)
 
         open Helpers (𝒦 .fst .fst)
 
@@ -155,7 +157,9 @@ module CompleteOrderedField ⦃ 🤖 : Oracle ⦄ (𝒦 : OrderedField ℓ ℓ')
       q-ε<sup = -rPos→< ε>0
 
       no-way : ⊥
-      no-way = Prop.rec isProp⊥ (λ (p , p>q-ε , p∈A) → no-way' _ p>q-ε p∈A) (<sup→∃∈ _ boundary q-ε<sup)
+      no-way = proof _ , isProp⊥ by do
+        (p , p>q-ε , p∈A) ← <sup→∃∈ _ boundary q-ε<sup
+        return (no-way' _ p>q-ε p∈A)
 
 
   -- Complete ordered field is Archimedean
@@ -228,18 +232,20 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       bounded = specify P
 
       bounded-inhab : isInhabited bounded
-      bounded-inhab = Prop.map
-        (λ (r , fr<y) → r , Inhab→∈ P fr<y)
-        (isUnbounded→isLowerUnbounded
-        (isArchimedean→isUnbounded
-        (isComplete→isArchimedean _ getSup')) y)
+      bounded-inhab = do
+        (r , fr<y) ←
+          isUnbounded→isLowerUnbounded
+          (isArchimedean→isUnbounded
+          (isComplete→isArchimedean _ getSup')) y
+        return (r , Inhab→∈ P fr<y)
 
       bounded-is-bounded : isUpperBounded bounded
-      bounded-is-bounded = Prop.map
-        (λ (r , y<fr) → r , λ s s∈b →
+      bounded-is-bounded = do
+        (r , y<fr) ←
+          isArchimedean→isUnbounded
+          (isComplete→isArchimedean _ getSup') y
+        return (r , λ s s∈b →
           inl (homRefl< s r (<'-trans (∈→Inhab P s∈b) y<fr)))
-        (isArchimedean→isUnbounded
-        (isComplete→isArchimedean _ getSup') y)
 
       boundary : Supremum bounded
       boundary = getSup bounded-inhab bounded-is-bounded
@@ -251,18 +257,15 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         where
         case-split : Trichotomy' (f-map x) y → f-map x ≡ y
         case-split (eq fx≡y) = fx≡y
-        case-split (lt fx<y) = Empty.rec
-          (Prop.rec isProp⊥
-          (λ (r , fx<fr , fr<y) →
-            <≤-asym (homRefl< x r fx<fr) (boundary .bound r (Inhab→∈ P fr<y)))
-          (findBetween fx<y))
-        case-split (gt fx>y) = Empty.rec
-          (Prop.rec isProp⊥
-          (λ (r , y<fr , fr<fx) → Prop.rec isProp⊥
-            (λ (s , r<s , s∈b) →
-              <'-asym (<'-trans y<fr (homPres< r s r<s)) (∈→Inhab P s∈b))
-            (<sup→∃∈ r boundary (homRefl< r x fr<fx)))
-          (findBetween fx>y))
+        case-split (lt fx<y) = Empty.rec (
+          proof _ , isProp⊥ by do
+          (r , fx<fr , fr<y) ← findBetween fx<y
+          return (<≤-asym (homRefl< x r fx<fr) (boundary .bound r (Inhab→∈ P fr<y))))
+        case-split (gt fx>y) = Empty.rec (
+          proof _ , isProp⊥ by do
+          (r , y<fr , fr<fx) ← findBetween fx>y
+          (s , r<s , s∈b) ← <sup→∃∈ r boundary (homRefl< r x fr<fx)
+          return (<'-asym (<'-trans y<fr (homPres< r s r<s)) (∈→Inhab P s∈b)))
 
 
     isEmbedding-f : isEmbedding f-map

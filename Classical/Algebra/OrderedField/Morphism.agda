@@ -14,6 +14,7 @@ open import Cubical.Data.Sigma
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Nat using (ℕ ; zero ; suc)
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.HITs.SetQuotients as SetQuot
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.Ring
@@ -176,16 +177,16 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
   isLowerUnbounded = (x : K) → ∥ Σ[ r ∈ K' ] f-map r < x ∥₁
 
   isUnbounded→isLowerUnbounded : isUnbounded → isLowerUnbounded
-  isUnbounded→isLowerUnbounded exceed x = Prop.map
-    (λ (r , fr>-x) → -' r ,
+  isUnbounded→isLowerUnbounded exceed x = do
+    (r , fr>-x) ← exceed (- x)
+    return (-' r ,
       transport (λ i → pres- r (~ i) < -Idempotent x i) (-Reverse< fr>-x))
-    (exceed (- x))
 
   isLowerUnbounded→isUnbounded : isLowerUnbounded → isUnbounded
-  isLowerUnbounded→isUnbounded -exceed x = Prop.map
-    (λ (r , fr<-x) → -' r ,
+  isLowerUnbounded→isUnbounded -exceed x = do
+    (r , fr<-x) ← -exceed (- x)
+    return (-' r ,
       transport (λ i → pres- r (~ i) > -Idempotent x i) (-Reverse< fr<-x))
-    (-exceed (- x))
 
 
   isLowerUnboundedΣ : Type _
@@ -203,19 +204,17 @@ module OrderedFieldHomStr (f : OrderedFieldHom 𝒦' 𝒦) where
   isArbitrarilySmall = (x : K) → x > 0r → ∥ Σ[ r ∈ K' ] (0r < f-map r) × (f-map r < x) ∥₁
 
   isUnbounded→isArbitrarilySmall : isUnbounded → isArbitrarilySmall
-  isUnbounded→isArbitrarilySmall exceed x x>0 =
-    Prop.map
-    (λ (r , fr>x⁻¹) →
-      let x⁻¹>0 : inv₊ x>0 > 0r
-          x⁻¹>0 = p>0→p⁻¹>0 x>0
-          r>0 : r >' 0r'
-          r>0 = homRefl>0 _ (<-trans x⁻¹>0 fr>x⁻¹)
-          fr>0 : f-map r > 0r
-          fr>0 = homPres>0 _ r>0
-          fr⁻¹<x⁻¹⁻¹ = inv-Reverse< fr>0 x⁻¹>0 fr>x⁻¹
-      in  _ , homPres>0 _ (p>'0→p⁻¹>'0 r>0) ,
-          transport (λ i → homPresInv r>0 (~ i) < inv₊Idem x>0 i) fr⁻¹<x⁻¹⁻¹)
-    (exceed (inv₊ x>0))
+  isUnbounded→isArbitrarilySmall exceed x x>0 = do
+    (r , fr>x⁻¹) ← exceed (inv₊ x>0)
+    let x⁻¹>0 : inv₊ x>0 > 0r
+        x⁻¹>0 = p>0→p⁻¹>0 x>0
+        r>0 : r >' 0r'
+        r>0 = homRefl>0 _ (<-trans x⁻¹>0 fr>x⁻¹)
+        fr>0 : f-map r > 0r
+        fr>0 = homPres>0 _ r>0
+        fr⁻¹<x⁻¹⁻¹ = inv-Reverse< fr>0 x⁻¹>0 fr>x⁻¹
+    return (_ , homPres>0 _ (p>'0→p⁻¹>'0 r>0) ,
+      transport (λ i → homPresInv r>0 (~ i) < inv₊Idem x>0 i) fr⁻¹<x⁻¹⁻¹)
 
 
   isArbitrarilySmallΣ : Type _
