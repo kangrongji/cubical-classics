@@ -14,6 +14,7 @@ open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.Ring
 open import Cubical.Algebra.CommRing
@@ -124,15 +125,14 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
 
       private
         map-sub-inhab : isInhabited map-sub
-        map-sub-inhab = Prop.map
-          (λ (q , q<r∈upper) →
-            f-map q , Inhab→∈ map-prop (λ p p∈upper → homPres< _ _ (q<r∈upper _ p∈upper)))
-          (a .lower-inhab)
+        map-sub-inhab = do
+          (q , q<r∈upper) ← a .lower-inhab
+          return (f-map q , Inhab→∈ map-prop (λ p p∈upper → homPres< _ _ (q<r∈upper _ p∈upper)))
 
         map-sub-bound : isUpperBounded map-sub
-        map-sub-bound = Prop.map
-          (λ (q , q∈upper) → f-map q , (λ r r∈map → inl (∈→Inhab map-prop r∈map _ q∈upper)))
-          (a .upper-inhab)
+        map-sub-bound = do
+          (q , q∈upper) ← a .upper-inhab
+          return (f-map q , (λ r r∈map → inl (∈→Inhab map-prop r∈map _ q∈upper)))
 
       map-sup : Supremum map-sub
       map-sup = getSup map-sub-inhab map-sub-bound
@@ -142,15 +142,10 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
 
 
       >sup-helper : (x : K') → ¬ x ∈ map-sub → ∥ Σ[ q ∈ K ] q ∈ a .upper × (f-map q <' x) ∥₁
-      >sup-helper x ¬∈sub =
-        Prop.rec squash₁
-          (λ (q , q∈a , ¬sup<fq) →
-            Prop.map
-            (λ (r , r<q , r∈upper) →
-                r , r∈upper , <≤-trans' (homPres< r q r<q) (¬<→≥' ¬sup<fq))
-            (a .upper-round q q∈a))
-          (¬∀→∃¬2 (λ _ _ → isProp<')
-            (¬map (Inhab→∈ map-prop) ¬∈sub))
+      >sup-helper x ¬∈sub = do
+        (q , q∈a , ¬sup<fq) ← ¬∀→∃¬2 (λ _ _ → isProp<') (¬map (Inhab→∈ map-prop) ¬∈sub)
+        (r , r<q , r∈upper) ← a .upper-round q q∈a
+        return (r , r∈upper , <≤-trans' (homPres< r q r<q) (¬<→≥' ¬sup<fq))
 
       >map-helper : (x : K') → x >' map-helper → ∥ Σ[ q ∈ K ] q ∈ a .upper × (f-map q <' x) ∥₁
       >map-helper x x>sup = >sup-helper x (>sup→¬∈ x map-sup x>sup)
@@ -158,13 +153,11 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
 
       private
         ∈-helper :  ¬ map-helper ∈ map-sub → ⊥
-        ∈-helper ¬∈sub = Prop.rec isProp⊥
-          (λ (q , q∈a , sup>fq) →
-            (Prop.rec isProp⊥
-              (λ (x , fq<x , x∈sub) →
-                <'-asym fq<x (∈→Inhab map-prop x∈sub q q∈a))
-            (<sup→∃∈ _ map-sup sup>fq)))
-          (>sup-helper _ ¬∈sub)
+        ∈-helper ¬∈sub =
+          proof _ , isProp⊥ by do
+          (q , q∈a , sup>fq) ← >sup-helper _ ¬∈sub
+          (x , fq<x , x∈sub) ← <sup→∃∈ _ map-sup sup>fq
+          return (<'-asym fq<x (∈→Inhab map-prop x∈sub q q∈a))
 
       map∈sub : map-helper ∈ map-sub
       map∈sub with decide (isProp∈ map-sub)
@@ -180,10 +173,10 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
       comp-helper : (x : K') → x ∈ map-sub (K→𝕂 q) → x ≤' f-map q
       comp-helper x x∈sub with <≤-total' (f-map q) x
       ... | inr x≤fq = x≤fq
-      ... | inl x>fq = Empty.rec (Prop.rec isProp⊥
-        (λ (r , fq<fr , fr<x) →
-          <'-asym fr<x (∈→Inhab (map-prop (K→𝕂 q)) x∈sub r (Inhab→∈ (q <P_) (homRefl< _ _ fq<fr))))
-        (findBetween x>fq))
+      ... | inl x>fq = Empty.rec (
+        proof _ , isProp⊥ by do
+        (r , fq<fr , fr<x) ← findBetween x>fq
+        return (<'-asym fr<x (∈→Inhab (map-prop (K→𝕂 q)) x∈sub r (Inhab→∈ (q <P_) (homRefl< _ _ fq<fr)))))
 
       comp-helper' : (x : K') → x ≤' f-map q → x ∈ map-sub (K→𝕂 q)
       comp-helper' x x≤fq =
@@ -229,45 +222,45 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
       map-helper-pres> : a >𝕂 b → map-helper a >' map-helper b
       map-helper-pres> a>b with <≤-total' (map-helper b) (map-helper a)
       ... | inl fb<fa = fb<fa
-      ... | inr fa≤fb = Empty.rec
-        (Prop.rec isProp⊥
-        (λ (q , q<r∈a , q∈b) →
-          let fq∈suba : f-map q ∈ map-sub a
-              fq∈suba = Inhab→∈ (map-prop a) (λ r r∈a → homPres< _ _ (q<r∈a r r∈a))
-              fa≥fq : map-helper a ≥' f-map q
-              fa≥fq = map-sup a .bound _ fq∈suba
-              fq>fb : f-map q >' map-helper b
-              fq>fb = map-helper< b _ q∈b
-              fb<fa : map-helper b <' map-helper a
-              fb<fa = <≤-trans' fq>fb fa≥fq
-          in  <≤-asym' fb<fa fa≤fb) a>b)
+      ... | inr fa≤fb = Empty.rec (
+        proof _ , isProp⊥ by do
+        (q , q<r∈a , q∈b)  ← a>b
+        let fq∈suba : f-map q ∈ map-sub a
+            fq∈suba = Inhab→∈ (map-prop a) (λ r r∈a → homPres< _ _ (q<r∈a r r∈a))
+            fa≥fq : map-helper a ≥' f-map q
+            fa≥fq = map-sup a .bound _ fq∈suba
+            fq>fb : f-map q >' map-helper b
+            fq>fb = map-helper< b _ q∈b
+            fb<fa : map-helper b <' map-helper a
+            fb<fa = <≤-trans' fq>fb fa≥fq
+        return (<≤-asym' fb<fa fa≤fb))
 
 
     module _ (a b : 𝕂) where
 
       fa+fb≤ : (q : K) → q ∈ (a +𝕂 b) .upper → map-helper a +' map-helper b <' f-map q
-      fa+fb≤ q q∈a+b = Prop.rec isProp<'
-        (λ (s , t , s∈a , t∈b , q≡s+t) →
-          subst (map-helper a +' map-helper b <'_)
-            (sym (pres+ s t) ∙ (λ i → f-map (q≡s+t (~ i))))
-            (+-Pres<' (map-helper< a s s∈a) (map-helper< b t t∈b)))
-        (∈→Inhab (+upper a b) q∈a+b)
+      fa+fb≤ q q∈a+b =
+        proof _ , isProp<' by do
+        (s , t , s∈a , t∈b , q≡s+t) ← ∈→Inhab (+upper a b) q∈a+b
+        return (subst (map-helper a +' map-helper b <'_)
+          (sym (pres+ s t) ∙ (λ i → f-map (q≡s+t (~ i))))
+          (+-Pres<' (map-helper< a s s∈a) (map-helper< b t t∈b)))
 
       fa+fb≤fa+b : map-helper a +' map-helper b ≤' map-helper (a +𝕂 b)
       fa+fb≤fa+b = map-sup (a +𝕂 b) .bound _ (Inhab→∈ (map-prop (a +𝕂 b)) fa+fb≤)
 
       ¬fa+fb<fa+b : ¬ map-helper a +' map-helper b <' map-helper (a +𝕂 b)
       ¬fa+fb<fa+b fa+fb<fa+b =
-        let (s , t , fa<s , fb<t , fa+b≡s+t)
-              = <-+-Decompose' (map-helper a) (map-helper b) _ fa+fb<fa+b
-        in  Prop.rec2 isProp⊥
-            (λ (p , p∈a , fp<s) (q , q∈b , fq<t) →
-              let fp+q<fa+b : f-map (p + q) <' map-helper (a +𝕂 b)
-                  fp+q<fa+b = transport (λ i → pres+ p q (~ i) <' fa+b≡s+t (~ i)) (+-Pres<' fp<s fq<t)
-                  p+q∈a+b : (p + q) ∈ (a +𝕂 b) .upper
-                  p+q∈a+b = Inhab→∈ (+upper a b) ∣ p , q , p∈a , q∈b , refl ∣₁
-              in  <'-asym fp+q<fa+b (map-helper< (a +𝕂 b) _ p+q∈a+b))
-            (>map-helper a s fa<s) (>map-helper b t fb<t)
+        proof _ , isProp⊥ by do
+        let (s , t , fa<s , fb<t , fa+b≡s+t) =
+              <-+-Decompose' (map-helper a) (map-helper b) _ fa+fb<fa+b
+        (p , p∈a , fp<s) ← >map-helper a s fa<s
+        (q , q∈b , fq<t) ← >map-helper b t fb<t
+        let fp+q<fa+b : f-map (p + q) <' map-helper (a +𝕂 b)
+            fp+q<fa+b = transport (λ i → pres+ p q (~ i) <' fa+b≡s+t (~ i)) (+-Pres<' fp<s fq<t)
+            p+q∈a+b : (p + q) ∈ (a +𝕂 b) .upper
+            p+q∈a+b = Inhab→∈ (+upper a b) ∣ p , q , p∈a , q∈b , refl ∣₁
+        return (<'-asym fp+q<fa+b (map-helper< (a +𝕂 b) _ p+q∈a+b))
 
       map-pres+ : map-helper (a +𝕂 b) ≡ map-helper a +' map-helper b
       map-pres+ = case-split (trichotomy' _ _)
@@ -316,34 +309,35 @@ module UniversalProperty ⦃ 🤖 : Oracle ⦄
         b₊ = b , b≥0
 
       fa·fb≤ : (q : K) → q ∈ (a₊ ·𝕂₊ b₊) .fst .upper → map-helper a ·' map-helper b <' f-map q
-      fa·fb≤ q q∈a·b = Prop.rec isProp<'
-        (λ (s , t , s∈a , t∈b , q≡s·t) →
+      fa·fb≤ q q∈a·b =
+        proof _ , isProp<' by do
+        (s , t , s∈a , t∈b , q≡s·t) ← ∈→Inhab (·upper₊ a₊ b₊) q∈a·b
+        return (
           subst (map-helper a ·' map-helper b <'_)
             (sym (pres· s t) ∙ (λ i → f-map (q≡s·t (~ i))))
             (·-PosPres≥0>0' (map-helper-pres≥0 a a≥0) (map-helper-pres≥0 b b≥0)
               (homPres>0 _ (≥𝕂0+q∈upper→q>0 a a≥0 s∈a)) (homPres>0 _ (≥𝕂0+q∈upper→q>0 b b≥0 t∈b))
               (map-helper< a s s∈a) (map-helper< b t t∈b)))
-        (∈→Inhab (·upper₊ a₊ b₊) q∈a·b)
 
       fa·fb≤fa·b : map-helper a ·' map-helper b ≤' map-helper ((a₊ ·𝕂₊ b₊) .fst)
       fa·fb≤fa·b = map-sup ((a₊ ·𝕂₊ b₊) .fst) .bound _ (Inhab→∈ (map-prop ((a₊ ·𝕂₊ b₊) .fst)) fa·fb≤)
 
       ¬fa·fb<fa·b : ¬ map-helper a ·' map-helper b <' map-helper ((a₊ ·𝕂₊ b₊) .fst)
       ¬fa·fb<fa·b fa·fb<fa·b =
-        let (s , t , fa<s , fb<t , fa·b≡s·t)
-              = <-·-Decompose' (map-helper a) (map-helper b) _
-                  (map-helper-pres>0 a a>0) (map-helper-pres>0 b b>0) fa·fb<fa·b
-        in  Prop.rec2 isProp⊥
-            (λ (p , p∈a , fp<s) (q , q∈b , fq<t) →
-              let fp·q<fa·b : f-map (p · q) <' map-helper ((a₊ ·𝕂₊ b₊) .fst)
-                  fp·q<fa·b =
-                    transport (λ i → pres· p q (~ i) <' fa·b≡s·t (~ i))
-                      (·-PosPres>' (homPres>0 _ (≥𝕂0+q∈upper→q>0 a a≥0 p∈a))
-                        (homPres>0 _ (≥𝕂0+q∈upper→q>0 b b≥0 q∈b)) fp<s fq<t)
-                  p·q∈a·b : (p · q) ∈ (a₊ ·𝕂₊ b₊) .fst .upper
-                  p·q∈a·b = Inhab→∈ (·upper₊ a₊ b₊) ∣ p , q , p∈a , q∈b , refl ∣₁
-              in  <'-asym fp·q<fa·b (map-helper<  ((a₊ ·𝕂₊ b₊) .fst) _ p·q∈a·b))
-            (>map-helper a s fa<s) (>map-helper b t fb<t)
+        proof _ , isProp⊥ by do
+        let (s , t , fa<s , fb<t , fa·b≡s·t) =
+              <-·-Decompose' (map-helper a) (map-helper b) _
+              (map-helper-pres>0 a a>0) (map-helper-pres>0 b b>0) fa·fb<fa·b
+        (p , p∈a , fp<s) ← >map-helper a s fa<s
+        (q , q∈b , fq<t) ← >map-helper b t fb<t
+        let fp·q<fa·b : f-map (p · q) <' map-helper ((a₊ ·𝕂₊ b₊) .fst)
+            fp·q<fa·b =
+              transport (λ i → pres· p q (~ i) <' fa·b≡s·t (~ i))
+              (·-PosPres>' (homPres>0 _ (≥𝕂0+q∈upper→q>0 a a≥0 p∈a))
+                (homPres>0 _ (≥𝕂0+q∈upper→q>0 b b≥0 q∈b)) fp<s fq<t)
+            p·q∈a·b : (p · q) ∈ (a₊ ·𝕂₊ b₊) .fst .upper
+            p·q∈a·b = Inhab→∈ (·upper₊ a₊ b₊) ∣ p , q , p∈a , q∈b , refl ∣₁
+        return (<'-asym fp·q<fa·b (map-helper<  ((a₊ ·𝕂₊ b₊) .fst) _ p·q∈a·b))
 
       map-pres·PosPos' : map-helper ((a₊ ·𝕂₊ b₊) .fst) ≡ map-helper a ·' map-helper b
       map-pres·PosPos' = case-split (trichotomy' _ _)

@@ -22,6 +22,7 @@ open import Cubical.Data.Nat.Order using ()
           ; isProp≤  to isProp≤ℕ)
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 
 open import Classical.Axioms
 open import Classical.Foundations.Powerset
@@ -46,7 +47,7 @@ module _ ⦃ 🤖 : Oracle ⦄
 
   {-
 
-    Convergence and Limit of Real Number Sequence
+    Convergence and Limit of Sequence in Metric Spaces
 
   -}
 
@@ -93,13 +94,13 @@ module _ ⦃ 🤖 : Oracle ⦄
       ε/2>0 = middle>l ε>0
 
       ∣x-y∣<ε : dist (p .lim) (q .lim) < ε
-      ∣x-y∣<ε = Prop.rec2 isProp<
-        (λ (n₀ , abs<₀) (n₁ , abs<₁) →
-          let n = sucmax n₀ n₁ in
-          ≤<-trans (dist-Δ _ _ _) (transport
-            (λ i → dist (p .lim) (seq n) + dist-symm (q .lim) (seq n) i < x/2+x/2≡x ε i)
-            (+-Pres< (abs<₀ _ sucmax>left) (abs<₁ _ sucmax>right))))
-        (p .conv ε/2 ε/2>0) (q .conv ε/2 ε/2>0)
+      ∣x-y∣<ε = proof (_ , isProp<) by do
+        (n₀ , abs<₀) ← p .conv ε/2 ε/2>0
+        (n₁ , abs<₁) ← q .conv ε/2 ε/2>0
+        let n = sucmax n₀ n₁
+        return (≤<-trans (dist-Δ _ _ _) (transport
+          (λ i → dist (p .lim) (seq n) + dist-symm (q .lim) (seq n) i < x/2+x/2≡x ε i)
+          (+-Pres< (abs<₀ _ sucmax>left) (abs<₁ _ sucmax>right))))
 
 
   {-

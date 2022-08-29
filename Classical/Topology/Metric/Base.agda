@@ -18,6 +18,7 @@ open import Cubical.Data.Sum
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 
 open import Classical.Axioms
@@ -165,22 +166,20 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     Metric→Topology .has-∅ = Inhab→∈ 𝓂-prop (λ x x∈∅ → Empty.rec (¬x∈∅ x x∈∅))
     Metric→Topology .has-total = Inhab→∈ 𝓂-prop (λ x _ → ∣ 1 , 1>0 , A⊆total {A = ℬ x 1 ⦃ 1>0 ⦄} ∣₁)
     Metric→Topology .∩-close {A = A} {B = B} A∈Open B∈Open =
-      Inhab→∈ 𝓂-prop (λ x x∈A∩B → Prop.map2
-      (λ (r₀ , r₀>0 , ℬxr₀⊆A) (r₁ , r₁>0 , ℬxr₁⊆B) →
-        let (r , r>0 , r<r₀ , r<r₁) = min2 r₀>0 r₁>0 in
+      Inhab→∈ 𝓂-prop (λ x x∈A∩B → do
+      (r₀ , r₀>0 , ℬxr₀⊆A) ← ∈→Inhab 𝓂-prop A∈Open x (left∈-∩  A B x∈A∩B)
+      (r₁ , r₁>0 , ℬxr₁⊆B) ← ∈→Inhab 𝓂-prop B∈Open x (right∈-∩ A B x∈A∩B)
+      let (r , r>0 , r<r₀ , r<r₁) = min2 r₀>0 r₁>0
+      return (
         r , r>0 , ⊆→⊆∩ A B
         (⊆-trans {A = ℬ x r ⦃ r>0 ⦄} (ℬ⊆ ⦃ r>0 ⦄ ⦃ r₀>0 ⦄ r<r₀) ℬxr₀⊆A)
-        (⊆-trans {A = ℬ x r ⦃ r>0 ⦄} (ℬ⊆ ⦃ r>0 ⦄ ⦃ r₁>0 ⦄ r<r₁) ℬxr₁⊆B))
-      (∈→Inhab 𝓂-prop A∈Open x (left∈-∩  A B x∈A∩B))
-      (∈→Inhab 𝓂-prop B∈Open x (right∈-∩ A B x∈A∩B)))
+        (⊆-trans {A = ℬ x r ⦃ r>0 ⦄} (ℬ⊆ ⦃ r>0 ⦄ ⦃ r₁>0 ⦄ r<r₁) ℬxr₁⊆B)))
+
     Metric→Topology .∪-close {S = S} S⊆Open =
-      Inhab→∈ 𝓂-prop (λ x x∈∪S →
-      Prop.rec squash₁
-      (λ (A , x∈A , A∈S) → Prop.map
-        (λ (r , r>0 , ℬxr⊆A) →
-          r , r>0 , (λ p → ⊆union ℬxr⊆A A∈S p))
-        (∈→Inhab 𝓂-prop (S⊆Open A∈S) x x∈A))
-      (∈union→∃ x∈∪S))
+      Inhab→∈ 𝓂-prop (λ x x∈∪S → do
+      (A , x∈A , A∈S) ← ∈union→∃ x∈∪S
+      (r , r>0 , ℬxr⊆A) ← ∈→Inhab 𝓂-prop (S⊆Open A∈S) x x∈A
+      return (r , r>0 , (λ p → ⊆union ℬxr⊆A A∈S p)))
 
 
     private

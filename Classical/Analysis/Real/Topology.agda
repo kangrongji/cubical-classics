@@ -18,6 +18,7 @@ open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.Data.Empty as Empty
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 
 open import Classical.Axioms
@@ -158,15 +159,15 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         cov-sup = getSup ∣ a , Inhab→∈ cov-prop (a∈𝐈 a b , cov-a) ∣₁ ∣ b , b≥x∈sub ∣₁
           where
           cov-a : ∥ Σ[ 𝒰₀ ∈ ℙ (ℙ ℝ) ] 𝒰₀ ⊆ 𝒰 × isFinSub 𝒰₀ × 𝒰₀ covers [ a , a ] ⦃ ∈→Inhab𝐈-L (a∈𝐈 a b) ⦄ ∥₁
-          cov-a = Prop.map
-            (λ (U , a∈U , U∈𝒰) →
+          cov-a = do
+            (U , a∈U , U∈𝒰) ← ∈cover (a∈𝐈 a b) 𝒰cov𝐈
+            return (
               [[ U ]] , A∈S→[A]⊆S U∈𝒰 , isFinSub[x] ,
               (λ {x} x∈[a,a] →
                 let a≡x : a ≡ x
                     a≡x = x∈[a,b] refl x∈[a,a]
                 in  subst (x ∈_) (sym union[A]) (subst (_∈ U) a≡x a∈U)) ,
               A∈S→[A]⊆S (𝒰cov𝐈 .snd U∈𝒰))
-            (∈cover (a∈𝐈 a b) 𝒰cov𝐈)
 
         x₀ = cov-sup .sup
 
@@ -263,26 +264,24 @@ module _ ⦃ 🤖 : Oracle ⦄ where
             x₀∈cov×¬x₀<b' = x₀∈cov , no-way
 
         ∃ℬ : ∥ Σ[ U ∈ ℙ ℝ ] Σ[ r ∈ ℝ ] Σ[ r>0 ∈ r > 0 ] (U ∈ 𝒰) × (ℬ x₀ r ⦃ r>0 ⦄ ⊆ U) ∥₁
-        ∃ℬ = Prop.rec squash₁
-          (λ (U , x₀∈U , U∈𝒰) → Prop.map
-          (λ (r , r>0 , ℬxr⊆U) → U , r , r>0 , U∈𝒰 , (λ p → ℬxr⊆U p))
-          (∈→Inhab𝓂 (𝒰cov𝐈 .snd U∈𝒰) x₀ x₀∈U))
-          (∈cover x₀∈𝐈 𝒰cov𝐈)
+        ∃ℬ = do
+          (U , x₀∈U , U∈𝒰) ← ∈cover x₀∈𝐈 𝒰cov𝐈
+          (r , r>0 , ℬxr⊆U) ← ∈→Inhab𝓂 (𝒰cov𝐈 .snd U∈𝒰) x₀ x₀∈U
+          return (U , r , r>0 , U∈𝒰 , (λ p → ℬxr⊆U p))
 
         isProp×' : isProp ((x₀ ∈ cov-sub) × (¬ x₀ < b))
         isProp×' = isProp× (isProp∈ cov-sub) (isProp¬ _)
 
         x₀∈cov×¬x₀<b : (x₀ ∈ cov-sub) × (¬ x₀ < b)
-        x₀∈cov×¬x₀<b = Prop.rec isProp×'
-          (λ (U , r , r>0 , U∈𝒰 , ℬxr⊆U) → Prop.rec isProp×'
-          (λ (y , x₀-r<y , y∈sub) → Prop.rec isProp×'
-          (λ (𝒰₀ , 𝒰₀⊆𝒰 , fin𝒰₀ , cov) →
-            x₀∈cov×¬x₀<b'
-              U r ⦃ r>0 ⦄ U∈𝒰 ℬxr⊆U
-              y x₀-r<y y∈sub
-              𝒰₀ 𝒰₀⊆𝒰 fin𝒰₀ cov)
-          (∈→Inhab cov-prop y∈sub .snd))
-          (<sup→∃∈ (x₀ - r) cov-sup (-rPos→< r>0))) ∃ℬ
+        x₀∈cov×¬x₀<b =
+          proof _ , isProp×' by do
+          (U , r , r>0 , U∈𝒰 , ℬxr⊆U) ← ∃ℬ
+          (y , x₀-r<y , y∈sub) ← <sup→∃∈ (x₀ - r) cov-sup (-rPos→< r>0)
+          (𝒰₀ , 𝒰₀⊆𝒰 , fin𝒰₀ , cov) ← ∈→Inhab cov-prop y∈sub .snd
+          return (x₀∈cov×¬x₀<b'
+            U r ⦃ r>0 ⦄ U∈𝒰 ℬxr⊆U
+            y x₀-r<y y∈sub
+            𝒰₀ 𝒰₀⊆𝒰 fin𝒰₀ cov)
 
         x₀≡b : x₀ ≡ b
         x₀≡b = ≤+¬<→≡ x₀≤b (x₀∈cov×¬x₀<b .snd)
@@ -316,14 +315,14 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   isBoundedByInterval A = ∥ Σ[ a ∈ ℝ ] Σ[ b ∈ ℝ ] Σ[ a≤b ∈ a ≤ b ] A ⊆ [ a , b ] ⦃ a≤b ⦄ ∥₁
 
   isBoundedSub→isBoundedByInterval : {A : ℙ ℝ} → isBoundedSub A → isBoundedByInterval A
-  isBoundedSub→isBoundedByInterval =
-    Prop.map (λ (a , b , a≤b , h) →
-      a , b , a≤b , λ {x} x∈A → Inhab→∈𝐈 ⦃ a≤b ⦄ (h x x∈A .fst) (h x x∈A .snd))
+  isBoundedSub→isBoundedByInterval x = do
+    (a , b , a≤b , h) ← x
+    return (a , b , a≤b , λ {x} x∈A → Inhab→∈𝐈 ⦃ a≤b ⦄ (h x x∈A .fst) (h x x∈A .snd))
 
   isBoundedByInterval→isBoundedSub : {A : ℙ ℝ} → isBoundedByInterval A → isBoundedSub A
-  isBoundedByInterval→isBoundedSub =
-    Prop.map (λ (a , b , a≤b , A⊆𝐈) →
-      a , b , a≤b , λ x x∈A → ∈→Inhab𝐈-L ⦃ a≤b ⦄ (A⊆𝐈 x∈A) , ∈→Inhab𝐈-R ⦃ a≤b ⦄ (A⊆𝐈 x∈A))
+  isBoundedByInterval→isBoundedSub x = do
+    (a , b , a≤b , A⊆𝐈) ← x
+    return (a , b , a≤b , λ x x∈A → ∈→Inhab𝐈-L ⦃ a≤b ⦄ (A⊆𝐈 x∈A) , ∈→Inhab𝐈-R ⦃ a≤b ⦄ (A⊆𝐈 x∈A))
 
 
   {-
@@ -336,7 +335,6 @@ module _ ⦃ 🤖 : Oracle ⦄ where
 
   isBoundedClosedSub→isCompactSub : {A : ℙ ℝ} → isBoundedSub A → isClosedSub A → isCompactSub A
   isBoundedClosedSub→isCompactSub {A = A} bA cA =
-    Prop.rec isPropIsCompactSub
-    (λ (a , b , a≤b , A⊆𝐈) →
-      isClosedInCompact→isCompact A⊆𝐈 cA ( isCompactInterval a b ⦃ a≤b ⦄))
-    (isBoundedSub→isBoundedByInterval bA)
+    proof _ , isPropIsCompactSub by do
+    (a , b , a≤b , A⊆𝐈) ← isBoundedSub→isBoundedByInterval bA
+    return (isClosedInCompact→isCompact A⊆𝐈 cA ( isCompactInterval a b ⦃ a≤b ⦄))

@@ -12,6 +12,7 @@ open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 
 open import Classical.Axioms
@@ -78,13 +79,12 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   union∪ {S = S} {T = T} = bi⊆→≡ ∪-S∪T⊆∪S-∪-∪T ∪S-∪-∪T⊆∪-S∪T
     where
     ∪-S∪T⊆∪S-∪-∪T : union (S ∪ T) ⊆ union S ∪ union T
-    ∪-S∪T⊆∪S-∪-∪T x∈∪-S∪T = ∈A+∈B→∈A∪B (union S) (union T)
-      (Prop.map
-      (λ (A , x∈A , A∈S∪T) →
+    ∪-S∪T⊆∪S-∪-∪T x∈∪-S∪T = ∈A+∈B→∈A∪B (union S) (union T) do
+      (A , x∈A , A∈S∪T) ← ∈union→∃ x∈∪-S∪T
+      return (
         case ∈A∪B→∈A+∈B S T A∈S∪T of λ
         { (inl A∈S) → inl (∃→∈union ∣ A , x∈A , A∈S ∣₁)
         ; (inr A∈T) → inr (∃→∈union ∣ A , x∈A , A∈T ∣₁) })
-      (∈union→∃ x∈∪-S∪T))
 
     ∪S-∪-∪T⊆∪-S∪T : union S ∪ union T ⊆ union (S ∪ T)
     ∪S-∪-∪T⊆∪-S∪T x∈∪S-∪-∪T = ∃→∈union
@@ -105,10 +105,10 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     where
     ∪[A]⊆A : union [ A ] ⊆ A
     ∪[A]⊆A {x = x} x∈∪[A] =
-      Prop.rec (isProp∈ A)
-      (λ (B , x∈B , B∈[A]) →
-        Prop.rec (isProp∈ A) (λ A≡B → subst (x ∈_) (sym A≡B) x∈B)
-      (y∈[x]→∥x≡y∥ B∈[A])) (∈union→∃ x∈∪[A])
+      proof _ , isProp∈ A by do
+      (B , x∈B , B∈[A]) ← ∈union→∃ x∈∪[A]
+      A≡B ← y∈[x]→∥x≡y∥ B∈[A]
+      return (subst (x ∈_) (sym A≡B) x∈B)
 
     A⊆∪[A] : A ⊆ union [ A ]
     A⊆∪[A] x∈A = ∃→∈union ∣ A , x∈A , x∈[x] ∣₁

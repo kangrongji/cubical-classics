@@ -14,6 +14,7 @@ open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Nat using (ℕ ; zero ; suc)
 open import Cubical.Data.NatPlusOne
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 open import Cubical.Algebra.CommRing
 open import Cubical.Tactics.CommRingSolver.Reflection
@@ -149,8 +150,9 @@ module OrderedFieldStr (𝒦 : OrderedField ℓ ℓ') where
 
   p>0→p⁻¹>0 : (p>0 : p > 0r) → inv₊ p>0 > 0r
   p>0→p⁻¹>0 {p = p} p>0 = ·-rPosCancel>0 {x = p} {y = inv₊ p>0} p>0 p·p⁻¹>0
-    where p·p⁻¹>0 : p · inv₊ p>0 > 0r
-          p·p⁻¹>0 = subst (_> 0r) (sym (·-rInv₊ p>0)) 1>0
+    where
+    p·p⁻¹>0 : p · inv₊ p>0 > 0r
+    p·p⁻¹>0 = subst (_> 0r) (sym (·-rInv₊ p>0)) 1>0
 
   p>q>0→p·q⁻¹>1 : (q>0 : q > 0r) → p > q → p · inv₊ q>0 > 1r
   p>q>0→p·q⁻¹>1 {q = q} {p = p} q>0 p>q =
@@ -159,17 +161,18 @@ module OrderedFieldStr (𝒦 : OrderedField ℓ ℓ') where
 
   inv-Reverse< : (p>0 : p > 0r)(q>0 : q > 0r) → p > q → inv₊ p>0 < inv₊ q>0
   inv-Reverse< {p = p} {q = q} p>0 q>0 p>q = q⁻¹>p⁻¹
-    where p⁻¹ = inv₊ p>0
-          q⁻¹ = inv₊ q>0
-          p⁻¹·q⁻¹>0 : p⁻¹ · q⁻¹ > 0r
-          p⁻¹·q⁻¹>0 = ·-Pres>0 {x = p⁻¹} {y = q⁻¹} (p>0→p⁻¹>0 {p = p} p>0) (p>0→p⁻¹>0 {p = q} q>0)
-          p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹ : (p · p⁻¹) · q⁻¹ > (q · q⁻¹) · p⁻¹
-          p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹ = transport (λ i → helper2 p p⁻¹ q⁻¹ i > helper3 q p⁻¹ q⁻¹ i)
-            (·-rPosPres< {x = p⁻¹ · q⁻¹} {y = q} {z = p} p⁻¹·q⁻¹>0 p>q)
-          1·q⁻¹>1·p⁻¹ : 1r · q⁻¹ > 1r · p⁻¹
-          1·q⁻¹>1·p⁻¹ = transport (λ i → ·-rInv₊ p>0 i · q⁻¹ > ·-rInv₊ q>0 i · p⁻¹) p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹
-          q⁻¹>p⁻¹ : q⁻¹ > p⁻¹
-          q⁻¹>p⁻¹ = transport (λ i → ·IdL q⁻¹ i > ·IdL p⁻¹ i) 1·q⁻¹>1·p⁻¹
+    where
+    p⁻¹ = inv₊ p>0
+    q⁻¹ = inv₊ q>0
+    p⁻¹·q⁻¹>0 : p⁻¹ · q⁻¹ > 0r
+    p⁻¹·q⁻¹>0 = ·-Pres>0 {x = p⁻¹} {y = q⁻¹} (p>0→p⁻¹>0 {p = p} p>0) (p>0→p⁻¹>0 {p = q} q>0)
+    p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹ : (p · p⁻¹) · q⁻¹ > (q · q⁻¹) · p⁻¹
+    p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹ = transport (λ i → helper2 p p⁻¹ q⁻¹ i > helper3 q p⁻¹ q⁻¹ i)
+      (·-rPosPres< {x = p⁻¹ · q⁻¹} {y = q} {z = p} p⁻¹·q⁻¹>0 p>q)
+    1·q⁻¹>1·p⁻¹ : 1r · q⁻¹ > 1r · p⁻¹
+    1·q⁻¹>1·p⁻¹ = transport (λ i → ·-rInv₊ p>0 i · q⁻¹ > ·-rInv₊ q>0 i · p⁻¹) p·p⁻¹·q⁻¹>q·q⁻¹·p⁻¹
+    q⁻¹>p⁻¹ : q⁻¹ > p⁻¹
+    q⁻¹>p⁻¹ = transport (λ i → ·IdL q⁻¹ i > ·IdL p⁻¹ i) 1·q⁻¹>1·p⁻¹
 
   inv₊Idem : (q>0 : q > 0r) → inv₊ (p>0→p⁻¹>0 q>0) ≡ q
   inv₊Idem {q = q} q>0 = sym (·IdL _)
@@ -295,11 +298,11 @@ module _ (𝒦 : OrderedField ℓ ℓ')(archimedes : isArchimedean (𝒦 .fst)) 
       1r/n>0 n = ·-Pres>0 1>0 (1/n>0 n)
 
       ∃P'n : ∥ Σ[ n ∈ ℕ ] P' n ∥₁
-      ∃P'n = Prop.map
-        (λ (ε , ε>0 , pε) →
-          let (1+ n , 1/n<ε) =
-                isArchimedean→isArchimedeanInv ε 1r ε>0 1>0
-          in  n , <-close _ _ (1r/n>0 _) 1/n<ε pε) ∃ε
+      ∃P'n = do
+        (ε , ε>0 , pε) ← ∃ε
+        let (1+ n , 1/n<ε) =
+              isArchimedean→isArchimedeanInv ε 1r ε>0 1>0
+        return (n , <-close _ _ (1r/n>0 _) 1/n<ε pε)
 
     findExplicit : Σ[ ε ∈ K ] (ε > 0r) × P ε
     findExplicit = let (n , p) = find (λ _ → decP _) ∃P'n in 1r / (1+ n) , (1r/n>0 _) , p
