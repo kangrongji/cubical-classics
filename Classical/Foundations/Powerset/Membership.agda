@@ -14,6 +14,7 @@ open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 
 open import Classical.Axioms
@@ -111,8 +112,11 @@ module _ ⦃ 🤖 : Oracle ⦄ where
 
 
   ∀∈+¬∈→⊆ : {A B : ℙ X} → ((x : X) → ∥ (x ∈ B) ⊎ (¬ x ∈ A) ∥₁) → A ⊆ B
-  ∀∈+¬∈→⊆ {B = B} ∀∈+¬∈ {x = x} x∈A = Prop.rec (isProp∈ B)
-    (λ { (inl x∈B) → x∈B ; (inr ¬x∈A) → Empty.rec (¬x∈A x∈A) }) (∀∈+¬∈ x)
+  ∀∈+¬∈→⊆ {B = B} ∀∈+¬∈ {x = x} x∈A = proof _ , isProp∈ B by do
+    inl x∈B ← ∀∈+¬∈ x
+      where
+      inr ¬x∈A → Empty.rec (¬x∈A x∈A)
+    return x∈B
 
 
   -- There always merely exists element outside a non-subset against another subset

@@ -89,8 +89,8 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     ∪S-∪-∪T⊆∪-S∪T : union S ∪ union T ⊆ union (S ∪ T)
     ∪S-∪-∪T⊆∪-S∪T x∈∪S-∪-∪T = ∃→∈union
       (case ∈A∪B→∈A+∈B (union S) (union T) x∈∪S-∪-∪T of λ
-        { (inl x∈S) → Prop.map (λ (A , x∈A , x∈S) → A , x∈A , ∪-left∈  S T x∈S) (∈union→∃ x∈S)
-        ; (inr x∈T) → Prop.map (λ (A , x∈A , x∈T) → A , x∈A , ∪-right∈ S T x∈T) (∈union→∃ x∈T) })
+        { (inl x∈S) → do (A , x∈A , x∈S) ← ∈union→∃ x∈S ; return (A , x∈A , ∪-left∈  S T x∈S)
+        ; (inr x∈T) → do (A , x∈A , x∈T) ← ∈union→∃ x∈T ; return (A , x∈A , ∪-right∈ S T x∈T) })
 
 
   union∪-left⊆ : {S T : ℙ (ℙ X)} → union S ⊆ union (S ∪ T)

@@ -14,6 +14,7 @@ open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.Data.Empty as Empty
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 
 private
@@ -99,7 +100,7 @@ module _
       ¬∣p₀∣ = Prop.rec isProp⊥ ¬p₀
 
       ∃∣p∣ : ∥ Σ[ n ∈ ℕ ] ∥ P n ∥₁ ∥₁
-      ∃∣p∣ = Prop.map (λ (n , p) → n , ∣ p ∣₁) ∃p
+      ∃∣p∣ = do (n , p) ← ∃p ; return (n , ∣ p ∣₁)
 
       ∥inhabMin∥ = findMinProp (λ _ → squash₁) dec∥P∥ ¬∣p₀∣ ∃∣p∣
 

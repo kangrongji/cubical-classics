@@ -13,6 +13,7 @@ open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.Data.Empty as Empty
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 
 open import Classical.Axioms
@@ -58,7 +59,7 @@ private
 
 
 takeOut∥Σ∥ : {P : X → Type ℓ'} → ∥ Σ[ x ∈ X ] ∥ P x ∥₁ ∥₁ → ∥ Σ[ x ∈ X ] P x ∥₁
-takeOut∥Σ∥ = Prop.rec squash₁ (λ (x , ∥p∥) → Prop.map (λ p → x , p) ∥p∥)
+takeOut∥Σ∥ h = do (x , ∥p∥) ← h ; p ← ∥p∥ ; return (x , p)
 
 
 module _ ⦃ 🤖 : Oracle ⦄ where
@@ -99,9 +100,9 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     ¬∀→∃¬2 f = takeOut∥Σ∥ helper
       where
       helper : ∥ Σ[ x ∈ X ] ∥ Σ[ y ∈ Y x ] ¬ P x y ∥₁ ∥₁
-      helper = Prop.map
-        (λ (x , ¬p) → x , ¬∀→∃¬ (isPropP _) ¬p)
-        (¬∀→∃¬ (λ _ → isPropΠ (λ _ → isPropP _ _)) f)
+      helper = do
+        (x , ¬p) ← ¬∀→∃¬ (λ _ → isPropΠ (λ _ → isPropP _ _)) f
+        return (x , ¬∀→∃¬ (isPropP _) ¬p)
 
 
   module _

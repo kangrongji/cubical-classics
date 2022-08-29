@@ -14,6 +14,7 @@ open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 
 open import Classical.Axioms
@@ -178,7 +179,9 @@ module Extremum ⦃ 🤖 : Oracle ⦄ (𝒦 : OrderedField ℓ ℓ') where
 
   supLowerBounded : {A : ℙ K}(b : K)(Sup : Supremum A) → ((x : K) → x ∈ A → b ≤ x) → Sup .sup ≥ b
   supLowerBounded b Sup b≤x∈A =
-    Prop.rec isProp≤ (λ (x , x∈A) → ≤-trans (b≤x∈A x x∈A) (Sup .bound x x∈A)) (Sup→Inhabited Sup)
+    proof _ , isProp≤ by do
+    (x , x∈A) ← Sup→Inhabited Sup
+    return (≤-trans (b≤x∈A x x∈A) (Sup .bound x x∈A))
 
 
   {-

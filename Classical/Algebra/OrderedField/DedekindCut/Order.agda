@@ -12,6 +12,7 @@ open import Cubical.Data.Sum
 open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 
 open import Classical.Preliminary.Logic
@@ -71,13 +72,16 @@ module Order ⦃ 🤖 : Oracle ⦄
   -- Strictness
 
   <𝕂→≤𝕂 : {a b : 𝕂} → a <𝕂 b → a ≤𝕂 b
-  <𝕂→≤𝕂 {a = a} a<b x∈upper = Prop.rec (isProp∈ (a .upper))
-    (λ (q , q<r∈upper , q∈upper) → a .upper-close _ _ q∈upper (q<r∈upper _ x∈upper)) a<b
+  <𝕂→≤𝕂 {a = a} a<b x∈upper =
+    proof _ , isProp∈ (a .upper) by do
+    (q , q<r∈upper , q∈upper) ← a<b
+    return (a .upper-close _ _ q∈upper (q<r∈upper _ x∈upper))
 
   <𝕂-arefl : {a b : 𝕂} → a <𝕂 b → a ≡ b → ⊥
-  <𝕂-arefl {a = a} {b = b} a<b a≡b = Prop.rec isProp⊥
-    (λ (q , q<r∈upper , q∈upper) →
-      <upper→¬∈upper b _ q<r∈upper (subst (λ x → q ∈ x .upper) a≡b q∈upper)) a<b
+  <𝕂-arefl {a = a} {b = b} a<b a≡b =
+    proof _ , isProp⊥ by do
+    (q , q<r∈upper , q∈upper)  ← a<b
+    return (<upper→¬∈upper b _ q<r∈upper (subst (λ x → q ∈ x .upper) a≡b q∈upper))
 
   >𝕂-arefl : {a b : 𝕂} → b <𝕂 a → a ≡ b → ⊥
   >𝕂-arefl h p = <𝕂-arefl h (sym p)
@@ -93,9 +97,9 @@ module Order ⦃ 🤖 : Oracle ⦄
   -- Tons of properties
 
   ¬a≤b→a>b : (a b : 𝕂) → ¬ (a ≤𝕂 b) → a >𝕂 b
-  ¬a≤b→a>b a b ¬a≤b = Prop.map
-    (λ (x , ¬x∈upper , x∈upper) → x , ¬∈upper→<upper a x ¬x∈upper , x∈upper)
-    (⊈→∃ ¬a≤b)
+  ¬a≤b→a>b a b ¬a≤b = do
+    (x , ¬x∈upper , x∈upper) ← ⊈→∃ ¬a≤b
+    return (x , ¬∈upper→<upper a x ¬x∈upper , x∈upper)
 
   ¬a>b→a≤b : (a b : 𝕂) → ¬ (a >𝕂 b) → a ≤𝕂 b
   ¬a>b→a≤b a b ¬a>b = ¬¬elim (isProp≤𝕂 {a = a} {b = b}) (¬map (¬a≤b→a>b a b) ¬a>b)
@@ -141,22 +145,21 @@ module Order ⦃ 🤖 : Oracle ⦄
 
 
   +𝕂-Pres< : (a b c d : 𝕂) → a <𝕂 b → c <𝕂 d → (a +𝕂 c) <𝕂 (b +𝕂 d)
-  +𝕂-Pres< a b c d a<b b<c = Prop.map2
-    (λ (q , q<b∈upper , q∈aupper) (p , p<d∈upper , p∈cupper) →
-      q + p ,
-      (λ x x∈b+d → Prop.rec isProp<
-        (λ (s , t , s∈b , t∈d , x≡s+t) →
-          subst (q + p <_) (sym x≡s+t) (+-Pres< (q<b∈upper s s∈b) (p<d∈upper t t∈d)))
-        (∈→Inhab (+upper b d) x∈b+d)) ,
-      Inhab→∈ (+upper a c) ∣ q , p , q∈aupper , p∈cupper , refl ∣₁ )
-    a<b b<c
+  +𝕂-Pres< a b c d a<b b<c = do
+    (q , q<b∈upper , q∈aupper) ← a<b
+    (p , p<d∈upper , p∈cupper) ← b<c
+    return (q + p , (λ x x∈b+d →
+      proof _ , isProp< by do
+      (s , t , s∈b , t∈d , x≡s+t) ← ∈→Inhab (+upper b d) x∈b+d
+      return (subst (q + p <_) (sym x≡s+t) (+-Pres< (q<b∈upper s s∈b) (p<d∈upper t t∈d)))) ,
+      Inhab→∈ (+upper a c) ∣ q , p , q∈aupper , p∈cupper , refl ∣₁)
+
 
   +𝕂-Pres≤ : (a b c d : 𝕂) → a ≤𝕂 b → c ≤𝕂 d → (a +𝕂 c) ≤𝕂 (b +𝕂 d)
   +𝕂-Pres≤ a b c d a≤b c≤d x∈b+d =
-    Prop.rec (isProp∈ ((a +𝕂 c) .upper))
-    (λ (s , t , s∈b , t∈d , x≡s+t) →
-      Inhab→∈ (+upper a c) ∣ s , t , a≤b s∈b , c≤d t∈d , x≡s+t ∣₁)
-    (∈→Inhab (+upper b d) x∈b+d)
+    proof _ , isProp∈ ((a +𝕂 c) .upper) by do
+    (s , t , s∈b , t∈d , x≡s+t) ← ∈→Inhab (+upper b d) x∈b+d
+    return (Inhab→∈ (+upper a c) ∣ s , t , a≤b s∈b , c≤d t∈d , x≡s+t ∣₁)
 
   +𝕂-rPres≤ : (a b c : 𝕂) → a ≤𝕂 b → (a +𝕂 c) ≤𝕂 (b +𝕂 c)
   +𝕂-rPres≤ a b c a≤b = +𝕂-Pres≤ a b c c a≤b (≤𝕂-refl {a = c} refl)
@@ -212,18 +215,18 @@ module Order ⦃ 🤖 : Oracle ⦄
 
 
   ·𝕂-Pres>0 : (a b : 𝕂₊) → a .fst >𝕂 𝟘 → b .fst >𝕂 𝟘 → (a ·𝕂₊ b) .fst >𝕂 𝟘
-  ·𝕂-Pres>0 a b a>0 b>0 = Prop.map2
-    (λ (q , q<r∈a , q∈𝟘) (p , p<r∈b , p∈𝟘) →
-      let q>0 = q∈𝕂₊→q>0 𝟘₊ q q∈𝟘
-          p>0 = q∈𝕂₊→q>0 𝟘₊ p p∈𝟘 in
-      q · p ,
-      (λ x x∈a·b → Prop.rec isProp<
-        (λ (s , t , s∈a , t∈b , x≡s·t) →
+  ·𝕂-Pres>0 a b a>0 b>0 = do
+    (q , q<r∈a , q∈𝟘) ← a>0
+    (p , p<r∈b , p∈𝟘) ← b>0
+    let q>0 = q∈𝕂₊→q>0 𝟘₊ q q∈𝟘
+        p>0 = q∈𝕂₊→q>0 𝟘₊ p p∈𝟘
+    return (q · p ,
+      (λ x x∈a·b → proof _ , isProp< by do
+        (s , t , s∈a , t∈b , x≡s·t) ← ∈→Inhab (·upper₊ a b) x∈a·b
+        return (
           subst (q · p <_) (sym x≡s·t)
-            (·-PosPres> q>0 p>0 (q<r∈a s s∈a) (p<r∈b t t∈b)))
-        (∈→Inhab (·upper₊ a b) x∈a·b)) ,
-      Inhab→∈ (0r <P_) (·-Pres>0 q>0 p>0) )
-    a>0 b>0
+            (·-PosPres> q>0 p>0 (q<r∈a s s∈a) (p<r∈b t t∈b)))) ,
+      Inhab→∈ (0r <P_) (·-Pres>0 q>0 p>0))
 
 
   -- Two lemmas for convenient case-splitting

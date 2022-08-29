@@ -11,6 +11,7 @@ open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.HITs.PropositionalTruncation as Prop
+open import Cubical.HITs.PropositionalTruncation.Monad
 open import Cubical.Relation.Nullary
 
 open import Classical.Axioms
@@ -52,19 +53,19 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     case-split (yeah x∈A) = inr (bi⊆→≡ A⊆[x] [x]⊆A)
       where
       [x]⊆A : [ x ] ⊆ A
-      [x]⊆A y∈[x] = Prop.rec (isProp∈ A)
-        (λ x≡y → subst (_∈ A) x≡y x∈A)
-        (y∈[x]→∥x≡y∥ y∈[x])
+      [x]⊆A y∈[x] = proof _ , isProp∈ A by do
+        x≡y ← y∈[x]→∥x≡y∥ y∈[x]
+        return (subst (_∈ A) x≡y x∈A)
     case-split (nope x∉A) = inl (A≡∅ (λ y → ¬∈→∉ {A = A} (∀¬x∈A y)))
       where
       ∀¬x∈A : (y : X) → ¬ y ∈ A
-      ∀¬x∈A y y∈A = Prop.rec isProp⊥
-        (λ x≡y → ∉→¬∈ {A = A} x∉A (subst (_∈ A) (sym x≡y) y∈A))
-        (y∈[x]→∥x≡y∥ (A⊆[x] y∈A))
+      ∀¬x∈A y y∈A = proof _ , isProp⊥ by do
+        x≡y ← y∈[x]→∥x≡y∥ (A⊆[x] y∈A)
+        return (∉→¬∈ {A = A} x∉A (subst (_∈ A) (sym x≡y) y∈A))
 
   A∈S→[A]⊆S : {A : ℙ X}{S : ℙ (ℙ X)} → A ∈ S → [ A ] ⊆ S
-  A∈S→[A]⊆S {S = S} A∈S B∈[A] =
-    Prop.rec (isProp∈ S) (λ A≡B → subst (_∈ S) A≡B A∈S) (y∈[x]→∥x≡y∥ B∈[A])
+  A∈S→[A]⊆S {S = S} A∈S B∈[A] = proof _ , isProp∈ S by
+    do A≡B ← y∈[x]→∥x≡y∥ B∈[A] ; return (subst (_∈ S) A≡B A∈S)
 
   [A]⊆S→A∈S : {A : ℙ X}{S : ℙ (ℙ X)} → [ A ] ⊆ S → A ∈ S
   [A]⊆S→A∈S [A]⊆S = [A]⊆S x∈[x]

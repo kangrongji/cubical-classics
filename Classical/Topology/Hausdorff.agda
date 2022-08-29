@@ -67,8 +67,9 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         𝒰 = specify P
 
         𝒰⊆Open : 𝒰 ⊆ Open
-        𝒰⊆Open p =
-          Prop.rec (isProp∈ Open) (λ (_ , _ , q , _) → N∈ℕbhx→N∈Open q) (∈→Inhab P p)
+        𝒰⊆Open p = proof _ , isProp∈ Open by do
+          (_ , _ , q , _) ← ∈→Inhab P p
+          return (N∈ℕbhx→N∈Open q)
 
         𝕌 : ℙ X
         𝕌 = union 𝒰
@@ -93,7 +94,9 @@ module _ ⦃ 🤖 : Oracle ⦄ where
           (𝒰₀ , 𝒰₀⊆𝒰 , fin𝒰₀ , 𝒰₀covK) ← takefin 𝒰-covers-K
           return (
             𝒰₀ , ⊆-trans {C = Open} 𝒰₀⊆𝒰 𝒰⊆Open , fin𝒰₀ , 𝒰₀covK ,
-            λ U U∈𝒰₀ → Prop.rec squash₁ (λ (_ , _ , _ , sep) → sep) (∈→Inhab P (∈⊆-trans {B = 𝒰} U∈𝒰₀ 𝒰₀⊆𝒰)))
+            λ U U∈𝒰₀ → do
+              (_ , _ , _ , sep) ← ∈→Inhab P (∈⊆-trans {B = 𝒰} U∈𝒰₀ 𝒰₀⊆𝒰)
+              sep)
 
         sepOpen : SepOpen x₀ K
         sepOpen = do

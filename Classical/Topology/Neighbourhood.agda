@@ -156,7 +156,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     Sep⊆ A⊆B = Prop.map (ΣSep⊆ A⊆B)
 
     Sep→∈∘∁ : {x : X}{A : ℙ X} → Sep x A → x ∈∘ (∁ A)
-    Sep→∈∘∁ = Prop.map (λ (U , U∈ℕx , A∩U≡∅) → U , U∈ℕx , A∩B=∅→A⊆∁B (∩-Comm _ _ ∙ A∩U≡∅))
+    Sep→∈∘∁ h = do (U , U∈ℕx , A∩U≡∅) ← h ; return (U , U∈ℕx , A∩B=∅→A⊆∁B (∩-Comm _ _ ∙ A∩U≡∅))
 
 
     -- It reads as "there merely exists neighbourhood of x and A respectively that don't intersect with each other",
@@ -166,11 +166,11 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     SepOpen x A = ∥ Σ[ U ∈ ℙ X ] Σ[ V ∈ ℙ X ] (U ∈ Open) × A ⊆ U × (V ∈ ℕbh x) × (A ∩ V ≡ ∅) ∥₁
 
     SepOpen⊆ : {x : X}{A U : ℙ X} → U ∈ Open → A ⊆ U → Sep x U → SepOpen x A
-    SepOpen⊆ {U = U} U∈Open A⊆U =
-      Prop.map (λ (V , V∈ℕx , U∩V≡∅) → U , V , U∈Open , A⊆U , V∈ℕx , A⊆B+B∩C≡∅→A∩C≡∅ A⊆U U∩V≡∅)
+    SepOpen⊆ {U = U} U∈Open A⊆U h =
+      do (V , V∈ℕx , U∩V≡∅) ← h ; return (U , V , U∈Open , A⊆U , V∈ℕx , A⊆B+B∩C≡∅→A∩C≡∅ A⊆U U∩V≡∅)
 
     SepOpen→Sep : {x : X}{A : ℙ X} → SepOpen x A → Sep x A
-    SepOpen→Sep = Prop.map (λ (_ , V , _ , _ , V∈ℕx , A∩V≡∅) → V , V∈ℕx , A∩V≡∅)
+    SepOpen→Sep h = do (_ , V , _ , _ , V∈ℕx , A∩V≡∅) ← h ; return (V , V∈ℕx , A∩V≡∅)
 
 
     -- A subset K ⊆ X is closed if for any x ∉ K, there merely exists neigubourhood of x separating from K.
