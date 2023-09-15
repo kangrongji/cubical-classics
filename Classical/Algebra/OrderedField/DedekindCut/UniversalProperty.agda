@@ -3,7 +3,7 @@
 The Universal Property of Dedekind Cuts
 
 -}
-{-# OPTIONS --safe --experimental-lossy-unification #-}
+{-# OPTIONS --safe --lossy-unification #-}
 module Classical.Algebra.OrderedField.DedekindCut.UniversalProperty where
 
 open import Cubical.Foundations.Prelude

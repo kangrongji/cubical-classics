@@ -9,7 +9,7 @@ TODO: Separating the completion procedure into construtive/classical parts,
 as indicated in `https://github.com/kangrongji/cubical-classics/issues/10`.
 
 -}
-{-# OPTIONS --safe --experimental-lossy-unification #-}
+{-# OPTIONS --safe --lossy-unification #-}
 module Classical.Algebra.OrderedField.Completion where
 
 open import Cubical.Foundations.Prelude

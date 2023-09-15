@@ -34,7 +34,7 @@ open import Cubical.Data.Nat.Order using ()
 open import Cubical.Data.NatPlusOne
 open import Cubical.Data.Int.MoreInts.QuoInt
   hiding   (_+_ ; _·_ ; -_)
-open import Cubical.HITs.Rationals.QuoQ.Base using (ℕ₊₁→ℤ)
+open import Cubical.Data.Rationals using (ℕ₊₁→ℤ)
 open import Cubical.Algebra.CommRing.Instances.QuoInt
 
 open import Cubical.Data.Unit

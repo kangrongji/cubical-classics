@@ -12,44 +12,6 @@ open import Cubical.Data.Empty as Empty
 open import Cubical.Data.Sum
 
 
--- Algebraic properties of `and` operation
-
-and-zeroˡ : ∀ x → false and x ≡ false
-and-zeroˡ false = refl
-and-zeroˡ true  = refl
-
-and-zeroʳ : ∀ x → x and false ≡ false
-and-zeroʳ false = refl
-and-zeroʳ true  = refl
-
-and-identityˡ : ∀ x → true and x ≡ x
-and-identityˡ false = refl
-and-identityˡ true  = refl
-
-and-identityʳ : ∀ x → x and true ≡ x
-and-identityʳ false = refl
-and-identityʳ true  = refl
-
-and-comm : ∀ x y → x and y ≡ y and x
-and-comm true  true  = refl
-and-comm true  false = refl
-and-comm false true  = refl
-and-comm false false = refl
-
-and-assoc : ∀ x y z → x and (y and z) ≡ (x and y) and z
-and-assoc true  true  true  = refl
-and-assoc true  true  false = refl
-and-assoc true  false true  = refl
-and-assoc true  false false = refl
-and-assoc false true  true  = refl
-and-assoc false true  false = refl
-and-assoc false false true  = refl
-and-assoc false false false = refl
-
-and-idem : ∀ x → x and x ≡ x
-and-idem false = refl
-and-idem true  = refl
-
 -- Absorption laws
 
 or-and-absorp : ∀ x y → x or (x and y) ≡ x

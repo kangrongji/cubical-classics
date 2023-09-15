@@ -203,16 +203,16 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     -- Open balls are really open
 
     isOpenℬ : {x : X}{r : ℝ} ⦃ _ : r > 0 ⦄ → ℬ x r ∈ MetricTopology .openset
-    isOpenℬ {x = x} {r = r} = Inhab→∈ 𝓂-prop
-      (λ y y∈ℬxr →
-        let r-d = r - dist y x
-            r-d>0 : r-d > 0
-            r-d>0 = subst (λ t → r - t > 0) (dist-symm _ _) (>→Diff>0 (∈→Inhabℬ y∈ℬxr))
-            r' = middle 0 r-d
-            r'>0 = middle>l r-d>0
-            d+r'<r : dist y x + r' < r
-            d+r'<r = subst (_< r) (+Comm _ _) (-MoveRToL< (middle<r r-d>0))
-        in  ∣ r' , r'>0 , ℬ⊆' ⦃ r'>0 ⦄ d+r'<r ∣₁)
+    isOpenℬ {x = x} {r = r} =
+      Inhab→∈ 𝓂-prop (λ y y∈ℬxr → do
+      let r-d = r - dist y x
+          r-d>0 : r-d > 0
+          r-d>0 = subst (λ t → r - t > 0) (dist-symm _ _) (>→Diff>0 (∈→Inhabℬ y∈ℬxr))
+          r' = middle 0 r-d
+          r'>0 = middle>l r-d>0
+          d+r'<r : dist y x + r' < r
+          d+r'<r = subst (_< r) (+Comm _ _) (-MoveRToL< (middle<r r-d>0))
+      return (r' , r'>0 , ℬ⊆' ⦃ r'>0 ⦄ d+r'<r))
 
 
     {-

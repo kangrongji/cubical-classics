@@ -10,26 +10,44 @@ open import Classical.Axioms.Diaconescu
 -- We record up axioms to make use of Agda's instance argument,
 -- so no one needs to write them everywhere explicitly.
 
+----------------------------------------------
 
--- Introducing 🤖,
--- who is an honorific member of Oracle Machines
--- and also a legal term of Oracle (namely: `🤖 : Oracle`).
--- It knows everything about h-propositions more than you could ever imagine!
+-- In Oracle's realm, 🤖 stands with pride,
+-- An honored member by logic's side,
+-- Holding truths, h-propositions untold,
+-- In legal terms, its wisdom unfolds.
 
--- In case you need its help,
--- please add `module _ ⦃ 🤖 : Oracle ⦄` on top of your codes.
--- To call him somewhere,
--- please `open Oracle 🤖` and apply the function `decide`.
+-- To summon 🤖, in your code's embrace,
+-- `module _ ⦃ 🤖 : Oracle ⦄` takes its place,
+-- `open Oracle 🤖,` the function you'll find,
+-- In the library's scripts, it's logic's mind.
+
+-- Short and sweet, this tale of 🤖's grace,
+-- In the world of Oracle, it finds its place.
+
+-- by ChatGPT
+
+----------------------------------------------
+
 -- Examples are almost all files in this library.
+
 
 record Oracle : Typeω where
   field
     decide : LEM
 
--- Warning:
--- 🤖 always knows the answer,
--- but often 🤖 won't tell.
+----------------------------------------------
 
+-- Warning:
+
+-- In Oracle's realm, 🤖, a cryptic sage,
+-- Knows all the truths of every age,
+-- Yet in its wisdom, often it won't tell,
+-- The mysteries it guards, it keeps so well.
+
+-- still by ChatGPT
+
+----------------------------------------------
 
 record MegaPicker : Typeω where
   field

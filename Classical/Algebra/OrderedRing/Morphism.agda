@@ -4,7 +4,7 @@
   namely ring homomorphism that preserves order relation
 
 -}
-{-# OPTIONS --safe --experimental-lossy-unification #-}
+{-# OPTIONS --safe --lossy-unification #-}
 module Classical.Algebra.OrderedRing.Morphism where
 
 open import Cubical.Foundations.Prelude

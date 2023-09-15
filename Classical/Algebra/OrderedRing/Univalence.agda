@@ -5,7 +5,7 @@ SIP for Ordered Ring
 TODO: Using DUARel to automate this part.
 
 -}
-{-# OPTIONS --safe --experimental-lossy-unification #-}
+{-# OPTIONS --safe --lossy-unification #-}
 module Classical.Algebra.OrderedRing.Univalence where
 
 open import Cubical.Foundations.Prelude

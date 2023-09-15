@@ -3,7 +3,7 @@
 Morphism between Ordered Field
 
 -}
-{-# OPTIONS --safe --experimental-lossy-unification #-}
+{-# OPTIONS --safe --lossy-unification #-}
 module Classical.Algebra.OrderedField.Morphism where
 
 open import Cubical.Foundations.Prelude hiding (lower)
@@ -337,7 +337,7 @@ module InclusionFromℚ (𝒦 : OrderedField ℓ ℓ') where
   open import Cubical.Data.Int.MoreInts.QuoInt
     using    (ℤ)
     renaming (_+_ to _+ℤ_ ; _·_ to _·ℤ_)
-  open import Cubical.HITs.Rationals.QuoQ
+  open import Cubical.Data.Rationals
     using    (ℚ ; ℕ₊₁→ℤ ; _∼_)
     renaming (_+_ to _+ℚ_ ; _·_ to _·ℚ_)
 
@@ -345,7 +345,7 @@ module InclusionFromℚ (𝒦 : OrderedField ℓ ℓ') where
     using    (ℤOrderedRing)
   open import Classical.Algebra.OrderedRing.Morphism
 
-  open import Cubical.Algebra.CommRing.Instances.QuoQ
+  open import Cubical.Algebra.CommRing.Instances.Rationals
   open import Classical.Algebra.OrderedField.Instances.QuoQ
 
 

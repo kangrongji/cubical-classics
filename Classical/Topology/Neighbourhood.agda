@@ -152,11 +152,13 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     Sep : (x : X) → ℙ X → Type _
     Sep x A = ∥ ΣSep x A ∥₁
 
-    Sep⊆ : {x : X}{A B : ℙ X} → A ⊆ B → Sep x B → Sep x A
+    Sep⊆ : {x : X} {A B : ℙ X} → A ⊆ B → Sep x B → Sep x A
     Sep⊆ A⊆B = Prop.map (ΣSep⊆ A⊆B)
 
-    Sep→∈∘∁ : {x : X}{A : ℙ X} → Sep x A → x ∈∘ (∁ A)
-    Sep→∈∘∁ h = do (U , U∈ℕx , A∩U≡∅) ← h ; return (U , U∈ℕx , A∩B=∅→A⊆∁B (∩-Comm _ _ ∙ A∩U≡∅))
+    Sep→∈∘∁ : {x : X} {A : ℙ X} → Sep x A → x ∈∘ (∁ A)
+    Sep→∈∘∁ {A = A} h = do
+      (U , U∈ℕx , A∩U≡∅) ← h
+      return (U , U∈ℕx , A∩B=∅→A⊆∁B {A = U} (∩-Comm U A ∙ A∩U≡∅))
 
 
     -- It reads as "there merely exists neighbourhood of x and A respectively that don't intersect with each other",
@@ -209,7 +211,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
       -- TODO : Make a solver to deal with these problems.
       ∪∅-helper : {A B C D : ℙ X} → A ∩ C ≡ ∅ → B ∩ D ≡ ∅ → (A ∪ B) ∩ (C ∩ D) ≡ ∅
       ∪∅-helper {A = A} {B = B} {C = C} {D = D} A∩C≡∅ B∩D≡∅ =
-          ∩-∪-lDist _ _ _
+          ∩-∪-lDist A _ _
         ∙ (λ i → ∩-Assoc A C D i ∪ (B ∩ ∩-Comm C D i))
         ∙ (λ i → ((A ∩ C) ∩ D) ∪ ∩-Assoc B D C i)
         ∙ (λ i → (A∩C≡∅ i ∩ D) ∪ (B∩D≡∅ i ∩ C))
@@ -217,8 +219,8 @@ module _ ⦃ 🤖 : Oracle ⦄ where
         ∙ ∪-Idem _
 
       ind-Sep-helper : (A B : ℙ X) → A ∈ Open → B ∈ Open → ΣSep x A → ΣSep x B → ΣSep x (A ∪ B)
-      ind-Sep-helper _ _ _ _ (VA , VA∈Nx , VA∅) (VB , VB∈Nx , VB∅) =
-        VA ∩ VB , ℕbh∩ VA∈Nx VB∈Nx , ∪∅-helper VA∅ VB∅
+      ind-Sep-helper A _ _ _ (VA , VA∈Nx , VA∅) (VB , VB∈Nx , VB∅) =
+        VA ∩ VB , ℕbh∩ VA∈Nx VB∈Nx , ∪∅-helper {A = A} VA∅ VB∅
 
       ind-Sep : (A B : ℙ X) → A ∈ Open → B ∈ Open → _
       ind-Sep A B p q = Prop.map2 (ind-Sep-helper A B p q)

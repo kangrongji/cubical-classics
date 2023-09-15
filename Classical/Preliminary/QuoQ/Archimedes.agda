@@ -35,7 +35,7 @@ open import Cubical.Data.NatPlusOne
 open import Cubical.Data.Int.MoreInts.QuoInt
   using    (ℤ ; pos)
   renaming (_·_ to _·ℤ_ ; _+_ to _+ℤ_ ; -_ to -ℤ_)
-open import Cubical.HITs.Rationals.QuoQ
+open import Cubical.Data.Rationals
   using    (ℚ ; ℕ₊₁→ℤ ; ·-zeroˡ ; ·-identityˡ)
 open import Cubical.HITs.SetQuotients as SetQuot
 open import Cubical.HITs.PropositionalTruncation as Prop

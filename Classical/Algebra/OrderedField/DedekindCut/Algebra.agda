@@ -3,7 +3,7 @@
 Algebraic Operations on Dedekind Cuts
 
 -}
-{-# OPTIONS --safe --experimental-lossy-unification #-}
+{-# OPTIONS --safe --lossy-unification #-}
 module Classical.Algebra.OrderedField.DedekindCut.Algebra where
 
 open import Cubical.Foundations.Prelude

@@ -3,7 +3,7 @@
   Properties of ordered ring
 
 -}
-{-# OPTIONS --safe --experimental-lossy-unification #-}
+{-# OPTIONS --safe --lossy-unification #-}
 module Classical.Algebra.OrderedRing.Properties where
 
 open import Cubical.Foundations.Prelude

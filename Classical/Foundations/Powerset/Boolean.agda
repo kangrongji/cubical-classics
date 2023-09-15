@@ -89,10 +89,10 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   -}
 
   ∪-lZero : (A : ℙ X) → total ∪ A ≡ total
-  ∪-lZero A i x = zeroˡ (A x) i
+  ∪-lZero A i x = or-zeroˡ (A x) i
 
   ∪-rZero : (A : ℙ X) → A ∪ total ≡ total
-  ∪-rZero A i x = zeroʳ (A x) i
+  ∪-rZero A i x = or-zeroʳ (A x) i
 
   ∪-lUnit : (A : ℙ X) → ∅ ∪ A ≡ A
   ∪-lUnit A i x = or-identityˡ (A x) i
@@ -110,10 +110,10 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   ∪-Idem A i x = or-idem (A x) i
 
   ∪-left∈ : {x : X}(A B : ℙ X) → x ∈ A → x ∈ (A ∪ B)
-  ∪-left∈ {x = x} _ B x∈A = (λ i → x∈A i or B x) ∙ zeroˡ _
+  ∪-left∈ {x = x} _ B x∈A = (λ i → x∈A i or B x) ∙ or-zeroˡ true
 
   ∪-right∈ : {x : X}(A B : ℙ X) → x ∈ B → x ∈ (A ∪ B)
-  ∪-right∈ {x = x} A _ x∈B = (λ i → A x or x∈B i) ∙ zeroʳ _
+  ∪-right∈ {x = x} A _ x∈B = (λ i → A x or x∈B i) ∙ or-zeroʳ _
 
   ∪-left⊆ : (A B : ℙ X) → A ⊆ (A ∪ B)
   ∪-left⊆ A B = ∪-left∈ A B
@@ -209,10 +209,12 @@ module _ ⦃ 🤖 : Oracle ⦄ where
   ∩-∪-rDist A B C i x = and-or-dist (A x) (B x) (C x) i
 
   ∪-∩-lDist : (A B C : ℙ X) → (A ∩ B) ∪ C ≡ (A ∪ C) ∩ (B ∪ C)
-  ∪-∩-lDist A B C = ∪-Comm _ _ ∙ ∪-∩-rDist _ _ _ ∙ (λ i → ∪-Comm C A i ∩ ∪-Comm C B i)
+  ∪-∩-lDist A B C = ∪-Comm (A ∩ B) C
+    ∙ ∪-∩-rDist C A B ∙ (λ i → ∪-Comm C A i ∩ ∪-Comm C B i)
 
   ∩-∪-lDist : (A B C : ℙ X) → (A ∪ B) ∩ C ≡ (A ∩ C) ∪ (B ∩ C)
-  ∩-∪-lDist A B C = ∩-Comm _ _ ∙ ∩-∪-rDist _ _ _ ∙ (λ i → ∩-Comm C A i ∪ ∩-Comm C B i)
+  ∩-∪-lDist A B C = ∩-Comm (A ∪ B) C
+    ∙ ∩-∪-rDist C A B ∙ (λ i → ∩-Comm C A i ∪ ∩-Comm C B i)
 
 
   -- Complementation laws
@@ -252,7 +254,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     ∉→∈∁ {A = B} (and-forceˡ (A x) (B x) (λ i → A∩B≡∅ i x) x∈A)
 
   A∩B=∅→B⊆∁A : {A B : ℙ X} → A ∩ B ≡ ∅ → B ⊆ (∁ A)
-  A∩B=∅→B⊆∁A A∩B≡∅ = A∩B=∅→A⊆∁B (∩-Comm _ _ ∙ A∩B≡∅)
+  A∩B=∅→B⊆∁A {A = A} {B} A∩B≡∅ = A∩B=∅→A⊆∁B {A = B} (∩-Comm B A ∙ A∩B≡∅)
 
   A⊆∁B→A∩B=∅ : {A B : ℙ X} → A ⊆ (∁ B) → A ∩ B ≡ ∅
   A⊆∁B→A∩B=∅ {X = X} {A = A} {B = B} A⊆∁B = →∩∅ helper
@@ -261,7 +263,7 @@ module _ ⦃ 🤖 : Oracle ⦄ where
     helper x x∈A = ∈∁→∉ {A = B} (A⊆∁B x∈A)
 
   B⊆∁A→A∩B=∅ : {A B : ℙ X} → B ⊆ (∁ A) → A ∩ B ≡ ∅
-  B⊆∁A→A∩B=∅ B⊆∁A = ∩-Comm _ _ ∙ A⊆∁B→A∩B=∅ B⊆∁A
+  B⊆∁A→A∩B=∅ {A = A} {B} B⊆∁A = ∩-Comm A B ∙ A⊆∁B→A∩B=∅ B⊆∁A
 
 
   {-

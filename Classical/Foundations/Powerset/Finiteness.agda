@@ -44,14 +44,14 @@ module _ ⦃ 🤖 : Oracle ⦄ where
 
   isFinSub∪ : {A B : ℙ X} → isFinSub A → isFinSub B → isFinSub (A ∪ B)
   isFinSub∪ p isfin∅ = subst isFinSub (sym (∪-rUnit _)) p
-  isFinSub∪ p (isfinsuc finB y) =
-    subst isFinSub (sym (∪-Assoc _ _ _)) (isfinsuc (isFinSub∪ p finB) y)
+  isFinSub∪ {A = A} p (isfinsuc finB y) =
+    subst isFinSub (sym (∪-Assoc A _ _)) (isfinsuc (isFinSub∪ p finB) y)
   isFinSub∪ p (fin-squash q s i) = fin-squash (isFinSub∪ p q) (isFinSub∪ p s) i
 
   isFinSub⊆ : {A B : ℙ X} → A ⊆ B → isFinSub B → isFinSub A
   isFinSub⊆ A⊆B isfin∅ = subst isFinSub (sym (A⊆∅→A≡∅ A⊆B)) isfin∅
   isFinSub⊆ {A = A} A⊆B (isfinsuc {A = B} finB y) =
-    subst isFinSub (sym (∩-∪-rDist _ _ _) ∙ A⊆B→A∩B≡A A⊆B) (isFinSub∪ finA∩B finA∩[y])
+    subst isFinSub (sym (∩-∪-rDist A _ _) ∙ A⊆B→A∩B≡A A⊆B) (isFinSub∪ finA∩B finA∩[y])
     where
     finA∩B : isFinSub (A ∩ B)
     finA∩B = isFinSub⊆ (right∈-∩ A B) finB

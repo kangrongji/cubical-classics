@@ -38,10 +38,10 @@ open import Cubical.Data.Int.MoreInts.QuoInt
            ; ·-comm to ·ℤ-comm
            ; ·-assoc to ·ℤ-assoc)
 open import Cubical.HITs.SetQuotients as SetQuot hiding (_/_)
-open import Cubical.HITs.Rationals.QuoQ
+open import Cubical.Data.Rationals
   using    (ℚ ; ℕ₊₁→ℤ ; isEquivRel∼)
 open import Cubical.Algebra.CommRing.Instances.QuoInt
-open import Cubical.Algebra.CommRing.Instances.QuoQ
+open import Cubical.Algebra.CommRing.Instances.Rationals
 
 
 open import Cubical.Relation.Nullary
